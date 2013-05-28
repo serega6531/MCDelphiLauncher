@@ -1,5 +1,4 @@
-MineCraft Delphi Launcher
+MCDelphiLauncher
 ================
 
 Free Minecraft Delphi Launcher
-Compiled at Delphi XE3
