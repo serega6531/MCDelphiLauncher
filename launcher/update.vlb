@@ -1,0 +1,12 @@
+﻿[Label1]
+Coordinates=100,1,46,51
+
+[Label2]
+Coordinates=81,70,46,51
+
+[]
+Coordinates=0,0,76,51
+
+[ProgressBar1]
+Coordinates=0,0,81,51
+
