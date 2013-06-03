@@ -212,7 +212,7 @@ if CheckJava then
 begin
 Login:=Edit1.Text;              {логин}
 Password:=Edit2.Text;           {пароль}
-if (Login <> '') AND (Length(Login) > 4) AND (Password <> '') AND (Length(Password) > 4) AND (Length(Login) < 14) AND (Length(Password) < 14) AND (withoutSpecialChars(Login,Password)) {AND CheckUser(login, password, launcherVer)} then
+if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND (withoutSpecialChars(Login,Password)) {AND CheckUser(login, password, launcherVer)} then
 begin {проверка логина, длины логина,          пароля,              длины пароля,              длины логина 2,          длины пароля 2,                проверка специальных символов,       проверка пользователя}
 if (IsSetFiles()) OR (CheckMd5()) OR (CheckBox1.Checked = true) then     {если файлов нет или старая версия или отмечено force update}
 begin

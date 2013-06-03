@@ -59,14 +59,26 @@ MinMem:=settings.Form2.Edit1.Text;
 MaxMem:=settings.Form2.Edit2.Text;
 end;
 
-
-procedure StartGame(Launch:string);
+Function GetJavaPath:string;
+var
+a: TRegistry;
 begin
-  //ShellExecute(0, 'open', 'cmd.exe', PWideChar('/c javaw ' + Launch), nil, SW_SHOW);
-  //ShellExecute(0, 'open', 'javaw.exe', PWideChar(Launch), nil, 0);
-  //WinExec(PAnsiChar(AnsiString('javaw' + Launch)), SW_SHOW);
-  //WinExec(PAnsiChar('javaw' + Launch), SW_SHOW);
-  //CreateProcess();
+a := TRegistry.Create;
+a.RootKey := HKEY_LOCAL_MACHINE;
+If a.OpenKey('\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\javaws.exe', false) then
+begin
+    result:=a.ReadString('Path') + 'javaw.exe';
+end
+else
+ShowMessage('Не могу запустить игру! Проблемы с обнаружением java!');
+end;
+
+procedure StartGame(JavaPath, Launch:string);
+var
+    si : TStartupInfo;
+    pi : TProcessInformation;
+begin
+CreateProcess(nil,PWideChar(WideString('"' + JavaPath + '"' + Launch)),nil,nil,True,NORMAL_PRIORITY_CLASS,nil,nil,si,pi);
 end;
 
 procedure TForm4.LaunchGame(OnlineMode: boolean);
@@ -98,8 +110,8 @@ if (OnlineMode = True) then          {если авторизирован}
   end;
   DoOnce:=true;
 end;
-enter.Form4.Memo1.Lines.Add(Launch);
-StartGame(Launch);
+enter.Form4.Memo1.Lines.Add(GetJavaPath + Launch);
+StartGame(GetJavaPath, Launch);
 end;
 
 end.

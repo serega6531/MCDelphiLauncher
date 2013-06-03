@@ -7,7 +7,7 @@ uses
    Vcl.Forms, Vcl.StdCtrls,
  Vcl.Imaging.pngimage,  main, ComCtrls, Vcl.Controls, System.Classes, settings,
   IdComponent, IdTCPConnection, IdTCPClient, IdHTTP, IdBaseComponent,
-  IdAntiFreezeBase, Vcl.IdAntiFreeze;
+  IdAntiFreezeBase, Vcl.IdAntiFreeze, dialogs;
 
 type
   TForm3 = class(TForm)
@@ -80,16 +80,26 @@ begin
 form3.ProgressBar1.Position:=0;
 HTTP:=TIdHTTP.Create(nil);
 HTTP.OnWork:=IdHTTP1Work;
+try
+begin
 FileSize:=GetInetFileSize(UpdateDir + 'minecraft.zip');
 form3.ProgressBar1.max:=FileSize;//Размер файла
 Label2.Caption:='Загрузка... (0/' + IntToStr(FileSize) + ' байт (~' + FloatToStr(Round(BToMb(FileSize))) + ' Мб))';
  LoadStream := TMemoryStream.Create;
   HTTP.Get(updateDir + 'minecraft.zip', LoadStream);     {загрузка файла}
   LoadStream.SaveToFile(appdata + '/' + rootdir + '/minecraft.zip');
+  UnpackArchive(appdata + '/' + rootdir + '/minecraft.zip', appdata + '/' + rootdir);    {распаковываем скачанный архив в корневую папку}
+  DeleteFile(appdata + '/' + rootdir + '/minecraft.zip');    {удаляем распакованый архив}
+end;
+except
+on E : Exception do
+begin
+ShowMessage('Ошибка обновления файлов: '+E.Message);
+main.onlineMode:=false;
+end;
+end;
 LoadStream.Free;      {освобождаем поток}
 HTTP.Free;
-UnpackArchive(appdata + '/' + rootdir + '/minecraft.zip', appdata + '/' + rootdir);    {распаковываем скачанный архив в корневую папку}
-DeleteFile(appdata + '/' + rootdir + '/minecraft.zip');    {удаляем распакованый архив}
 Form1.Hide;
 Form3.Hide;
 form4.Show;
