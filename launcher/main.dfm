@@ -1041,15 +1041,6 @@ object Form1: TForm1
     PasswordChar = '*'
     TabOrder = 0
   end
-  object Button1: TButton
-    Left = 359
-    Top = 328
-    Width = 114
-    Height = 25
-    Caption = #1048#1075#1088#1072#1090#1100' '#1074' '#1086#1092#1092#1083#1072#1081#1085#1077
-    TabOrder = 1
-    OnClick = Button1Click
-  end
   object Button2: TButton
     Left = 233
     Top = 328
@@ -1116,7 +1107,7 @@ object Form1: TForm1
     Request.ContentRangeInstanceLength = -1
     Request.Accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
     Request.BasicAuthentication = False
-    Request.UserAgent = 'Mozilla/3.0 (compatible; Indy Library)'
+    Request.UserAgent = 'Minecraft Launcher'
     Request.Ranges.Units = 'bytes'
     Request.Ranges = <>
     HTTPOptions = [hoForceEncodeParams]

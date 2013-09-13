@@ -8,13 +8,11 @@ uses
 
 type
   TForm4 = class(TForm)
-    Button1: TButton;
     Label1: TLabel;
     Memo1: TMemo;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormActivate(Sender: TObject);
     procedure LaunchGame(OnlineMode:boolean);
-    procedure Button1Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
 
   private
@@ -35,16 +33,10 @@ implementation
 uses main, settings;
 
 
-procedure TForm4.Button1Click(Sender: TObject);
-begin
-LaunchGame(true);
-end;
-
 procedure TForm4.FormActivate(Sender: TObject);
 begin
-Label1.Caption:='Добро пожаловать на сервер happyminers.ru, ' + Login + '!';
-if main.OnlineMode = false then
-LaunchGame(false);
+Label1.Caption:='Добро пожаловать на сервер happyminers.ru, ' + Login + '! Игра серчас будет запущена.';
+LaunchGame();
 end;
 
 procedure TForm4.FormClose(Sender: TObject; var Action: TCloseAction);  {если закрыть окно}
@@ -73,45 +65,35 @@ else
 ShowMessage('Не могу запустить игру! Проблемы с обнаружением java!');
 end;
 
-procedure StartGame(JavaPath, Launch:string);
+procedure StartGame(JavaPath, Launch, MinecraftPath:string);
 var
     si : TStartupInfo;
     pi : TProcessInformation;
 begin
-CreateProcess(nil,PWideChar(WideString('"' + JavaPath + '"' + Launch)),nil,nil,True,NORMAL_PRIORITY_CLASS,nil,nil,si,pi);
+//CreateProcess(nil,PWideChar(WideString('"' + JavaPath + '"' + Launch)),nil,nil,True,NORMAL_PRIORITY_CLASS,nil,nil,si,pi);
+MinecraftPath := MinecraftPath +'\bin\';
+ShellExecuteA(0,nil,PAnsiChar(JavaPath);,lpParameters,lpDirectory,SW_SHOWNORMAL);
+
 end;
 
 procedure TForm4.LaunchGame(OnlineMode: boolean);
 var
-    Launch, GameFiles:string;
+    Launch:string;
 begin
 if DoOnce = false then
 begin
- GameFiles := appdata + '\' + RootDir +'\bin\minecraft.jar;';
-  GameFiles := GameFiles + appdata + '\' + RootDir +'\bin\lwjgl.jar;';
-  GameFiles := GameFiles + appdata + '\' + RootDir +'\bin\lwjgl_util.jar;';
-  GameFiles := GameFiles + appdata + '\' + RootDir +'\bin\jinput.jar;';
-if (OnlineMode = True) then          {если авторизирован}
   begin
-  Launch := ' -Xms' + MinMem + 'm' +
+  Launch:=PAnsiChar(' -Xms' + MinMem + 'm' +
             ' -Xmx' + MaxMem + 'm' +
-            ' -Djava.library.path="'+ appdata + '\' + RootDir + '\bin\natives"' +
-            ' -cp "'+ GameFiles +'"' +
-            ' net.minecraft.client.Minecraft '+ main.LaunchParams;    {Параметры + автоподключение}
+            ' -Djava.library.path=natives' +                                   {This all for minecraft down 1.6}
+            ' -cp "'+ "minecraft.jar;jinput.jar;lwjgl.jar;lwjgl_util.jar;" +
+            ' net.minecraft.client.Minecraft '+ main.LaunchParams;)    {Параметры + автоподключение}
   end
-  else if (OnlineMode = false) then
-
-  begin
-  Launch := ' -Xms' + MinMem +
-            ' -Xmx' + MaxMem +
-            ' -Djava.library.path="'+appdata + '\' + RootDir + '\bin\natives"' +         {если не авторизирован}
-            ' -cp "'+ GameFiles +'"' +
-            ' net.minecraft.client.Minecraft '+ Login;                                         {+ логин}
   end;
   DoOnce:=true;
 end;
 enter.Form4.Memo1.Lines.Add(GetJavaPath + Launch);
-StartGame(GetJavaPath, Launch);
+StartGame(GetJavaPath(), Launch, (appdata + '\' + RootDir));
 end;
 
 end.

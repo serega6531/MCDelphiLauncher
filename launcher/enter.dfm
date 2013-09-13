@@ -25,15 +25,6 @@ object Form4: TForm4
     Height = 13
     Caption = #1044#1086#1073#1088#1086' '#1087#1086#1078#1072#1083#1086#1074#1072#1090#1100' '#1085#1072' '#1089#1077#1088#1074#1077#1088' happyminers.ru, '
   end
-  object Button1: TButton
-    Left = 368
-    Top = 496
-    Width = 169
-    Height = 41
-    Caption = #1042#1086#1081#1090#1080' '#1074' '#1080#1075#1088#1091
-    TabOrder = 0
-    OnClick = Button1Click
-  end
   object Memo1: TMemo
     Left = 72
     Top = 104

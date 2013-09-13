@@ -14,7 +14,6 @@ type
     Label1: TLabel;
     Edit2: TEdit;
     Label2: TLabel;
-    Button1: TButton;
     Button2: TButton;
     Button3: TButton;
     CheckBox1: TCheckBox;
@@ -25,7 +24,6 @@ type
     CheckBox2: TCheckBox;
     Button4: TButton;
     procedure Button2Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
   private
@@ -44,7 +42,6 @@ var
   appdata:string;
   MinMem, MaxMem:string;
   LaunchParams:string;
-  onlineMode:boolean;
 
 
 
@@ -179,19 +176,6 @@ begin
   Result := InternetGetConnectedState (@dwConnectionTypes, 0);
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);         {Кнопка OFFLINE}
-begin
-if not (edit1.Text = '') then
-begin
-Login:=Edit1.Text;              {логин}
-onlineMode:=false;
-enter.login:=login;
-form1.Hide;
-form4.Show;
-end
-else
-ShowMessage('Введите логин');
-end;
 
 function CheckJava:boolean;
 var
