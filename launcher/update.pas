@@ -43,7 +43,6 @@ function GetInetFileSize(const FileUrl:string): integer;         {измерение разм
 var
   idHTTP: TidHTTP;
 begin
-  Result:=0;
   idHTTP:=TIdHTTP.Create(nil);
   idHTTP.Head(FileUrl);
   Result:=idHTTP.Response.ContentLength;
@@ -58,7 +57,6 @@ end;
 procedure UnpackArchive(arpath, expath:string);
 var
 DataStream:TMemoryStream;
-FZIPStream:TStream;
 Read: TFWZipReader;
 i:integer;
 begin
@@ -95,7 +93,6 @@ except
 on E : Exception do
 begin
 ShowMessage('Ошибка обновления файлов: '+E.Message);
-main.onlineMode:=false;
 end;
 end;
 LoadStream.Free;      {освобождаем поток}

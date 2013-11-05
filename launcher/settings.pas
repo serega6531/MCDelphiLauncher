@@ -17,8 +17,6 @@ type
     Label5: TLabel;
     Button1: TButton;
     Button2: TButton;
-    Label6: TLabel;
-    Edit3: TEdit;
     procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
   private
@@ -55,7 +53,6 @@ if (StrToInt(Edit1.Text) > 256) AND (StrToInt(Edit2.Text) > StrToInt(Edit1.text)
 begin
 MinMem:=Edit1.Text;
 MaxMem:=Edit2.Text;
-RootDir:=Edit3.Text;
 end
 else
 ShowMessage('Ошибка! Проверьте правильность введённых данных');
@@ -64,7 +61,7 @@ end;
 procedure TForm2.FormCreate(Sender: TObject);
 begin
 Label1.Caption:='Версия лаунчера' + LauncherVer;   {вывод версии}
-rootdir:=Edit3.Text;                               {Корневая папка(.happyminers)}
+rootdir:='.happyminers.ru';                        {Корневая папка(.happyminers)}
 appdata:=GetSpecialFolderPath(CSIDL_APPDATA);      {получаем appdata/roaming}
   files[1]:='bin\minecraft.jar';                   {Список файлов для проверки/загрузки}
   files[2]:='bin\lwjgl_util.jar';

@@ -4,9 +4,6 @@ Coordinates=122,71,46,51
 [Label1]
 Coordinates=10,71,46,51
 
-[Edit3]
-Coordinates=60,10,40,51
-
 [Button1]
 Coordinates=110,10,53,51
 
@@ -19,9 +16,6 @@ Coordinates=10,10,40,51
 [Edit2]
 Coordinates=236,10,40,51
 
-[Label6]
-Coordinates=66,71,46,51
-
 [Label2]
 Coordinates=234,71,46,51
 
@@ -30,4 +24,7 @@ Coordinates=173,10,53,51
 
 [Label3]
 Coordinates=10,132,46,51
+
+[]
+Coordinates=60,10,40,51
 

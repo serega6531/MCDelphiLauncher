@@ -3,7 +3,7 @@ object Form2: TForm2
   Top = 0
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-  ClientHeight = 199
+  ClientHeight = 175
   ClientWidth = 404
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -221,13 +221,6 @@ object Form2: TForm2
     Height = 13
     Caption = #1052#1041
   end
-  object Label6: TLabel
-    Left = 16
-    Top = 110
-    Width = 75
-    Height = 13
-    Caption = #1055#1072#1087#1082#1072' '#1089' '#1080#1075#1088#1086#1081':'
-  end
   object Edit1: TEdit
     Left = 184
     Top = 48
@@ -246,7 +239,7 @@ object Form2: TForm2
   end
   object Button1: TButton
     Left = 48
-    Top = 152
+    Top = 128
     Width = 137
     Height = 25
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
@@ -255,18 +248,10 @@ object Form2: TForm2
   end
   object Button2: TButton
     Left = 208
-    Top = 152
+    Top = 128
     Width = 137
     Height = 25
     Caption = #1053#1072#1079#1072#1076
     TabOrder = 3
-  end
-  object Edit3: TEdit
-    Left = 184
-    Top = 102
-    Width = 121
-    Height = 21
-    TabOrder = 4
-    Text = '.happyminers'
   end
 end

@@ -3,96 +3,109 @@ unit enter;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Registry, shellapi;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Registry, shellapi;
 
-type
-  TForm4 = class(TForm)
-    Label1: TLabel;
-    Memo1: TMemo;
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure FormActivate(Sender: TObject);
-    procedure LaunchGame(OnlineMode:boolean);
-    procedure FormCreate(Sender: TObject);
-
-  private
-    { Private declarations}
-  public
-    { Public declarations }
-  end;
+    procedure LaunchGame();
 
 var
-  Form4: TForm4;
   login:string;
   DoOnce:boolean;
 
 implementation
 
-{$R *.dfm}
-
 uses main, settings;
 
 
-procedure TForm4.FormActivate(Sender: TObject);
-begin
-Label1.Caption:='Добро пожаловать на сервер happyminers.ru, ' + Login + '! Игра серчас будет запущена.';
-LaunchGame();
-end;
+procedure GetTreeDirs(Root: string; OutPaper: TStringList);
+var
+  i: Integer;
+  s: string;
 
-procedure TForm4.FormClose(Sender: TObject; var Action: TCloseAction);  {если закрыть окно}
-begin
-Application.Terminate;
-end;
+  procedure InsDirs(s: string; ind: Integer; Path: string; OPaper: TStringList);
+  var {Вставляет в Memo список вложенных директорий}
+    sr: TSearchRec;
+    attr: Integer;
+  begin
+    attr := 0;
+    attr := faAnyFile;
+    if DirectoryExists(Path) then
+      if FindFirst(IncludeTrailingBackslash(Path) + '*.*', attr, SR) = 0 then
+      begin
+        repeat
+          if (sr.Attr = faDirectory) and (sr.Name[Length(sr.Name)] <> '.') then
+            OPaper.Insert(ind, s + sr.Name);
+        until (FindNext(sr) <> 0);
+        FindClose(SR);
+      end
+  end;
 
-procedure TForm4.FormCreate(Sender: TObject);
 begin
-DoOnce:=false;
-MinMem:=settings.Form2.Edit1.Text;
-MaxMem:=settings.Form2.Edit2.Text;
+  {Проверяем существуетли начальный каталог}
+  if not DirectoryExists(Root) then
+    exit;
+  {Создаем список каталогов первой вложенности}
+  if root[Length(Root)] <> '\' then
+    InsDirs(root + '\', OutPaper.Count, Root, OutPaper)
+  else
+    InsDirs(root, OutPaper.Count, Root, OutPaper);
+  i := 0;
+  repeat
+    s := OutPaper[i]; //в s получаем путь к уже внесенному в список кат.
+    // Вставляем сразу за данной директорией в списке,
+    // список вложенных в нее директорий.
+    // Тем самым увеличиваем OutPaper.Lines.Count.
+    // Таким образом катологи в которых поиск еще не производился,
+    // оказываются ниже и очереь до них еще дойдет.
+    InsDirs(s + '\', i + 1, OutPaper[i], OutPaper);
+    inc(i);
+  until (i = OutPaper.Count);
 end;
 
 Function GetJavaPath:string;
-var
-a: TRegistry;
+var dirs: TStringList;
+    root:string;
 begin
-a := TRegistry.Create;
-a.RootKey := HKEY_LOCAL_MACHINE;
-If a.OpenKey('\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\javaws.exe', false) then
-begin
-    result:=a.ReadString('Path') + 'javaw.exe';
-end
-else
-ShowMessage('Не могу запустить игру! Проблемы с обнаружением java!');
+  if DirectoryExists('C:\Program Files\Java') then
+  begin
+    root:='C:\Program Files\Java';
+  end
+  else if DirectoryExists('C:\Program Files(x86)\Java') then
+  begin
+    root:='C:\Program Files(x86)\Java';
+  end;
+dirs := TStringList.Create;
+  try
+    GetTreeDirs(root, dirs);
+    dirs.Sort;
+    result:=dirs.Strings[dirs.Count-1];
+  finally
+    dirs.Free;
+  end;
 end;
 
 procedure StartGame(JavaPath, Launch, MinecraftPath:string);
-var
+{var
     si : TStartupInfo;
-    pi : TProcessInformation;
+    pi : TProcessInformation;}
 begin
 //CreateProcess(nil,PWideChar(WideString('"' + JavaPath + '"' + Launch)),nil,nil,True,NORMAL_PRIORITY_CLASS,nil,nil,si,pi);
-MinecraftPath := MinecraftPath +'\bin\';
-ShellExecuteA(0,nil,PAnsiChar(JavaPath);,lpParameters,lpDirectory,SW_SHOWNORMAL);
+ShellExecuteA(0,nil,PAnsiChar(JavaPath + 'bin/javaw.exe'),{lpParameters}nil,PAnsiChar(MinecraftPath +'\bin\'),SW_SHOWNORMAL);
 
 end;
 
-procedure TForm4.LaunchGame(OnlineMode: boolean);
+procedure LaunchGame();
 var
     Launch:string;
 begin
-if DoOnce = false then
-begin
+MinMem:=settings.Form2.Edit1.Text;
+MaxMem:=settings.Form2.Edit2.Text;
   begin
   Launch:=PAnsiChar(' -Xms' + MinMem + 'm' +
             ' -Xmx' + MaxMem + 'm' +
             ' -Djava.library.path=natives' +                                   {This all for minecraft down 1.6}
-            ' -cp "'+ "minecraft.jar;jinput.jar;lwjgl.jar;lwjgl_util.jar;" +
-            ' net.minecraft.client.Minecraft '+ main.LaunchParams;)    {Параметры + автоподключение}
-  end
+            ' -cp "'+ 'minecraft.jar;jinput.jar;lwjgl.jar;lwjgl_util.jar;' +
+            ' net.minecraft.client.Minecraft '+ main.LaunchParams);    {Параметры + автоподключение}
   end;
-  DoOnce:=true;
-end;
-enter.Form4.Memo1.Lines.Add(GetJavaPath + Launch);
 StartGame(GetJavaPath(), Launch, (appdata + '\' + RootDir));
 end;
 

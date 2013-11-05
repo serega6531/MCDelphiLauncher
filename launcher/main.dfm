@@ -1047,7 +1047,7 @@ object Form1: TForm1
     Width = 105
     Height = 25
     Caption = #1048#1075#1088#1072#1090#1100
-    TabOrder = 2
+    TabOrder = 1
     OnClick = Button2Click
   end
   object Button3: TButton
@@ -1056,7 +1056,7 @@ object Form1: TForm1
     Width = 105
     Height = 25
     Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-    TabOrder = 3
+    TabOrder = 2
   end
   object CheckBox1: TCheckBox
     Left = 359
@@ -1064,21 +1064,21 @@ object Form1: TForm1
     Width = 93
     Height = 17
     Caption = 'Force Update'
-    TabOrder = 4
+    TabOrder = 3
   end
   object Memo1: TMemo
     Left = 8
     Top = 176
     Width = 297
     Height = 72
-    TabOrder = 5
+    TabOrder = 4
   end
   object Edit1: TEdit
     Left = 416
     Top = 208
     Width = 225
     Height = 21
-    TabOrder = 6
+    TabOrder = 5
   end
   object CheckBox2: TCheckBox
     Left = 458
@@ -1094,7 +1094,7 @@ object Form1: TForm1
     Width = 105
     Height = 25
     Caption = #1056#1077#1075#1080#1089#1090#1088#1072#1094#1080#1103
-    TabOrder = 8
+    TabOrder = 6
     OnClick = Button4Click
   end
   object IdHTTP1: TIdHTTP

@@ -203,7 +203,8 @@ begin
   DownloadFiles();        {загрузка файлов}
 end;
 form1.Hide;                                         {запуск внутреннего меню}
-enter.Form4.ShowModal;
+//enter;
+Application.Terminate;
 end
 else
 ShowMessage('Неправильный логин или пароль');        {тут всё понято}
