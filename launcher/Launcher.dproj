@@ -40,6 +40,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
+        <DCC_UnitSearchPath>$(BDS)\Source\DUnit\src;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
@@ -105,6 +106,9 @@
         <DCCReference Include="FWZipStream.pas"/>
         <DCCReference Include="FWZipWriter.pas"/>
         <DCCReference Include="enter.pas"/>
+        <DCCReference Include="RegExpr.pas"/>
+        <DCCReference Include="Perimeter.pas"/>
+        <DCCReference Include="superobject.pas"/>
         <None Include="ModelSupport_Launcher\default.txaPackage"/>
         <None Include="ModelSupport_Launcher\default.txvpck"/>
         <None Include="ModelSupport_Launcher\update\default.txvpck"/>

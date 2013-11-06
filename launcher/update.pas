@@ -99,7 +99,8 @@ LoadStream.Free;      {освобождаем поток}
 HTTP.Free;
 Form1.Hide;
 Form3.Hide;
-form4.Show;
+LaunchGame();
+Application.Terminate;
 DoOnce:=true;
 end;
 end;

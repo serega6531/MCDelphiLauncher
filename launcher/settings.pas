@@ -49,7 +49,7 @@ end;
 
 procedure TForm2.Button1Click(Sender: TObject);     {кнопка сохранить}
 begin
-if (StrToInt(Edit1.Text) > 256) AND (StrToInt(Edit2.Text) > StrToInt(Edit1.text)) AND (Edit3.Text <> '') then       {проверка правильности данных}
+if (StrToInt(Edit1.Text) > 256) AND (StrToInt(Edit2.Text) > StrToInt(Edit1.text)) then       {проверка правильности данных}
 begin
 MinMem:=Edit1.Text;
 MaxMem:=Edit2.Text;

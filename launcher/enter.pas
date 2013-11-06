@@ -84,13 +84,13 @@ dirs := TStringList.Create;
 end;
 
 procedure StartGame(JavaPath, Launch, MinecraftPath:string);
-{var
+var
     si : TStartupInfo;
-    pi : TProcessInformation;}
+    pi : TProcessInformation;
 begin
 //CreateProcess(nil,PWideChar(WideString('"' + JavaPath + '"' + Launch)),nil,nil,True,NORMAL_PRIORITY_CLASS,nil,nil,si,pi);
-ShellExecuteA(0,nil,PAnsiChar(JavaPath + 'bin/javaw.exe'),{lpParameters}nil,PAnsiChar(MinecraftPath +'\bin\'),SW_SHOWNORMAL);
-
+ShellExecuteA(0,nil,PAnsiChar(JavaPath + 'bin\javaw.exe'),{lpParameters}nil,PAnsiChar(MinecraftPath +'\bin\'),SW_SHOWNORMAL);
+//CreateProcess(JavaPath + 'bin\javaw.exe', ' Parameters', nil, nil, false, NORMAL_PRIORITY_CLASS, nil, nil, si, pi);
 end;
 
 procedure LaunchGame();
@@ -100,13 +100,14 @@ begin
 MinMem:=settings.Form2.Edit1.Text;
 MaxMem:=settings.Form2.Edit2.Text;
   begin
-  Launch:=PAnsiChar(' -Xms' + MinMem + 'm' +
+  {Launch:=PAnsiChar(' -Xms' + MinMem + 'm' +
             ' -Xmx' + MaxMem + 'm' +
-            ' -Djava.library.path=natives' +                                   {This all for minecraft down 1.6}
+            ' -Djava.library.path=natives' +                                   //This all for minecraft down 1.6
             ' -cp "'+ 'minecraft.jar;jinput.jar;lwjgl.jar;lwjgl_util.jar;' +
-            ' net.minecraft.client.Minecraft '+ main.LaunchParams);    {Параметры + автоподключение}
-  end;
+            ' net.minecraft.client.Minecraft '+ main.LaunchParams);    //Параметры + автоподключение
+  end;}
 StartGame(GetJavaPath(), Launch, (appdata + '\' + RootDir));
 end;
 
+end;
 end.

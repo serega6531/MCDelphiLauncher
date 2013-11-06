@@ -17,7 +17,6 @@ type
     Button2: TButton;
     Button3: TButton;
     CheckBox1: TCheckBox;
-    IdHTTP1: TIdHTTP;
     Image1: TImage;
     Memo1: TMemo;
     Edit1: TEdit;
@@ -42,6 +41,7 @@ var
   appdata:string;
   MinMem, MaxMem:string;
   LaunchParams:string;
+  token:string;
 
 
 
@@ -49,7 +49,7 @@ implementation
 
 {$R *.dfm}
 
-uses settings, update, enter, IdHashMessageDigest;
+uses settings, update, enter, IdHashMessageDigest, RegExpr, superobject;
 
 function md5(SourceString: string): string;
 var
@@ -65,43 +65,58 @@ FreeAndNil(md5);
 end;
 end;
 
+function getToken():string;
+ const
+   letters: string = 'abcdef1234567890';   //string with all possible chars
+   var i:integer;
+ begin
+   Randomize;
+   for i := 1 to 16 do
+    result := result + letters[Random(Length(letters))];
+end;
 
-function CheckUser(login, password, version:string):boolean;   {проверка пользователя}
+function CheckUser(login, password, token:string):boolean;   //проверка пользователя
 var
 passHash, res:string;
-PostData:TStringList;
+json:TStringStream;
+http:TIdHTTP;
 begin
 passHash:= md5(password);
-PostData:= TStringList.Create;
-PostData.add('user=' + Login);
-PostData.add('password=' + PassHash);          {Пост дата - пользователь, пароль, версия}
-PostData.add('version=' + version);
-res:=main.Form1.IdHTTP1.Post('http://www.happyminers.ru/MineCraft/auth.php', PostData);   {получение ответа}
-if (res = 'Bad login') then       {проверка не прошла}
+http := TIdHttp.Create(nil);
+http.HandleRedirects := True;
+http.ReadTimeout := 5000;
+http.Request.ContentType := 'application/json';
+json := TStringStream.Create('{"username": "'+ login +'","password": "'+ password +'","clientToken": "' + token +'"}');
+json.Position := 0;
+res:=http.Post('http://www.happyminers.ru/MineCraft/auth16x.php', json);   {получение ответа}
+main.Form1.Memo1.Text:=('{"username": "'+ login +'","password": "'+ passHash +'","clientToken": "' + token + '"}');
+json.free;
+http.Free;
+{if (res = 'Bad login') then       //проверка не прошла
 result:=false
 else
 begin
 LaunchParams:=res;
-result:=true;                    {проверка прошла}
-end;
-main.Form1.Memo1.Lines.Text:=res;
-main.Form1.Memo1.Lines.Add('http://www.happyminers.ru/MineCraft/auth.php');     {!!!ВРЕМЕННЫЕ ЛОГИ!!!}
-main.Form1.Memo1.Lines.AddStrings(PostData);
+result:=true;                    //проверка прошла
+end;}
+main.Form1.Memo1.Text:=(res);
 end;
 
-function CheckMd5():boolean;                      {проверка md5}
+function CheckMd5():boolean;                      //проверка md5
 var
 FileMd5, md5Return:string;
 resulttmp:boolean;
+http:TIdHTTP;
 begin
+http := TIdHttp.Create(nil);
 Try
-FileMd5:=(MD5DigestToStr(MD5File(appdata + '\' + RootDir + '\' + files[1])));   {получение md5 и запись в fileMd5}
+FileMd5:=(MD5DigestToStr(MD5File(appdata + '\' + RootDir + '\' + files[1])));   //получение md5 и запись в fileMd5
 Except
 resulttmp:=true;
 end;
 if resulttmp <> true then
 begin
-md5Return:=main.Form1.IdHTTP1.Get(UpdateDir + 'md5.php?md5=' + FileMd5);
+md5Return:=http.Get(UpdateDir + 'md5.php?md5=' + FileMd5);      // НЕБЕЗОПАСНО!!!
 if md5Return = 'true' then
 result:=false
 else if (md5Return = 'false') then
@@ -139,33 +154,9 @@ end;
   end;
 end;
 
-function withoutSpecialChars(Login,Password:string):boolean;    {проверка специальных символов (оптимизация запросов к БД)}
-var b,i:integer;
-result1,result2:boolean;
-begin
-b:=1;
-for i:= 1 to Length(Login) do
-case Login[i] of
-'a'..'z','A'..'Z': inc(b);
-end;
-if i = b then result1:=true else result1:=false;
-
-b:=1;
-for i:= 1 to Length(Password) do
-case Password[i] of
-'a'..'z','A'..'Z': inc(b);
-end;
-if i = b then result2:=true else result2:=false;
-
-if result1 = true AND result2 = true then
-result:=true
-else
-result:=false;
-end;
-
 procedure DownloadFiles();            {загрузка файлов}
 begin
-update.Form3.ShowModal;                {все функции в юните update}
+//date.Form3.ShowModal;                {все функции в юните update}
 end;
 
 function IsConnectedToInternet: Boolean;
@@ -196,15 +187,15 @@ if CheckJava then
 begin
 Login:=Edit1.Text;              {логин}
 Password:=Edit2.Text;           {пароль}
-if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND (withoutSpecialChars(Login,Password)) {AND CheckUser(login, password, launcherVer)} then
-begin {проверка логина, длины логина,          пароля,              длины пароля,              длины логина 2,          длины пароля 2,                проверка специальных символов,       проверка пользователя}
+if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND CheckUser(login, password, token) then
+begin {проверка логина, длины логина,   длины пароля,                    проверка пользователя}
 if (IsSetFiles()) OR (CheckMd5()) OR (CheckBox1.Checked = true) then     {если файлов нет или старая версия или отмечено force update}
 begin
   DownloadFiles();        {загрузка файлов}
 end;
-form1.Hide;                                         {запуск внутреннего меню}
+//form1.Hide;                                         {запуск внутреннего меню}
 //enter;
-Application.Terminate;
+//Application.Terminate;
 end
 else
 ShowMessage('Неправильный логин или пароль');        {тут всё понято}
@@ -221,9 +212,9 @@ begin
 if not IsConnectedToInternet then
 begin
   ShowMessage('Нет соединения с интернетом. Можно играть в оффлайне :-).');
-  edit2.Enabled:=false;
-  button2.Enabled:=false;
+  Application.Terminate;
 end;
+token := getToken();
 
 end;
 
