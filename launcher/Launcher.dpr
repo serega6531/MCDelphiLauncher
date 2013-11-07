@@ -15,7 +15,7 @@ uses
   enter in 'enter.pas',
   RegExpr in 'RegExpr.pas',
   Perimeter in 'Perimeter.pas',
-  superobject in 'superobject.pas';
+  uJSON in 'uJSON.pas';
 
 {$R *.res}
 
@@ -23,8 +23,8 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := False;
   Application.Title := 'Minecraft launcher';
-  AApplication.CreateForm(TForm1, Form1);
+  Application.CreateForm(TForm1, Form1);
   Application.CreateForm(TForm2, Form2);
   Application.CreateForm(TForm3, Form3);
-  pplication.Run;
+  Application.Run;
 end.

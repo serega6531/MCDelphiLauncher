@@ -49,7 +49,7 @@ implementation
 
 {$R *.dfm}
 
-uses settings, update, enter, IdHashMessageDigest, RegExpr, superobject;
+uses settings, update, enter, IdHashMessageDigest, RegExpr, uJSON;
 
 function md5(SourceString: string): string;
 var
@@ -77,29 +77,32 @@ end;
 
 function CheckUser(login, password, token:string):boolean;   //проверка пользователя
 var
-passHash, res:string;
+res, jsontext, session:string;
 json:TStringStream;
+jsonres : TJSONObject;
 http:TIdHTTP;
 begin
-passHash:= md5(password);
+jsontext:='{"username": "'+ login +'","password": "'+ password +'","clientToken": "' + token +'"}';
 http := TIdHttp.Create(nil);
 http.HandleRedirects := True;
 http.ReadTimeout := 5000;
 http.Request.ContentType := 'application/json';
-json := TStringStream.Create('{"username": "'+ login +'","password": "'+ password +'","clientToken": "' + token +'"}');
+json := TStringStream.Create(jsontext);
 json.Position := 0;
 res:=http.Post('http://www.happyminers.ru/MineCraft/auth16x.php', json);   {получение ответа}
-main.Form1.Memo1.Text:=('{"username": "'+ login +'","password": "'+ passHash +'","clientToken": "' + token + '"}');
 json.free;
 http.Free;
-{if (res = 'Bad login') then       //проверка не прошла
+if (res = 'Bad login') then       //проверка не прошла
 result:=false
 else
 begin
-LaunchParams:=res;
+jsonres := TJSONObject.create(res);
+session:=jsonres.getString('accessToken');
+LaunchParams:=session;
 result:=true;                    //проверка прошла
-end;}
-main.Form1.Memo1.Text:=(res);
+end;
+main.Form1.Memo1.Lines.Add(LaunchParams);   //DEBUG
+
 end;
 
 function CheckMd5():boolean;                      //проверка md5

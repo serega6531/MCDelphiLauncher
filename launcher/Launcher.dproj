@@ -108,7 +108,7 @@
         <DCCReference Include="enter.pas"/>
         <DCCReference Include="RegExpr.pas"/>
         <DCCReference Include="Perimeter.pas"/>
-        <DCCReference Include="superobject.pas"/>
+        <DCCReference Include="uJSON.pas"/>
         <None Include="ModelSupport_Launcher\default.txaPackage"/>
         <None Include="ModelSupport_Launcher\default.txvpck"/>
         <None Include="ModelSupport_Launcher\update\default.txvpck"/>
