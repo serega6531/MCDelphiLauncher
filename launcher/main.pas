@@ -35,8 +35,6 @@ var
   Form1: TForm1;
   Login:string;
   password:string;
-  Files:Array[1..14] of string;
-  FilesFullPatch:Array[1..14] of string;
   RootDir:string;
   appdata:string;
   MinMem, MaxMem:string;
@@ -72,7 +70,7 @@ function getToken():string;
  begin
    Randomize;
    for i := 1 to 16 do
-    result := result + letters[Random(Length(letters))];
+    result := result + letters[Random(Length(letters))+1];
 end;
 
 function CheckUser(login, password, token:string):boolean;   //проверка пользователя
@@ -108,58 +106,41 @@ end;
 function CheckMd5():boolean;                      //проверка md5
 var
 FileMd5, md5Return:string;
-resulttmp:boolean;
 http:TIdHTTP;
 begin
-http := TIdHttp.Create(nil);
-Try
-FileMd5:=(MD5DigestToStr(MD5File(appdata + '\' + RootDir + '\' + files[1])));   //получение md5 и запись в fileMd5
-Except
-resulttmp:=true;
-end;
-if resulttmp <> true then
+if FileExists(appdata + '\' + RootDir + '\' + 'bin\minecraft.jar') then
 begin
-md5Return:=http.Get(UpdateDir + 'md5.php?md5=' + FileMd5);      // НЕБЕЗОПАСНО!!!
-if md5Return = 'true' then
-result:=false
-else if (md5Return = 'false') then
-result:=true
-else
-begin
-  ShowMessage('При проверке md5 возникла ошиибка. Проверьте подключение к интернету. Если проблема не исчезла - используйтe offline mode.');
-  result:=false;
-end;
+FileMd5:=(MD5DigestToStr(MD5File(appdata + '\' + RootDir + '\' + 'bin\minecraft.jar')));   //получение md5 и запись в fileMd5
+//блаблабла
+result:=true;
 end
 else
-result:=false;
-end;
-
-function IsSetFiles():boolean;
-var count:integer;
 begin
 result:=false;
-count:=1;
+end;
+end;
+
+function IsSetFiles(servername:string):boolean;
+begin
+result:=false;
 if not (DirectoryExists(appdata + '/' + rootdir)) then          {если есть папка}
 begin
 CreateDir(appdata + '/' + rootdir);                  {создаём папку}
 end;
-  While (count < 15) do
-  begin
-    if FileExists(FilesFullPatch[count]) then                  {если есть файл(1-14)}
-      begin
-    Count:=count + 1;
-      end
-    else
-      begin;
-    result:=true;                                                {true если файла нет}
-    Break;
-  end;
-  end;
+if FileExists(appdata + '/' + rootdir + '/' + servername + '/minecraft.jar') then                  {если есть файл(1-14)}
+begin
+result:=true;                                                {true если файла нет}
+end;
+if not FileExists('launcher_profiles.json') then
+begin
+result:=false;
+end;
 end;
 
 procedure DownloadFiles();            {загрузка файлов}
 begin
-//date.Form3.ShowModal;                {все функции в юните update}
+update.loadBase();                {все функции в юните update}
+//load server files
 end;
 
 function IsConnectedToInternet: Boolean;
@@ -192,7 +173,7 @@ Login:=Edit1.Text;              {логин}
 Password:=Edit2.Text;           {пароль}
 if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND CheckUser(login, password, token) then
 begin {проверка логина, длины логина,   длины пароля,                    проверка пользователя}
-if (IsSetFiles()) OR (CheckMd5()) OR (CheckBox1.Checked = true) then     {если файлов нет или старая версия или отмечено force update}
+if not (IsSetFiles({servername}'test')) OR (CheckMd5()) OR (CheckBox1.Checked = true) then     {если файлов нет или старая версия или отмечено force update}
 begin
   DownloadFiles();        {загрузка файлов}
 end;
@@ -214,7 +195,7 @@ procedure TForm1.FormCreate(Sender: TObject);
 begin
 if not IsConnectedToInternet then
 begin
-  ShowMessage('Нет соединения с интернетом. Можно играть в оффлайне :-).');
+  ShowMessage('Нет соединения с интернетом.');
   Application.Terminate;
 end;
 token := getToken();
