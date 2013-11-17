@@ -15,7 +15,10 @@ uses
   enter in 'enter.pas',
   RegExpr in 'RegExpr.pas',
   Perimeter in 'Perimeter.pas',
-  uJSON in 'uJSON.pas';
+  uJSON in 'uJSON.pas',
+  ServerData in 'ServerData.pas',
+  ServerList in 'ServerList.pas',
+  UpdateManager in 'UpdateManager.pas';
 
 {$R *.res}
 

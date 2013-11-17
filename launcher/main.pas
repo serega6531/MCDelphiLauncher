@@ -7,7 +7,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.Imaging.pngimage, md5, IdBaseComponent, IdComponent,
   IdTCPConnection, IdTCPClient, Vcl.OleCtrls, SHDocVw, IdHTTP,
-  System.Classes, IdIcmpClient, IdRawBase, IdRawClient, wininet, shellapi, system.UITypes;
+  System.Classes, IdIcmpClient, IdRawBase, IdRawClient, wininet, shellapi, system.UITypes,
+  Vcl.Menus;
 
 type
   TForm1 = class(TForm)
@@ -22,6 +23,8 @@ type
     Edit1: TEdit;
     CheckBox2: TCheckBox;
     Button4: TButton;
+    ServersDropdownList: TComboBox;
+    Label3: TLabel;
     procedure Button2Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -35,9 +38,6 @@ var
   Form1: TForm1;
   Login:string;
   password:string;
-  RootDir:string;
-  appdata:string;
-  MinMem, MaxMem:string;
   LaunchParams:string;
   token:string;
 
@@ -47,7 +47,7 @@ implementation
 
 {$R *.dfm}
 
-uses settings, update, enter, IdHashMessageDigest, RegExpr, uJSON;
+uses settings, update, enter, IdHashMessageDigest, RegExpr, uJSON, ServerList;
 
 function md5(SourceString: string): string;
 var
@@ -137,12 +137,6 @@ result:=false;
 end;
 end;
 
-procedure DownloadFiles();            {загрузка файлов}
-begin
-update.loadBase();                {все функции в юните update}
-//load server files
-end;
-
 function IsConnectedToInternet: Boolean;
 var
   dwConnectionTypes : DWORD;
@@ -173,13 +167,7 @@ Login:=Edit1.Text;              {логин}
 Password:=Edit2.Text;           {пароль}
 if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND CheckUser(login, password, token) then
 begin {проверка логина, длины логина,   длины пароля,                    проверка пользователя}
-if not (IsSetFiles({servername}'test')) OR (CheckMd5()) OR (CheckBox1.Checked = true) then     {если файлов нет или старая версия или отмечено force update}
-begin
-  DownloadFiles();        {загрузка файлов}
-end;
-//form1.Hide;                                         {запуск внутреннего меню}
-//enter;
-//Application.Terminate;
+Form3.processUpdate((IsSetFiles({servername}'test')) OR (CheckMd5()) OR (CheckBox1.Checked = true), 'test');        {загрузка файлов}
 end
 else
 ShowMessage('Неправильный логин или пароль');        {тут всё понято}
@@ -191,6 +179,19 @@ begin
 ShellExecute(Handle, nil, 'http://www.happyminers.ru', nil, nil, SW_SHOW);
 end;
 
+
+procedure initServerList;
+var servers:TServerList;
+i:integer;
+begin
+servers.Create;
+for I := 0 to servers.getServersCount - 1 do
+begin
+Form1.ServersDropdownList.Items.Add(servers.getServer(i).getName);
+end;
+servers.Destroy;
+end;
+
 procedure TForm1.FormCreate(Sender: TObject);
 begin
 if not IsConnectedToInternet then
@@ -198,8 +199,8 @@ begin
   ShowMessage('Нет соединения с интернетом.');
   Application.Terminate;
 end;
+initServerList();
 token := getToken();
-
 end;
 
 end.

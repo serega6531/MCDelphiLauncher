@@ -4,7 +4,7 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Minecraft launcher - happyminers.ru'
-  ClientHeight = 378
+  ClientHeight = 413
   ClientWidth = 749
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -188,7 +188,7 @@ object Form1: TForm1
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 359
+    Left = 350
     Top = 206
     Width = 51
     Height = 19
@@ -1033,6 +1033,19 @@ object Form1: TForm1
       A5A35C0AF894949494949494948E7229E053525252525252523ACAA5804F4949
       4949494949E928D7FF05DA0314F4BA1C6F970000000049454E44AE426082}
   end
+  object Label3: TLabel
+    Left = 350
+    Top = 281
+    Width = 58
+    Height = 19
+    Caption = #1057#1077#1088#1074#1077#1088':'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
   object Edit2: TEdit
     Left = 416
     Top = 248
@@ -1043,7 +1056,7 @@ object Form1: TForm1
   end
   object Button2: TButton
     Left = 233
-    Top = 328
+    Top = 360
     Width = 105
     Height = 25
     Caption = #1048#1075#1088#1072#1090#1100
@@ -1052,7 +1065,7 @@ object Form1: TForm1
   end
   object Button3: TButton
     Left = 493
-    Top = 328
+    Top = 360
     Width = 105
     Height = 25
     Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
@@ -1060,7 +1073,7 @@ object Form1: TForm1
   end
   object CheckBox1: TCheckBox
     Left = 359
-    Top = 289
+    Top = 321
     Width = 93
     Height = 17
     Caption = 'Force Update'
@@ -1082,7 +1095,7 @@ object Form1: TForm1
   end
   object CheckBox2: TCheckBox
     Left = 458
-    Top = 289
+    Top = 321
     Width = 113
     Height = 17
     Caption = #1047#1072#1087#1086#1084#1085#1080#1090#1100' '#1083#1086#1075#1080#1085
@@ -1090,11 +1103,20 @@ object Form1: TForm1
   end
   object Button4: TButton
     Left = 613
-    Top = 328
+    Top = 360
     Width = 105
     Height = 25
     Caption = #1056#1077#1075#1080#1089#1090#1088#1072#1094#1080#1103
     TabOrder = 6
     OnClick = Button4Click
+  end
+  object ServersDropdownList: TComboBox
+    Left = 416
+    Top = 283
+    Width = 225
+    Height = 21
+    Style = csDropDownList
+    DropDownCount = 5
+    TabOrder = 8
   end
 end

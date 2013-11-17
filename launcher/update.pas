@@ -5,20 +5,14 @@ interface
 uses
   Winapi.Windows, System.SysUtils,
    Vcl.Forms, Vcl.StdCtrls,
- Vcl.Imaging.pngimage,  main, ComCtrls, Vcl.Controls, System.Classes, settings,
-  IdComponent, IdTCPConnection, IdTCPClient, IdHTTP, IdBaseComponent,
-  IdAntiFreezeBase, Vcl.IdAntiFreeze, dialogs;
+ Vcl.Imaging.pngimage,  main, ComCtrls, Vcl.Controls, System.Classes;
 
 type
   TForm3 = class(TForm)
-    Label1: TLabel;
-    Label2: TLabel;
-    ProgressBar1: TProgressBar;
-    IdAntiFreeze1: TIdAntiFreeze;
-    IdHTTP1: TIdHTTP;
-    procedure FormActivate(Sender: TObject);
-    procedure IdHttp1work(ASender: TObject; AWorkMode: TWorkMode;
-  AWorkCount: Int64);
+    Title: TLabel;
+    LoadingLabel: TLabel;
+    ProgressBar: TProgressBar;
+    procedure processUpdate(isForceUpdate:boolean; servername:string);
   private
     { Private declarations }
   public
@@ -27,89 +21,26 @@ type
 
 var
   Form3: TForm3;
-  DoOnce:boolean = false;
-  FileSize:integer;
-
-const
-    updateDir:string = 'http://happyminers.ru/MineCraft/MinecraftDownload/';        {Папка для обновления на сервере}
 
 implementation
 
 {$R *.dfm}
 
-uses enter, FWZipReader;
+uses enter, ServerList, UpdateManager;
 
-function GetInetFileSize(const FileUrl:string): integer;         {измерение размера файла}
-var
-  idHTTP: TidHTTP;
-begin
-  idHTTP:=TIdHTTP.Create(nil);
-  idHTTP.Head(FileUrl);
-  Result:=idHTTP.Response.ContentLength;
-  IdHTTP.Free;
-end;
+{ TForm3 }
 
-function BToMb(bytes:integer):real;
+procedure TForm3.processUpdate(isForceUpdate: boolean; servername:string);
+var manager:TUpdateManager;
+servers:TServerList;
 begin
-  result:=bytes/(1024*1024);
-end;
+manager.Create;
+servers.Create;
 
-procedure UnpackArchive(arpath, expath:string);
-var
-DataStream:TMemoryStream;
-Read: TFWZipReader;
-i:integer;
-begin
-DataStream:=TMemoryStream.Create;
-DataStream.LoadFromFile(arpath);
-DataStream.Read(i,SizeOf(i));
-Read := TFWZipReader.Create;
-Read.LoadFromStream(DataStream);
-Read.ExtractAll(expath);
-end;
+servers.getServerIdByName(servername);
 
-procedure TForm3.FormActivate(Sender: TObject);
-var
-HTTP:TIdHTTP;
-LoadStream: TMemoryStream;
-begin
-if DoOnce = false then
-begin
-form3.ProgressBar1.Position:=0;
-HTTP:=TIdHTTP.Create(nil);
-HTTP.OnWork:=IdHTTP1Work;
-try
-begin
-FileSize:=GetInetFileSize(UpdateDir + 'minecraft.zip');
-form3.ProgressBar1.max:=FileSize;//Размер файла
-Label2.Caption:='Загрузка... (0/' + IntToStr(FileSize) + ' байт (~' + FloatToStr(Round(BToMb(FileSize))) + ' Мб))';
- LoadStream := TMemoryStream.Create;
-  HTTP.Get(updateDir + 'minecraft.zip', LoadStream);     {загрузка файла}
-  LoadStream.SaveToFile(appdata + '/' + rootdir + '/minecraft.zip');
-  UnpackArchive(appdata + '/' + rootdir + '/minecraft.zip', appdata + '/' + rootdir);    {распаковываем скачанный архив в корневую папку}
-  DeleteFile(appdata + '/' + rootdir + '/minecraft.zip');    {удаляем распакованый архив}
-end;
-except
-on E : Exception do
-begin
-ShowMessage('Ошибка обновления файлов: '+E.Message);
-end;
-end;
-LoadStream.Free;      {освобождаем поток}
-HTTP.Free;
-Form1.Hide;
-Form3.Hide;
-LaunchGame();
-Application.Terminate;
-DoOnce:=true;
-end;
-end;
-
-procedure TForm3.IdHTTP1Work(ASender: TObject; AWorkMode: TWorkMode;
-  AWorkCount: Int64);
-begin
-form3.ProgressBar1.Position:=AWorkCount;//количество скачаного на данный момент
-Label2.Caption:='Загрузка... (' + IntToStr(AWorkCount) + '/' + IntToStr(FileSize) + ' байт (~' + FloatToStr(Round(BToMb(FileSize))) + ' Мб))';
+manager.Destroy;
+servers.Destroy;
 end;
 
 end.

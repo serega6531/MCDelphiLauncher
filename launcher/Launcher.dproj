@@ -109,6 +109,9 @@
         <DCCReference Include="RegExpr.pas"/>
         <DCCReference Include="Perimeter.pas"/>
         <DCCReference Include="uJSON.pas"/>
+        <DCCReference Include="ServerData.pas"/>
+        <DCCReference Include="ServerList.pas"/>
+        <DCCReference Include="UpdateManager.pas"/>
         <None Include="ModelSupport_Launcher\default.txaPackage"/>
         <None Include="ModelSupport_Launcher\default.txvpck"/>
         <None Include="ModelSupport_Launcher\update\default.txvpck"/>

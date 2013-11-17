@@ -184,10 +184,9 @@ object Form3: TForm3
     0000000000000000000000000000000000000000000000000000000000000000
     00000000000000000000000000000000000000000000}
   OldCreateOrder = False
-  OnActivate = FormActivate
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
+  object Title: TLabel
     Left = 136
     Top = 24
     Width = 196
@@ -200,39 +199,18 @@ object Form3: TForm3
     Font.Style = []
     ParentFont = False
   end
-  object Label2: TLabel
-    Left = 32
+  object LoadingLabel: TLabel
+    Left = 24
     Top = 80
     Width = 133
     Height = 13
     Caption = #1047#1072#1075#1088#1091#1079#1082#1072'... (0 '#1073#1072#1081#1090'(0 '#1052#1073'))'
   end
-  object ProgressBar1: TProgressBar
+  object ProgressBar: TProgressBar
     Left = 24
     Top = 128
     Width = 433
     Height = 33
     TabOrder = 0
-  end
-  object IdAntiFreeze1: TIdAntiFreeze
-    Left = 416
-    Top = 56
-  end
-  object IdHTTP1: TIdHTTP
-    AllowCookies = True
-    ProxyParams.BasicAuthentication = False
-    ProxyParams.ProxyPort = 0
-    Request.ContentLength = -1
-    Request.ContentRangeEnd = -1
-    Request.ContentRangeStart = -1
-    Request.ContentRangeInstanceLength = -1
-    Request.Accept = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
-    Request.BasicAuthentication = False
-    Request.UserAgent = 'Mozilla/3.0 (compatible; Indy Library)'
-    Request.Ranges.Units = 'bytes'
-    Request.Ranges = <>
-    HTTPOptions = [hoForceEncodeParams]
-    Left = 352
-    Top = 56
   end
 end
