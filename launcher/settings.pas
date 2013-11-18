@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, main, SHFolder;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, main, SHFolder, ServerList, ServerData;
 
 type
   TForm2 = class(TForm)
@@ -17,8 +17,8 @@ type
     Label5: TLabel;
     Button1: TButton;
     Button2: TButton;
-    procedure FormCreate(Sender: TObject);
     procedure Button1Click(Sender: TObject);
+    function initServers():TServerList;
   private
     { Private declarations }
   public
@@ -34,6 +34,7 @@ var
   MinMem, MaxMem:string;
   appdata:string;
   MinecraftDir:string;
+  servers:TServerList;
 
 implementation
 
@@ -62,11 +63,20 @@ else
 ShowMessage('Ошибка! Проверьте правильность введённых данных');
 end;
 
-procedure TForm2.FormCreate(Sender: TObject);
+function TForm2.initServers():TServerList;
+var serverdata:TServerData;
 begin
 Label1.Caption:='Версия лаунчера' + LauncherVer;   {вывод версии}
 appdata:=GetSpecialFolderPath(CSIDL_APPDATA);      {получаем appdata/roaming}
 MinecraftDir:=appdata + '\' + RootDir + '\';
+{serverdata:=TServerData.Create('Test Server', '127.0.0.1');
+servers.addServer(serverdata);
+FreeAndNil(serverdata);}
+servers:=TServerList.Create;
+serverdata:=TServerData.Create('Test Server 1', '127.0.0.1');
+servers.addServer(serverdata, 0);
+FreeAndNil(serverdata);
+result:=servers;
 end;
 
 end.

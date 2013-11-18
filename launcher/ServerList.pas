@@ -8,11 +8,11 @@ type
 TServerList = class(TObject)
 
 private
-Servers:array of TServerData;
+Servers:array[0..2] of TServerData;
 public
 constructor Create(); overload;
 destructor Destroy; override;
-procedure setServer(server:TServerData;id:integer);
+procedure addServer(server:TServerData; id:integer);
 function getServer(id:integer):TServerData;
 function getOnlineStatus(id:integer):boolean;
 function getServersCount():integer;
@@ -64,10 +64,10 @@ end;
 
 function TServerList.getServersCount: integer;
 begin
-result:=Length(Servers);
+if Length(Servers) > 0 then result:=Length(Servers) else raise Exception.Create('Server''s not exists');
 end;
 
-procedure TServerList.setServer(server:TServerData;id:integer);
+procedure TServerList.addServer(server:TServerData; id:integer);
 begin
 Servers[id]:=server;
 end;

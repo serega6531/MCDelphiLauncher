@@ -8,7 +8,7 @@ uses
   Vcl.Imaging.pngimage, md5, IdBaseComponent, IdComponent,
   IdTCPConnection, IdTCPClient, Vcl.OleCtrls, SHDocVw, IdHTTP,
   System.Classes, IdIcmpClient, IdRawBase, IdRawClient, wininet, shellapi, system.UITypes,
-  Vcl.Menus;
+  Vcl.Menus, Math;
 
 type
   TForm1 = class(TForm)
@@ -47,7 +47,7 @@ implementation
 
 {$R *.dfm}
 
-uses settings, update, enter, IdHashMessageDigest, RegExpr, uJSON, ServerList;
+uses settings, update, enter, IdHashMessageDigest, RegExpr, uJSON, ServerList, ServerData;
 
 function md5(SourceString: string): string;
 var
@@ -70,7 +70,7 @@ function getToken():string;
  begin
    Randomize;
    for i := 1 to 16 do
-    result := result + letters[Random(Length(letters))+1];
+    result := result + letters[RandomRange(1,Length(letters))];
 end;
 
 function CheckUser(login, password, token:string):boolean;   //проверка пользователя
@@ -137,7 +137,7 @@ result:=false;
 end;
 end;
 
-function IsConnectedToInternet: Boolean;
+function IsConnectedToInternet: Boolean;               //WARNING! WORKING BADLY!
 var
   dwConnectionTypes : DWORD;
 begin
@@ -182,14 +182,21 @@ end;
 
 procedure initServerList;
 var servers:TServerList;
+server:TServerData;
 i:integer;
 begin
-servers.Create;
-for I := 0 to servers.getServersCount - 1 do
+i:=0;
+servers:=Form2.initServers;
+{for I := 0 to servers.getServersCount - 1 do
 begin
-Form1.ServersDropdownList.Items.Add(servers.getServer(i).getName);
-end;
-servers.Destroy;
+server:=servers.getServer(i);
+Form1.ServersDropdownList.Items.Add(server.getName);
+end;}
+repeat
+server:=servers.getServer(i);
+Form1.ServersDropdownList.Items.Add(server.getName);
+Inc(i);
+until (i < servers.getServersCount);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);

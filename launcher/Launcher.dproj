@@ -107,7 +107,6 @@
         <DCCReference Include="FWZipWriter.pas"/>
         <DCCReference Include="enter.pas"/>
         <DCCReference Include="RegExpr.pas"/>
-        <DCCReference Include="Perimeter.pas"/>
         <DCCReference Include="uJSON.pas"/>
         <DCCReference Include="ServerData.pas"/>
         <DCCReference Include="ServerList.pas"/>

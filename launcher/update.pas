@@ -34,8 +34,9 @@ procedure TForm3.processUpdate(isForceUpdate: boolean; servername:string);
 var manager:TUpdateManager;
 servers:TServerList;
 begin
-manager.Create;
-servers.Create;
+manager:=TUpdateManager.Create;
+servers:=TServerList.Create;
+
 
 servers.getServerIdByName(servername);
 
