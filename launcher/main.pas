@@ -187,16 +187,12 @@ i:integer;
 begin
 i:=0;
 servers:=Form2.initServers;
-{for I := 0 to servers.getServersCount - 1 do
+while i < servers.getServersCount do
 begin
-server:=servers.getServer(i);
-Form1.ServersDropdownList.Items.Add(server.getName);
-end;}
-repeat
-server:=servers.getServer(i);
-Form1.ServersDropdownList.Items.Add(server.getName);
-Inc(i);
-until (i < servers.getServersCount);
+  Form1.ServersDropdownList.Items.Add(servers.getServer(i).getName);
+  Inc(i);
+end;
+Form1.ServersDropdownList.ItemIndex:=0;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -204,7 +200,7 @@ begin
 if not IsConnectedToInternet then
 begin
   ShowMessage('Нет соединения с интернетом.');
-  Application.Terminate;
+  //Application.Terminate;
 end;
 initServerList();
 token := getToken();

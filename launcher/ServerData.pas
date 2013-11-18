@@ -35,12 +35,12 @@ end;
 
 function TServerData.getAdress: string;
 begin
-result:=self.adress;
+result:=adress;
 end;
 
 function TServerData.getName: string;
 begin
-result:=self.name;
+result:=name;
 end;
 
 end.
