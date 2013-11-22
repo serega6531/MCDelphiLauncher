@@ -31,13 +31,14 @@ uses enter, UpdateManager;
 { TForm3 }
 
 procedure TForm3.processUpdate(isForceUpdate: boolean; chosenserver:TServerData);
-var manager:TUpdateManager;
+var
+  manager:TUpdateManager;
 begin
-manager:=TUpdateManager.Create;
+  manager:=TUpdateManager.Create;
 
-//update
+  //update
 
-manager.Destroy;
+  manager.Destroy;
 end;
 
 end.

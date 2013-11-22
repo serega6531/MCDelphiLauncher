@@ -62,8 +62,9 @@ begin
 end;
 
 Function GetJavaPath:string;
-var dirs: TStringList;
-    root:string;
+var 
+  dirs: TStringList;
+  root:string;
 begin
   if DirectoryExists('C:\Program Files\Java') then
   begin
@@ -80,6 +81,7 @@ dirs := TStringList.Create;
     result:=dirs.Strings[dirs.Count-1];
   finally
     dirs.Free;
+    Raise Exception.Create('Can''t find Java');
   end;
 end;
 

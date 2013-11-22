@@ -24,8 +24,8 @@ implementation
 
 constructor TServerData.Create(name, adress: string);
 begin
-self.name:=name;
-self.adress:=adress;
+	self.name := name;
+	self.adress := adress;
 end;
 
 destructor TServerData.Destroy;
@@ -35,12 +35,12 @@ end;
 
 function TServerData.getAdress: string;
 begin
-result:=adress;
+	result := adress;
 end;
 
 function TServerData.getName: string;
 begin
-result:=name;
+	result := name;
 end;
 
 end.
