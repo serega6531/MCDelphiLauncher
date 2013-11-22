@@ -20,14 +20,11 @@ Coordinates=127,10,40,51
 Coordinates=181,10,53,51
 
 []
-Coordinates=10,10,40,51
+Coordinates=148,80,53,51
 Visible=True
 
 [Image1]
 Coordinates=170,150,49,51
-
-[Memo1]
-Coordinates=148,80,53,51
 
 [Edit1]
 Coordinates=0,0,40,51

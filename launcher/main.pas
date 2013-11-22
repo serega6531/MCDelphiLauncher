@@ -1,3 +1,5 @@
+//Delphi launcher by serega6531
+
 unit main;
 
 interface
@@ -8,7 +10,7 @@ uses
   Vcl.Imaging.pngimage, md5, IdBaseComponent, IdComponent,
   IdTCPConnection, IdTCPClient, Vcl.OleCtrls, SHDocVw, IdHTTP,
   System.Classes, IdIcmpClient, IdRawBase, IdRawClient, wininet, shellapi, system.UITypes,
-  Vcl.Menus, Math;
+  Vcl.Menus, Math, AuthManager, PerimeterUnicode;
 
 type
   TForm1 = class(TForm)
@@ -19,15 +21,20 @@ type
     Button3: TButton;
     CheckBox1: TCheckBox;
     Image1: TImage;
-    Memo1: TMemo;
     Edit1: TEdit;
     CheckBox2: TCheckBox;
     Button4: TButton;
     ServersDropdownList: TComboBox;
     Label3: TLabel;
+    Button1: TButton;
     procedure Button2Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+    procedure closeLauncher;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+
   private
     { Private declarations }
   public
@@ -40,6 +47,7 @@ var
   password:string;
   LaunchParams:string;
   token:string;
+  auth:TAuthManager;
 
 
 
@@ -61,46 +69,6 @@ Result := AnsiLowerCase(md5.HashStringAsHex(SourceString));
 finally
 FreeAndNil(md5);
 end;
-end;
-
-function getToken():string;
- const
-   letters: string = 'abcdef1234567890';   //string with all possible chars
-   var i:integer;
- begin
-   Randomize;
-   for i := 1 to 16 do
-    result := result + letters[RandomRange(1,Length(letters))];
-end;
-
-function CheckUser(login, password, token:string):boolean;   //проверка пользователя
-var
-res, jsontext, session:string;
-json:TStringStream;
-jsonres : TJSONObject;
-http:TIdHTTP;
-begin
-jsontext:='{"username": "'+ login +'","password": "'+ password +'","clientToken": "' + token +'"}';
-http := TIdHttp.Create(nil);
-http.HandleRedirects := True;
-http.ReadTimeout := 5000;
-http.Request.ContentType := 'application/json';
-json := TStringStream.Create(jsontext);
-json.Position := 0;
-res:=http.Post('http://www.happyminers.ru/MineCraft/auth16x.php', json);   {получение ответа}
-json.free;
-http.Free;
-if (res = 'Bad login') then       //проверка не прошла
-result:=false
-else
-begin
-jsonres := TJSONObject.create(res);
-session:=jsonres.getString('accessToken');
-LaunchParams:=session;
-result:=true;                    //проверка прошла
-end;
-main.Form1.Memo1.Lines.Add(LaunchParams);   //DEBUG
-
 end;
 
 function CheckMd5():boolean;                      //проверка md5
@@ -159,19 +127,29 @@ if dialog = mrYes then ShellExecute(0, 'open', 'http://www.java.com/ru/', nil, n
   result:=true;
 end;
 
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+closeLauncher();
+end;
+
 procedure TForm1.Button2Click(Sender: TObject);         {кнопка ИГРАТЬ}
 begin
 if CheckJava then
 begin
 Login:=Edit1.Text;              {логин}
 Password:=Edit2.Text;           {пароль}
-if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND CheckUser(login, password, token) then
+if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND auth.isAuth(login, password) then
 begin {проверка логина, длины логина,   длины пароля,                    проверка пользователя}
-Form3.processUpdate((IsSetFiles({servername}'test')) OR (CheckMd5()) OR (CheckBox1.Checked = true), 'test');        {загрузка файлов}
+Form3.processUpdate((IsSetFiles({servername}'test')) OR (CheckMd5()) OR (CheckBox1.Checked = true), settings.servers.getServerByName(serversDropdownList.Items[serversDropdownList.ItemIndex]));        {загрузка файлов}
 end
 else
 ShowMessage('Неправильный логин или пароль');        {тут всё понято}
 end;
+end;
+
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+Form2.ShowModal;
 end;
 
 procedure TForm1.Button4Click(Sender: TObject);
@@ -180,13 +158,22 @@ ShellExecute(Handle, nil, 'http://www.happyminers.ru', nil, nil, SW_SHOW);
 end;
 
 
+
+procedure TForm1.closeLauncher;
+begin
+  auth.Destroy;
+  servers.Destroy;
+  stopPerimeter;
+  Application.Terminate;
+end;
+
 procedure initServerList;
-var servers:TServerList;
-server:TServerData;
+var
 i:integer;
 begin
 i:=0;
-servers:=Form2.initServers;
+Form2.initServers();
+servers:=settings.servers;
 while i < servers.getServersCount do
 begin
   Form1.ServersDropdownList.Items.Add(servers.getServer(i).getName);
@@ -195,15 +182,34 @@ end;
 Form1.ServersDropdownList.ItemIndex:=0;
 end;
 
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-if not IsConnectedToInternet then
+closeLauncher();
+end;
+
+function ExternalChecking: LongWord;
+begin
+  MessageBox(0, 'Функция при проверках', 'Info', MB_ICONASTERISK);
+end;
+
+procedure ExternalEliminating;
+begin
+  MessageBox(0, 'Функция при противодействии', 'Info', MB_ICONASTERISK);
+end;
+
+
+procedure TForm1.FormCreate(Sender: TObject);
+var PerimeterInputData: TPerimeterInputData;
+begin
+PerimeterInputData.ResistanceType := 5;
+PerimeterInputData.CheckingsType := 8;PerimeterInputData.ExternalType := 0;PerimeterInputData.MainFormHandle := Form1.Handle;PerimeterInputData.Interval := 20;InitPerimeter(PerimeterInputData);
+{if not IsConnectedToInternet then         //NEED CHANGE!
 begin
   ShowMessage('Нет соединения с интернетом.');
   //Application.Terminate;
-end;
+end;}
 initServerList();
-token := getToken();
+auth:=TAuthManager.Create();
 end;
 
 end.

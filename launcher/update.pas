@@ -5,14 +5,14 @@ interface
 uses
   Winapi.Windows, System.SysUtils,
    Vcl.Forms, Vcl.StdCtrls,
- Vcl.Imaging.pngimage,  main, ComCtrls, Vcl.Controls, System.Classes;
+ Vcl.Imaging.pngimage,  main, ComCtrls, Vcl.Controls, System.Classes, ServerData;
 
 type
   TForm3 = class(TForm)
     Title: TLabel;
     LoadingLabel: TLabel;
     ProgressBar: TProgressBar;
-    procedure processUpdate(isForceUpdate:boolean; servername:string);
+    procedure processUpdate(isForceUpdate:boolean; chosenserver:TServerData);
   private
     { Private declarations }
   public
@@ -26,22 +26,18 @@ implementation
 
 {$R *.dfm}
 
-uses enter, ServerList, UpdateManager;
+uses enter, UpdateManager;
 
 { TForm3 }
 
-procedure TForm3.processUpdate(isForceUpdate: boolean; servername:string);
+procedure TForm3.processUpdate(isForceUpdate: boolean; chosenserver:TServerData);
 var manager:TUpdateManager;
-servers:TServerList;
 begin
 manager:=TUpdateManager.Create;
-servers:=TServerList.Create;
 
-
-servers.getServerIdByName(servername);
+//update
 
 manager.Destroy;
-servers.Destroy;
 end;
 
 end.

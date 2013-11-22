@@ -18,8 +18,9 @@ type
     Button1: TButton;
     Button2: TButton;
     procedure Button1Click(Sender: TObject);
-    function initServers():TServerList;
+    procedure initServers();
     procedure FormCreate(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -64,26 +65,23 @@ else
 ShowMessage('Ошибка! Проверьте правильность введённых данных');
 end;
 
+procedure TForm2.Button2Click(Sender: TObject);
+begin
+Form2.Close;
+end;
+
 procedure TForm2.FormCreate(Sender: TObject);
 begin
-Label1.Caption:='Версия лаунчера' + LauncherVer;   {вывод версии}
+Label1.Caption:='Версия лаунчера: '+ LauncherVer;   {вывод версии}
 appdata:=GetSpecialFolderPath(CSIDL_APPDATA);      {получаем appdata/roaming}
 MinecraftDir:=appdata + '\' + RootDir + '\';
 end;
 
-function TForm2.initServers():TServerList;
-var serverdata:TServerData;
+procedure TForm2.initServers();
 begin
-{serverdata:=TServerData.Create('Test Server', '127.0.0.1');
-servers.addServer(serverdata);
-FreeAndNil(serverdata);}
 servers:=TServerList.Create;
-serverdata:=TServerData.Create('Test Server 1', '127.0.0.1');
-servers.addServer(serverdata, 0);
-serverdata:=TServerData.Create('Test Server 2', '127.0.0.2');
-servers.addServer(serverdata, 1);
-//FreeAndNil(serverdata);
-result:=servers;
+servers.addServer(TServerData.Create('Test Server 1', '127.0.0.1'), 0);
+servers.addServer(TServerData.Create('Test Server 2', '127.0.0.2'), 1);
 end;
 
 end.

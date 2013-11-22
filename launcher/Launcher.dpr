@@ -17,7 +17,9 @@ uses
   uJSON in 'uJSON.pas',
   ServerData in 'ServerData.pas',
   ServerList in 'ServerList.pas',
-  UpdateManager in 'UpdateManager.pas';
+  UpdateManager in 'UpdateManager.pas',
+  AuthManager in 'AuthManager.pas',
+  PerimeterUnicode in 'PerimeterUnicode.pas';
 
 {$R *.res}
 

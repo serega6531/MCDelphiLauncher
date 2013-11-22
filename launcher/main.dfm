@@ -4,8 +4,8 @@ object Form1: TForm1
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Minecraft launcher - happyminers.ru'
-  ClientHeight = 413
-  ClientWidth = 749
+  ClientHeight = 348
+  ClientWidth = 639
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -184,12 +184,13 @@ object Form1: TForm1
     0000000000000000000000000000000000000000000000000000000000000000
     00000000000000000000000000000000000000000000}
   OldCreateOrder = False
+  OnClose = FormClose
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel
-    Left = 350
-    Top = 206
+    Left = 41
+    Top = 144
     Width = 51
     Height = 19
     Caption = #1051#1086#1075#1080#1085':'
@@ -201,8 +202,8 @@ object Form1: TForm1
     ParentFont = False
   end
   object Label2: TLabel
-    Left = 350
-    Top = 246
+    Left = 41
+    Top = 184
     Width = 60
     Height = 19
     Caption = #1055#1072#1088#1086#1083#1100':'
@@ -214,8 +215,8 @@ object Form1: TForm1
     ParentFont = False
   end
   object Image1: TImage
-    Left = 48
-    Top = 30
+    Left = 0
+    Top = 8
     Width = 636
     Height = 110
     AutoSize = True
@@ -1034,8 +1035,8 @@ object Form1: TForm1
       4949494949E928D7FF05DA0314F4BA1C6F970000000049454E44AE426082}
   end
   object Label3: TLabel
-    Left = 350
-    Top = 281
+    Left = 41
+    Top = 219
     Width = 58
     Height = 19
     Caption = #1057#1077#1088#1074#1077#1088':'
@@ -1047,16 +1048,16 @@ object Form1: TForm1
     ParentFont = False
   end
   object Edit2: TEdit
-    Left = 416
-    Top = 248
+    Left = 107
+    Top = 186
     Width = 225
     Height = 21
     PasswordChar = '*'
     TabOrder = 0
   end
   object Button2: TButton
-    Left = 233
-    Top = 360
+    Left = 38
+    Top = 306
     Width = 105
     Height = 25
     Caption = #1048#1075#1088#1072#1090#1100
@@ -1064,59 +1065,62 @@ object Form1: TForm1
     OnClick = Button2Click
   end
   object Button3: TButton
-    Left = 493
-    Top = 360
+    Left = 162
+    Top = 306
     Width = 105
     Height = 25
     Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
     TabOrder = 2
+    OnClick = Button3Click
   end
   object CheckBox1: TCheckBox
-    Left = 359
-    Top = 321
+    Left = 50
+    Top = 259
     Width = 93
     Height = 17
     Caption = 'Force Update'
     TabOrder = 3
   end
-  object Memo1: TMemo
-    Left = 8
-    Top = 176
-    Width = 297
-    Height = 72
-    TabOrder = 4
-  end
   object Edit1: TEdit
-    Left = 416
-    Top = 208
+    Left = 107
+    Top = 146
     Width = 225
     Height = 21
-    TabOrder = 5
+    TabOrder = 4
   end
   object CheckBox2: TCheckBox
-    Left = 458
-    Top = 321
+    Left = 149
+    Top = 259
     Width = 113
     Height = 17
     Caption = #1047#1072#1087#1086#1084#1085#1080#1090#1100' '#1083#1086#1075#1080#1085
-    TabOrder = 7
+    TabOrder = 6
   end
   object Button4: TButton
-    Left = 613
-    Top = 360
+    Left = 282
+    Top = 306
     Width = 105
     Height = 25
     Caption = #1056#1077#1075#1080#1089#1090#1088#1072#1094#1080#1103
-    TabOrder = 6
+    TabOrder = 5
     OnClick = Button4Click
   end
   object ServersDropdownList: TComboBox
-    Left = 416
-    Top = 283
+    Left = 107
+    Top = 221
     Width = 225
     Height = 21
     Style = csDropDownList
     DropDownCount = 5
+    TabOrder = 7
+  end
+  object Button1: TButton
+    Left = 402
+    Top = 306
+    Width = 105
+    Height = 25
+    Caption = #1042#1099#1093#1086#1076
     TabOrder = 8
+    OnClick = Button1Click
   end
 end

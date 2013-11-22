@@ -111,6 +111,8 @@
         <DCCReference Include="ServerData.pas"/>
         <DCCReference Include="ServerList.pas"/>
         <DCCReference Include="UpdateManager.pas"/>
+        <DCCReference Include="AuthManager.pas"/>
+        <DCCReference Include="PerimeterUnicode.pas"/>
         <None Include="ModelSupport_Launcher\default.txaPackage"/>
         <None Include="ModelSupport_Launcher\default.txvpck"/>
         <None Include="ModelSupport_Launcher\update\default.txvpck"/>

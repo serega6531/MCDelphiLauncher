@@ -12,12 +12,13 @@ Servers:array[0..2] of TServerData;
 public
 constructor Create(); overload;
 destructor Destroy; override;
-procedure addServer(server:TServerData; id:integer);
-procedure addServers(newservers:array of TServerData; startid:integer);
+procedure addServer(server:TServerData; id:integer); overload;
+procedure addServer(name, adress:string; id:integer); overload;
+procedure addServers(arr:array of TServerData; start:integer);
 function getServer(id:integer):TServerData;
 function getOnlineStatus(id:integer):boolean;
 function getServersCount():integer;
-function getServerIdByName(name:string):integer;
+function getServerByName(name:string):TServerData;
 end;
 
 
@@ -25,14 +26,6 @@ implementation
 
 { TServerList }
 
-procedure TServerList.addServers(newservers: array of TServerData; startid:integer);
-var
-  I: Integer;
-begin
-for I := 0 to Length(newservers)-1 do
-addServer(newservers[i],startid);
-Inc(startid);
-end;
 
 constructor TServerList.Create();
 begin
@@ -42,6 +35,24 @@ end;
 destructor TServerList.Destroy;
 begin
   inherited;
+end;
+
+function TServerList.getServerByName(name:string):TServerData;
+var I:integer;
+foo:boolean;
+begin
+foo:=false;
+for I := 0 to getServersCount()+1 do
+begin
+if getServer(i).getName = name then
+begin
+  result:=getServer(i);
+  foo:=true;
+  break;
+end;
+end;
+if foo = false then
+raise Exception.Create('Server not found');
 end;
 
 function TServerList.getOnlineStatus(id: integer): boolean;      //true is online
@@ -55,34 +66,33 @@ begin
 result:=Servers[id];
 end;
 
-function TServerList.getServerIdByName(name: string): integer;
-var
-  i: Integer;
-begin
-result:=-1;
-for i := 0 to getServersCount - 1 do
-begin
-  if servers[i].getName = name then
-  begin
-  result:=i;
-  break;
-  end;
-end;
-if result = -1 then
-raise Exception.Create('Server doesn''t exists');
-end;
-
 function TServerList.getServersCount: integer;
 var
   I, count: Integer;
 begin
-count:=1;
-for I := 0 to Length(servers)-1 do begin if servers[i] <> nil then Inc(count) else begin if i <> 0 then begin result:=i; break; end else result:=0; end; end;
+count:=0;
+for I := 0 to Length(servers)-1 do begin if servers[i] <> nil then Inc(count) else begin if i <> 0 then begin result:=count; break; end; end; end;
 end;
 
 procedure TServerList.addServer(server:TServerData; id:integer);
 begin
 Servers[id]:=server;
+end;
+
+procedure TServerList.addServer(name, adress: string; id: integer);
+begin
+servers[id]:=TServerData.Create(name, adress);
+end;
+
+procedure TServerList.addServers(arr: array of TServerData; start: integer);
+var i, j:integer;
+begin
+j:=0;
+for I := start to Length(arr) do
+  begin
+     servers[i]:=arr[j];
+     Inc(j);
+  end;
 end;
 
 end.

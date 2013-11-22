@@ -189,9 +189,9 @@ object Form2: TForm2
   object Label1: TLabel
     Left = 16
     Top = 24
-    Width = 93
+    Width = 96
     Height = 13
-    Caption = #1042#1077#1088#1089#1080#1103' '#1083#1072#1091#1085#1095#1077#1088#1072': '
+    Caption = #1042#1077#1088#1089#1080#1103' '#1083#1072#1091#1085#1095#1077#1088#1072':  '
   end
   object Label2: TLabel
     Left = 16
@@ -253,5 +253,6 @@ object Form2: TForm2
     Height = 25
     Caption = #1053#1072#1079#1072#1076
     TabOrder = 3
+    OnClick = Button2Click
   end
 end
