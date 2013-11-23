@@ -8,9 +8,9 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.Imaging.pngimage, md5, IdBaseComponent, IdComponent,
-  IdTCPConnection, IdTCPClient, Vcl.OleCtrls, SHDocVw, IdHTTP,
-  System.Classes, IdIcmpClient, IdRawBase, IdRawClient, shellapi, system.UITypes,
-  Vcl.Menus, Math, AuthManager, PerimeterUnicode;
+  IdTCPConnection, IdTCPClient, Vcl.OleCtrls, IdHTTP, IdIcmpClient,
+  System.Classes, IdRawBase, IdRawClient, shellapi, system.UITypes,
+  Vcl.Menus, Math, AuthManager, PerimeterUnicode, wininet;
 
 type
   TForm1 = class(TForm)
@@ -27,13 +27,15 @@ type
     ServersDropdownList: TComboBox;
     Label3: TLabel;
     Button1: TButton;
+    ping: TIdIcmpClient;
     procedure Button2Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button1Click(Sender: TObject);
-    procedure closeLauncher;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure onPingReply(ASender: TComponent;
+      const AReplyStatus: TReplyStatus);
 
   private
     { Private declarations }
@@ -45,9 +47,9 @@ var
   Form1: TForm1;
   Login:string;
   password:string;
-  LaunchParams:string;
   token:string;
   auth:TAuthManager;
+  pingtime:cardinal;
 
 
 
@@ -55,7 +57,7 @@ implementation
 
 {$R *.dfm}
 
-uses settings, update, enter, IdHashMessageDigest, RegExpr, uJSON, ServerList, ServerData;
+uses settings, update, enter, IdHashMessageDigest, uJSON, ServerList, ServerData;
 
 function md5(SourceString: string): string;
 var md5: TIdHashMessageDigest5;
@@ -72,8 +74,7 @@ end;
 
 function CheckMd5():boolean;                      //проверка md5
 var
-  FileMd5, md5Return:string;
-  http:TIdHTTP;
+  FileMd5: string;
 begin
   if FileExists(appdata + '\' + RootDir + '\' + 'bin\minecraft.jar') then
   begin
@@ -102,14 +103,18 @@ function IsSetFiles(servername:string):boolean;
   end;
 end;
 
-function IsConnectedToInternet: Boolean;               //WARNING! WORKING BADLY!
-var
-  dwConnectionTypes : DWORD;
+function IsConnectedToInternet: Boolean;
+
 begin
-  dwConnectionTypes := INTERNET_CONNECTION_MODEM + INTERNET_CONNECTION_LAN + INTERNET_CONNECTION_PROXY;
-  Result := InternetGetConnectedState (@dwConnectionTypes, 0);
+  //later
+  result := true;
 end;
 
+procedure TForm1.onPingReply(ASender: TComponent;
+  const AReplyStatus: TReplyStatus);
+begin
+  pingtime:=AReplyStatus.MsRoundTripTime;
+end;
 
 function CheckJava:boolean;
 var
@@ -123,9 +128,11 @@ begin
   result := true;
 end;
 
+procedure closeLauncher; forward;
+
 procedure TForm1.Button1Click(Sender: TObject);
 begin
-  closeLauncher();
+  CloseLauncher();
 end;
 
 procedure TForm1.Button2Click(Sender: TObject);         {кнопка ИГРАТЬ}
@@ -154,12 +161,12 @@ end;
 
 
 
-procedure TForm1.closeLauncher;
+procedure CloseLauncher;
 begin
-  auth.Destroy;
-  servers.Destroy;
-  stopPerimeter;
-  Application.Terminate;
+  Auth.Destroy;
+  Servers.Destroy;
+  StopPerimeter;
+  ExitProcess(0);
 end;
 
 procedure initServerList;
@@ -179,25 +186,25 @@ end;
 
 procedure TForm1.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  closeLauncher();
+  CloseLauncher();
 end;
-
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
   PerimeterInputData: TPerimeterInputData;
 begin
-  PerimeterInputData.ResistanceType := 2;
-  PerimeterInputData.CheckingsType := 8;
-  PerimeterInputData.ExternalType := 0;
+  PerimeterInputData.ResistanceType := 0;
+  PerimeterInputData.CheckingsType := 700;
+  PerimeterInputData.ExternalType := 2;
   PerimeterInputData.MainFormHandle := Form1.Handle;
   PerimeterInputData.Interval := 20;
-  InitPerimeter(PerimeterInputData);
-  {if not IsConnectedToInternet then         //NEED CHANGE!
+  PerimeterInputData.ExtProcOnEliminating := @closeLauncher;
+  //InitPerimeter(PerimeterInputData);      Will activate later
+  if not IsConnectedToInternet then
   begin
     ShowMessage('Нет соединения с интернетом.');
-    //Application.Terminate;
-  end;}
+    Application.Terminate;
+  end;
   initServerList();
   auth := TAuthManager.Create();
 end;

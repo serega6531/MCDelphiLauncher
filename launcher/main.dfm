@@ -1123,4 +1123,12 @@ object Form1: TForm1
     TabOrder = 8
     OnClick = Button1Click
   end
+  object ping: TIdIcmpClient
+    Protocol = 1
+    ProtocolIPv6 = 58
+    IPVersion = Id_IPv4
+    OnReply = onPingReply
+    Left = 608
+    Top = 304
+  end
 end

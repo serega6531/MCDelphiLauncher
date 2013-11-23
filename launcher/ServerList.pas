@@ -71,6 +71,7 @@ function TServerList.getServersCount: integer;
 var
   I, count: Integer;
 begin
+  result:=0;
   count := 0;
   for I := 0 to Length(servers)-1 do 
   begin

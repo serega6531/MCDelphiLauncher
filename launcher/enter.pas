@@ -26,7 +26,6 @@ var
     sr: TSearchRec;
     attr: Integer;
   begin
-    attr := 0;
     attr := faAnyFile;
     if DirectoryExists(Path) then
       if FindFirst(IncludeTrailingBackslash(Path) + '*.*', attr, SR) = 0 then
@@ -86,12 +85,9 @@ dirs := TStringList.Create;
 end;
 
 procedure StartGame(JavaPath, Launch, MinecraftPath:string);
-var
-    si : TStartupInfo;
-    pi : TProcessInformation;
 begin
 //CreateProcess(nil,PWideChar(WideString('"' + JavaPath + '"' + Launch)),nil,nil,True,NORMAL_PRIORITY_CLASS,nil,nil,si,pi);
-ShellExecuteA(0,nil,PAnsiChar(JavaPath + 'bin\javaw.exe'),{lpParameters}nil,PAnsiChar(MinecraftPath +'\bin\'),SW_SHOWNORMAL);
+//ShellExecuteA(0,nil,PAnsiChar(JavaPath + 'bin\javaw.exe'),{lpParameters}nil,PAnsiChar(MinecraftPath +'\bin\'),SW_SHOWNORMAL);
 //CreateProcess(JavaPath + 'bin\javaw.exe', ' Parameters', nil, nil, false, NORMAL_PRIORITY_CLASS, nil, nil, si, pi);
 end;
 

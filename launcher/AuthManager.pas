@@ -1,18 +1,19 @@
 unit AuthManager;
 
 interface
+
 uses System.Classes, uJson, IdHTTP, Math;
 
 type
-TAuthManager = class(TObject)
+  TAuthManager = class(TObject)
 
 private
-function generateToken():string;
+  function generateToken():string;
 public
-constructor Create(); overload;
-destructor Destroy; override;
-function isAuth(login, password:string):boolean;
-function getParams():string;
+  constructor Create(); overload;
+  destructor Destroy; override;
+  function isAuth(login, password:string):boolean;
+  function getParams():string;
 end;
 
 var LaunchParams:string;
@@ -51,30 +52,26 @@ end;
 
 function TAuthManager.isAuth(login, password:string): boolean;
 var
-res, jsontext, session:string;
-json:TStringStream;
-jsonres : TJSONObject;
-http:TIdHTTP;
+  res, jsontext:string;
+  json:TStringStream;
+  http:TIdHTTP;
 begin
-jsontext:='{"username": "'+ login +'","password": "'+ password +'","clientToken": "' + generateToken() +'"}';
-http := TIdHttp.Create(nil);
-http.HandleRedirects := True;
-http.ReadTimeout := 5000;
-http.Request.ContentType := 'application/json';
-json := TStringStream.Create(jsontext);
-json.Position := 0;
-res:=http.Post('http://www.happyminers.ru/MineCraft/auth16x.php', json);   {получение ответа}
-json.free;
-http.Free;
-if (res = 'Bad login') then       //проверка не прошла
-result:=false
-else
-begin
-jsonres := TJSONObject.create(res);
-LaunchParams:=jsonres.getString('accessToken');
-result:=true;                    //проверка прошла
-end;
-
+  jsontext:='{"username": "'+ login +'","password": "'+ password +'","clientToken": "' + generateToken() +'"}';
+  http := TIdHttp.Create(nil);
+  http.HandleRedirects := True;
+  http.ReadTimeout := 5000;
+  http.Request.ContentType := 'application/json';
+  json := TStringStream.Create(jsontext);
+  json.Position := 0;
+  res:=http.Post('http://www.happyminers.ru/MineCraft/auth16x.php', json);   {получение ответа}
+  json.free;
+  http.Free;
+  if (res = 'Bad login') then       //проверка не прошла
+    result:=false
+  else begin
+    LaunchParams := Copy(res, Pos('accessToken":"', res)+Length('accessToken":"'), 21);
+    result:=true;                    //проверка прошла
+  end;
 end;
 
 end.
