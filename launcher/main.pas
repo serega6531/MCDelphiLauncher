@@ -7,35 +7,35 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.Imaging.pngimage, md5, IdBaseComponent, IdComponent,
-  IdTCPConnection, IdTCPClient, Vcl.OleCtrls, IdHTTP, IdIcmpClient,
+  Vcl.Imaging.pngimage, md5, IdBaseComponent, IdComponent, Vcl.OleCtrls, IdHTTP, IdIcmpClient,
   System.Classes, IdRawBase, IdRawClient, shellapi, system.UITypes,
-  Vcl.Menus, Math, AuthManager, PerimeterUnicode, wininet;
+  Vcl.Menus, Math, AuthManager, PerimeterUnicode, sSkinManager, sButton,
+  sComboBox, sEdit, sLabel, sCheckBox, registry;
 
 type
   TForm1 = class(TForm)
-    Label1: TLabel;
-    Edit2: TEdit;
-    Label2: TLabel;
-    Button2: TButton;
-    Button3: TButton;
-    CheckBox1: TCheckBox;
-    Image1: TImage;
-    Edit1: TEdit;
-    CheckBox2: TCheckBox;
-    Button4: TButton;
-    ServersDropdownList: TComboBox;
-    Label3: TLabel;
-    Button1: TButton;
-    ping: TIdIcmpClient;
-    procedure Button2Click(Sender: TObject);
+    LogoImg: TImage;
+    sSkinManager1: TsSkinManager;
+    ExitBtn: TsButton;
+    SiteBtn: TsButton;
+    ServersDropdownList: TsComboBox;
+    LoginEdit: TsEdit;
+    PasswordEdit: TsEdit;
+    LoginLabel: TsLabel;
+    PasswordLabel: TsLabel;
+    ServerLabel: TsLabel;
+    UpdateCheckbox: TsCheckBox;
+    RememberCheckbox: TsCheckBox;
+    SettingsBtn: TsButton;
+    LoginBtn: TsButton;
     procedure Button4Click(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure Button3Click(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure onPingReply(ASender: TComponent;
-      const AReplyStatus: TReplyStatus);
+    procedure SiteBtnClick(Sender: TObject);
+    procedure ExitBtnClick(Sender: TObject);
+    procedure SettingsBtnClick(Sender: TObject);
+    procedure LoginBtnClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -50,6 +50,7 @@ var
   token:string;
   auth:TAuthManager;
   pingtime:cardinal;
+  reg:TRegIniFile;
 
 
 
@@ -57,34 +58,7 @@ implementation
 
 {$R *.dfm}
 
-uses settings, update, enter, IdHashMessageDigest, uJSON, ServerList, ServerData;
-
-function md5(SourceString: string): string;
-var md5: TIdHashMessageDigest5;
-begin
-// получаем md5-хэш для строки
-  Result := '';
-  md5 := TIdHashMessageDigest5.Create;
-  try
-    Result := AnsiLowerCase(md5.HashStringAsHex(SourceString));
-  finally
-    FreeAndNil(md5);
-  end;
-end;
-
-function CheckMd5():boolean;                      //проверка md5
-var
-  FileMd5: string;
-begin
-  if FileExists(appdata + '\' + RootDir + '\' + 'bin\minecraft.jar') then
-  begin
-    FileMd5:=(MD5DigestToStr(MD5File(appdata + '\' + RootDir + '\' + 'bin\minecraft.jar')));   //получение md5 и запись в fileMd5
-    //блаблабла
-   result := true;
-  end else begin
-    result := false;
-  end;
-end;
+uses settings, update, enter, IdHashMessageDigest, ServerList, ServerData;
 
 function IsSetFiles(servername:string):boolean;
   begin
@@ -110,44 +84,25 @@ begin
   result := true;
 end;
 
-procedure TForm1.onPingReply(ASender: TComponent;
-  const AReplyStatus: TReplyStatus);
+procedure TForm1.SiteBtnClick(Sender: TObject);
 begin
-  pingtime:=AReplyStatus.MsRoundTripTime;
+  ShellExecute(Handle, nil, 'http://www.happyminers.ru', nil, nil, SW_SHOW);
+end;
+
+procedure TForm1.SettingsBtnClick(Sender: TObject);
+begin
+  Form2.ShowModal;
 end;
 
 function CheckJava:boolean;
-var
-  dialog:integer;
 begin
-  if not ShellExecute(0,'open','java',nil,nil,0) = 42 then begin
-   result := false;
-   dialog :=  MessageDlg('Java не найдена! Скачать?',mtError,[mbYes,mbNo], 0);
-  if dialog = mrYes then ShellExecute(0, 'open', 'http://www.java.com/ru/', nil, nil, SW_SHOW);
-  end else
+  //later
   result := true;
 end;
 
 procedure closeLauncher; forward;
 
-procedure TForm1.Button1Click(Sender: TObject);
-begin
-  CloseLauncher();
-end;
 
-procedure TForm1.Button2Click(Sender: TObject);         {кнопка ИГРАТЬ}
-begin
-  if CheckJava then
-  begin
-    Login := Edit1.Text;              {логин}
-    Password := Edit2.Text;           {пароль}
-    if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND auth.isAuth(login, password) then
-    begin {проверка логина, длины логина,   длины пароля,                    проверка пользователя}
-      Form3.processUpdate((IsSetFiles({servername}'test')) OR (CheckMd5()) OR (CheckBox1.Checked = true), settings.servers.getServerByName(serversDropdownList.Items[serversDropdownList.ItemIndex]));        {загрузка файлов}
-    end else
-     ShowMessage('Неправильный логин или пароль');        {тут всё понято}
-  end;
-end;
 
 procedure TForm1.Button3Click(Sender: TObject);
 begin
@@ -161,10 +116,16 @@ end;
 
 
 
+procedure TForm1.ExitBtnClick(Sender: TObject);
+begin
+  closeLauncher();
+end;
+
 procedure CloseLauncher;
 begin
   Auth.Destroy;
   Servers.Destroy;
+  reg.Destroy;
   StopPerimeter;
   ExitProcess(0);
 end;
@@ -189,6 +150,16 @@ begin
   CloseLauncher();
 end;
 
+function _auth(login, password:string):boolean;
+begin
+  result := auth.isAuth(login, password);
+  if result = true then
+  begin
+    reg.WriteString('Auth','Login',login);
+    reg.WriteString('Auth','Password',password);
+  end;
+end;
+
 procedure TForm1.FormCreate(Sender: TObject);
 var
   PerimeterInputData: TPerimeterInputData;
@@ -207,6 +178,34 @@ begin
   end;
   initServerList();
   auth := TAuthManager.Create();
+  Reg := TRegIniFile.Create('Software\happyminers');
+  if (reg.ReadString('Auth', 'Login', 'def') <> 'def') AND (reg.ReadString('Auth', 'Password', 'def') <> 'def') then
+  begin
+    if MessageDlg('Обнаружены данные прошлой авторизации? Использовать их?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    begin
+      self.LoginEdit.Text := reg.ReadString('Auth', 'Login', 'def');
+      self.PasswordEdit.Text := reg.ReadString('Auth', 'Password', 'def');
+    end else begin
+      reg.WriteString('Auth', 'Login', 'def'); reg.WriteString('Auth', 'Password', 'def');
+    end;
+
+  end;
+
+end;
+
+procedure TForm1.LoginBtnClick(Sender: TObject);
+begin
+  if CheckJava then
+  begin
+    Login := LoginEdit.Text;              {логин}
+    Password := PasswordEdit.Text;           {пароль}
+    if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND _auth(login, password) then   //DISABLE AUTH FOR DEBUG
+    begin {проверка логина, длины логина,   длины пароля,                    проверка пользователя}
+      Form3.processUpdate((UpdateCheckbox.Checked = true), settings.servers.getServerByName(serversDropdownList.Items[serversDropdownList.ItemIndex]));        {загрузка файлов}
+    end else
+      //ShowMessage('Неправильный логин или пароль');
+      MessageDlg('Неправильный логин или пароль',mtError, [mbOK], 0);
+  end;
 end;
 
 end.

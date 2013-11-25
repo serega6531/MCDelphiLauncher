@@ -2,7 +2,7 @@ unit AuthManager;
 
 interface
 
-uses System.Classes, uJson, IdHTTP, Math;
+uses System.Classes, IdHTTP, Math;
 
 type
   TAuthManager = class(TObject)
@@ -37,12 +37,13 @@ end;
 
 function TAuthManager.generateToken: string;
  const
-   letters: string = 'abcdef1234567890';   //string with all possible chars
-   var i:integer;
+    letters: string = 'abcdef1234567890';   //string with all possible chars
+  var
+    i:integer;
  begin
    Randomize;
    for i := 1 to 16 do
-    result := result + letters[RandomRange(1,Length(letters))];
+    result := result + letters[RandomRange(1,16)];
 end;
 
 function TAuthManager.getParams: string;
@@ -69,7 +70,7 @@ begin
   if (res = 'Bad login') then       //проверка не прошла
     result:=false
   else begin
-    LaunchParams := Copy(res, Pos('accessToken":"', res)+Length('accessToken":"'), 21);
+    LaunchParams := Copy(res, Pos('accessToken":"', res)+14, 21);
     result:=true;                    //проверка прошла
   end;
 end;

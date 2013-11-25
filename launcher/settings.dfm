@@ -4,7 +4,7 @@ object Form2: TForm2
   BorderIcons = [biSystemMenu, biMinimize]
   Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
   ClientHeight = 175
-  ClientWidth = 404
+  ClientWidth = 346
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -186,73 +186,105 @@ object Form2: TForm2
   OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
+  object VersionLabel: TsLabel
     Left = 16
     Top = 24
-    Width = 96
+    Width = 93
     Height = 13
-    Caption = #1042#1077#1088#1089#1080#1103' '#1083#1072#1091#1085#1095#1077#1088#1072':  '
+    Caption = #1042#1077#1088#1089#1080#1103' '#1083#1072#1091#1085#1095#1077#1088#1072': '
   end
-  object Label2: TLabel
-    Left = 16
+  object XmsLabel: TsLabel
+    Left = 21
     Top = 51
-    Width = 152
+    Width = 155
     Height = 13
-    Caption = #1052#1080#1085#1080#1084#1072#1083#1100#1085#1072#1103' '#1087#1072#1084#1103#1090#1100' '#1085#1072' '#1080#1075#1088#1091':'
+    Caption = #1052#1080#1085#1080#1084#1072#1083#1100#1085#1072#1103' '#1087#1072#1084#1103#1090#1100' '#1085#1072' '#1080#1075#1088#1091': '
   end
-  object Label3: TLabel
+  object XmxLabel: TsLabel
     Left = 16
     Top = 83
-    Width = 157
+    Width = 160
     Height = 13
-    Caption = #1052#1072#1082#1089#1080#1084#1072#1083#1100#1085#1072#1103' '#1087#1072#1084#1103#1090#1100' '#1085#1072' '#1080#1075#1088#1091':'
+    Caption = #1052#1072#1082#1089#1080#1084#1072#1083#1100#1085#1072#1103' '#1087#1072#1084#1103#1090#1100' '#1085#1072' '#1080#1075#1088#1091': '
   end
-  object Label4: TLabel
-    Left = 319
-    Top = 51
-    Width = 14
-    Height = 13
-    Caption = #1052#1041
-  end
-  object Label5: TLabel
-    Left = 319
-    Top = 83
-    Width = 14
-    Height = 13
-    Caption = #1052#1041
-  end
-  object Edit1: TEdit
-    Left = 184
+  object sEdit1: TsEdit
+    Left = 192
     Top = 48
     Width = 121
     Height = 21
+    Color = clWhite
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 0
     Text = '512'
+    SkinData.SkinSection = 'EDIT'
+    BoundLabel.Indent = 0
+    BoundLabel.Font.Charset = DEFAULT_CHARSET
+    BoundLabel.Font.Color = clWindowText
+    BoundLabel.Font.Height = -11
+    BoundLabel.Font.Name = 'Tahoma'
+    BoundLabel.Font.Style = []
+    BoundLabel.Layout = sclLeft
+    BoundLabel.MaxWidth = 0
+    BoundLabel.UseSkinColor = True
   end
-  object Edit2: TEdit
-    Left = 184
-    Top = 75
+  object sEdit2: TsEdit
+    Left = 192
+    Top = 80
     Width = 121
     Height = 21
+    Color = clWhite
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 1
-    Text = '2048'
+    Text = '1024'
+    SkinData.SkinSection = 'EDIT'
+    BoundLabel.Indent = 0
+    BoundLabel.Font.Charset = DEFAULT_CHARSET
+    BoundLabel.Font.Color = clWindowText
+    BoundLabel.Font.Height = -11
+    BoundLabel.Font.Name = 'Tahoma'
+    BoundLabel.Font.Style = []
+    BoundLabel.Layout = sclLeft
+    BoundLabel.MaxWidth = 0
+    BoundLabel.UseSkinColor = True
   end
-  object Button1: TButton
-    Left = 48
+  object SaveBtn: TsButton
+    Left = 16
     Top = 128
-    Width = 137
+    Width = 145
     Height = 25
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
     TabOrder = 2
-    OnClick = Button1Click
+    OnClick = SaveBtnClick
+    SkinData.SkinSection = 'BUTTON'
   end
-  object Button2: TButton
-    Left = 208
+  object BackBtn: TsButton
+    Left = 184
     Top = 128
-    Width = 137
+    Width = 141
     Height = 25
     Caption = #1053#1072#1079#1072#1076
     TabOrder = 3
-    OnClick = Button2Click
+    OnClick = BackBtnClick
+    SkinData.SkinSection = 'BUTTON'
+  end
+  object sSkinProvider1: TsSkinProvider
+    AddedTitle.Font.Charset = DEFAULT_CHARSET
+    AddedTitle.Font.Color = clNone
+    AddedTitle.Font.Height = -11
+    AddedTitle.Font.Name = 'Tahoma'
+    AddedTitle.Font.Style = []
+    SkinData.SkinSection = 'FORM'
+    TitleButtons = <>
+    Left = 304
   end
 end

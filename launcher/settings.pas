@@ -4,23 +4,23 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, main, SHFolder, ServerList, ServerData;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, main, SHFolder, ServerList, ServerData,
+  sSkinProvider, sEdit, sLabel, sButton;
 
 type
   TForm2 = class(TForm)
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Edit1: TEdit;
-    Edit2: TEdit;
-    Label4: TLabel;
-    Label5: TLabel;
-    Button1: TButton;
-    Button2: TButton;
-    procedure Button1Click(Sender: TObject);
+    sSkinProvider1: TsSkinProvider;
+    sEdit1: TsEdit;
+    sEdit2: TsEdit;
+    VersionLabel: TsLabel;
+    XmsLabel: TsLabel;
+    XmxLabel: TsLabel;
+    SaveBtn: TsButton;
+    BackBtn: TsButton;
     procedure initServers();
     procedure FormCreate(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure SaveBtnClick(Sender: TObject);
+    procedure BackBtnClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -51,27 +51,17 @@ begin
   if SUCCEEDED(SHGetFolderPath(0,folder,0,SHGFP_TYPE_CURRENT,@path[0])) then
     Result := path
   else
-    Raise Exception.Create('Cant find appdata');
+    Raise Exception.Create('Can''t find AppData dir');
 end;
 
-procedure TForm2.Button1Click(Sender: TObject);     {кнопка сохранить}
-begin
-  if (StrToInt(Edit1.Text) > 256) AND (StrToInt(Edit2.Text) > StrToInt(Edit1.text)) then       {проверка правильности данных}
-  begin
-    MinMem := Edit1.Text;
-    MaxMem := Edit2.Text;
-  end else
-    ShowMessage('Ошибка! Проверьте правильность введённых данных');
-end;
-
-procedure TForm2.Button2Click(Sender: TObject);
+procedure TForm2.BackBtnClick(Sender: TObject);
 begin
   Form2.Close;
 end;
 
 procedure TForm2.FormCreate(Sender: TObject);
 begin
-  Label1.Caption:='Версия лаунчера: '+ LauncherVer;   {вывод версии}
+  VersionLabel.Caption:='Версия лаунчера: '+ LauncherVer;   {вывод версии}
   appdata:=GetSpecialFolderPath(CSIDL_APPDATA);      {получаем appdata/roaming}
   MinecraftDir:=appdata + '\' + RootDir + '\';
 end;
@@ -81,6 +71,17 @@ begin
   servers:=TServerList.Create;
   servers.addServer(TServerData.Create('Test Server 1', '127.0.0.1'), 0);
   servers.addServer(TServerData.Create('Test Server 2', '127.0.0.2'), 1);
+end;
+
+procedure TForm2.SaveBtnClick(Sender: TObject);
+begin
+    if (StrToInt(sEdit1.Text) > 256) AND (StrToInt(sEdit2.Text) > StrToInt(sEdit1.text)) then       {проверка правильности данных}
+  begin
+    MinMem := sEdit1.Text;
+    MaxMem := sEdit2.Text;
+    self.Close;
+  end else
+    ShowMessage('Ошибка! Проверьте правильность введённых данных');
 end;
 
 end.

@@ -5,14 +5,18 @@ interface
 uses
   Winapi.Windows, System.SysUtils,
    Vcl.Forms, Vcl.StdCtrls,
- Vcl.Imaging.pngimage,  main, ComCtrls, Vcl.Controls, System.Classes, ServerData;
+ Vcl.Imaging.pngimage,  main, ComCtrls, Vcl.Controls, System.Classes, ServerData,
+  sSkinProvider, sLabel, acProgressBar, sButton;
 
 type
   TForm3 = class(TForm)
-    Title: TLabel;
-    LoadingLabel: TLabel;
-    ProgressBar: TProgressBar;
+    sSkinProvider1: TsSkinProvider;
+    ProgressBar: TsProgressBar;
+    Title: TsLabel;
+    LoadingLabel: TsLabel;
+    CancelBtn: TsButton;
     procedure processUpdate(isForceUpdate:boolean; chosenserver:TServerData);
+    procedure CancelBtnClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -22,6 +26,7 @@ type
 var
   Form3: TForm3;
 
+
 implementation
 
 {$R *.dfm}
@@ -30,13 +35,20 @@ uses enter, UpdateManager;
 
 { TForm3 }
 
+procedure TForm3.CancelBtnClick(Sender: TObject);
+begin
+  Application.Terminate;
+end;
+
 procedure TForm3.processUpdate(isForceUpdate: boolean; chosenserver:TServerData);
 var
   manager:TUpdateManager;
 begin
+  form1.Hide;
+  form3.Show;
   manager:=TUpdateManager.Create;
 
-  //update
+  manager.init('base');
 
   manager.Destroy;
 end;

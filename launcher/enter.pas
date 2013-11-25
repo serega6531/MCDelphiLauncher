@@ -95,8 +95,8 @@ procedure LaunchGame();
 var
     Launch:string;
 begin
-MinMem:=settings.Form2.Edit1.Text;
-MaxMem:=settings.Form2.Edit2.Text;
+MinMem:=settings.Form2.sEdit1.Text;
+MaxMem:=settings.Form2.sEdit2.Text;
   begin
   {Launch:=PAnsiChar(' -Xms' + MinMem + 'm' +
             ' -Xmx' + MaxMem + 'm' +

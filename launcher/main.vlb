@@ -1,31 +1,7 @@
-﻿[Label2]
-Coordinates=64,10,46,51
-
-[Label1]
-Coordinates=215,78,46,51
-
-[Button1]
-Coordinates=79,78,53,51
-
-[Button2]
+﻿[]
 Coordinates=10,78,53,51
-
-[CheckBox1]
-Coordinates=250,10,70,51
-
-[Edit2]
-Coordinates=127,10,40,51
-
-[Button3]
-Coordinates=181,10,53,51
-
-[]
-Coordinates=148,80,53,51
 Visible=True
 
-[Image1]
+[LogoImg]
 Coordinates=170,150,49,51
-
-[Edit1]
-Coordinates=0,0,40,51
 

@@ -4,7 +4,7 @@ object Form3: TForm3
   BorderIcons = [biMinimize]
   BorderStyle = bsSingle
   Caption = #1047#1072#1075#1088#1091#1079#1082#1072' '#1092#1072#1081#1083#1086#1074
-  ClientHeight = 195
+  ClientHeight = 242
   ClientWidth = 484
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -186,31 +186,54 @@ object Form3: TForm3
   OldCreateOrder = False
   PixelsPerInch = 96
   TextHeight = 13
-  object Title: TLabel
+  object Title: TsLabel
     Left = 136
     Top = 24
-    Width = 196
-    Height = 23
-    Caption = #1048#1076#1105#1090' '#1079#1072#1075#1088#1091#1079#1082#1072' '#1092#1072#1081#1083#1086#1074
+    Width = 217
+    Height = 25
+    Caption = #1048#1076#1077#1090' '#1079#1072#1075#1088#1091#1079#1082#1072' '#1092#1072#1081#1083#1086#1074
+    ParentFont = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -19
+    Font.Height = -21
     Font.Name = 'Tahoma'
     Font.Style = []
-    ParentFont = False
   end
-  object LoadingLabel: TLabel
+  object LoadingLabel: TsLabel
     Left = 24
-    Top = 80
+    Top = 88
     Width = 133
     Height = 13
     Caption = #1047#1072#1075#1088#1091#1079#1082#1072'... (0 '#1073#1072#1081#1090'(0 '#1052#1073'))'
   end
-  object ProgressBar: TProgressBar
+  object ProgressBar: TsProgressBar
     Left = 24
-    Top = 128
+    Top = 120
     Width = 433
-    Height = 33
+    Height = 41
+    Smooth = True
     TabOrder = 0
+    SkinData.SkinSection = 'GAUGE'
+  end
+  object CancelBtn: TsButton
+    Left = 104
+    Top = 176
+    Width = 249
+    Height = 33
+    Caption = #1054#1090#1084#1077#1085#1080#1090#1100
+    TabOrder = 1
+    OnClick = CancelBtnClick
+    SkinData.SkinSection = 'BUTTON'
+  end
+  object sSkinProvider1: TsSkinProvider
+    AddedTitle.Font.Charset = DEFAULT_CHARSET
+    AddedTitle.Font.Color = clNone
+    AddedTitle.Font.Height = -11
+    AddedTitle.Font.Name = 'Tahoma'
+    AddedTitle.Font.Style = []
+    SkinData.SkinSection = 'FORM'
+    TitleButtons = <>
+    Left = 440
+    Top = 16
   end
 end
