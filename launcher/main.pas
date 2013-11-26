@@ -60,25 +60,7 @@ implementation
 
 uses settings, update, enter, IdHashMessageDigest, ServerList, ServerData;
 
-function IsSetFiles(servername:string):boolean;
-  begin
-  result := false;
-  if not (DirectoryExists(appdata + '/' + rootdir)) then          {если есть папка}
-  begin
-    CreateDir(appdata + '/' + rootdir);                  {создаём папку}
-  end;
-  if FileExists(appdata + '/' + rootdir + '/' + servername + '/minecraft.jar') then                  {если есть файл(1-14)}
-  begin
-    result := true;                                                {true если файла нет}
-  end;
-  if not FileExists('launcher_profiles.json') then
-  begin
-    result := false;
-  end;
-end;
-
 function IsConnectedToInternet: Boolean;
-
 begin
   //later
   result := true;
@@ -160,6 +142,14 @@ begin
   end;
 end;
 
+function needUpdate():boolean;
+var
+  _http:TIdHTTP;
+begin
+  _http := TidHTTP.Create(nil);
+  if _http.Get('http://www.happyminers.ru/MineCraft/launcherver.php') = settings.LauncherVer then result := false else result := true;
+end;
+
 procedure TForm1.FormCreate(Sender: TObject);
 var
   PerimeterInputData: TPerimeterInputData;
@@ -170,14 +160,14 @@ begin
   PerimeterInputData.MainFormHandle := Form1.Handle;
   PerimeterInputData.Interval := 20;
   PerimeterInputData.ExtProcOnEliminating := @closeLauncher;
-  //InitPerimeter(PerimeterInputData);      Will activate later
+  //InitPerimeter(PerimeterInputData);      //Will activate later
   if not IsConnectedToInternet then
   begin
     ShowMessage('Нет соединения с интернетом.');
     Application.Terminate;
   end;
-  initServerList();
   auth := TAuthManager.Create();
+  initServerList();
   Reg := TRegIniFile.Create('Software\happyminers');
   if (reg.ReadString('Auth', 'Login', 'def') <> 'def') AND (reg.ReadString('Auth', 'Password', 'def') <> 'def') then
   begin
@@ -188,9 +178,13 @@ begin
     end else begin
       reg.WriteString('Auth', 'Login', 'def'); reg.WriteString('Auth', 'Password', 'def');
     end;
-
   end;
-
+  if needUpdate() then
+  begin
+    MessageDlg('Необходимо обновить лаунчер!', mtError, [mbOk], 0);
+    ShellExecute(Handle, nil, 'http://www.happyminers.ru/?mode=start', nil, nil, SW_SHOW);
+    closeLauncher();
+  end;
 end;
 
 procedure TForm1.LoginBtnClick(Sender: TObject);

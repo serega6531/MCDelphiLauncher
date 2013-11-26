@@ -69,7 +69,7 @@ end;
 procedure TForm2.initServers();
 begin
   servers:=TServerList.Create;
-  servers.addServer(TServerData.Create('Test Server 1', '127.0.0.1'), 0);
+  servers.addServer(TServerData.Create('Classic', '127.0.0.1'), 0);
   servers.addServer(TServerData.Create('Test Server 2', '127.0.0.2'), 1);
 end;
 

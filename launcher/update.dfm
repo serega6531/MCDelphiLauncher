@@ -217,7 +217,7 @@ object Form3: TForm3
   end
   object CancelBtn: TsButton
     Left = 104
-    Top = 176
+    Top = 184
     Width = 249
     Height = 33
     Caption = #1054#1090#1084#1077#1085#1080#1090#1100

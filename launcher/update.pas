@@ -6,7 +6,7 @@ uses
   Winapi.Windows, System.SysUtils,
    Vcl.Forms, Vcl.StdCtrls,
  Vcl.Imaging.pngimage,  main, ComCtrls, Vcl.Controls, System.Classes, ServerData,
-  sSkinProvider, sLabel, acProgressBar, sButton;
+  sSkinProvider, sLabel, acProgressBar, sButton, IdHashMessageDigest, idGlobal, Dialogs;
 
 type
   TForm3 = class(TForm)
@@ -48,7 +48,7 @@ begin
   form3.Show;
   manager:=TUpdateManager.Create;
 
-  manager.init('base');
+  manager.init(chosenserver.getName,isForceUpdate);
 
   manager.Destroy;
 end;

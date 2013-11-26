@@ -2,8 +2,8 @@ unit UpdateManager;
 
 interface
 
-uses ServerData, settings, idHTTP, IdBaseComponent, IdAntiFreezeBase, IdComponent, System.Classes, System.SysUtils, FWZipReader,
- update, idAntiFreeze, Forms;
+uses settings, idHTTP, IdBaseComponent, IdAntiFreezeBase, IdComponent, System.Classes, System.SysUtils, FWZipReader,
+ update, idAntiFreeze, Forms, IdHashMessageDigest, IdGlobal, FileCtrl;
 
 type
   TUpdateManager = class(TObject)
@@ -19,7 +19,8 @@ private
 public
   constructor Create(); overload;
   destructor Destroy; override;
-  procedure init(subj:string);
+  procedure init(server:string;force:boolean);
+  function Md5File(filename:string): string;
 end;
 
 const updateDir:string = 'http://www.happyminers.ru/MineCraft/MinecraftDownload/';
@@ -45,6 +46,30 @@ begin
   inherited;
 end;
 
+procedure RemoveAll(path: string);
+var
+  sr: TSearchRec;
+begin
+  if FindFirst(path + '\*.*', faAnyFile, sr) = 0 then
+  begin
+    repeat
+      if sr.Attr and faDirectory = 0 then
+      begin
+        DeleteFile(path + '\' + sr.name);
+      end
+      else
+      begin
+        if pos('.', sr.name) <= 0 then
+          RemoveAll(path + '\' + sr.name);
+      end;
+    until
+      FindNext(sr) <> 0;
+  end;
+  FindClose(sr);
+  //RemoveDir(PChar(path));
+end;
+
+
 function BToMb(bytes:integer):real;
 begin
   result:=bytes/(1048576);    //1048576 is 1024*1024
@@ -56,6 +81,19 @@ begin
   WorkCount:=AWorkCount;
   update.Form3.progressbar.position := AWorkCount;
   update.Form3.LoadingLabel.Caption := 'Загрузка... ('+ IntToStr(AWorkCount) + '/' + IntToStr(FileSize) +' байт('+ FloatToStr(Round(BToMb(FileSize))) + '/' + FloatToStr(Round(BToMb(AWorkCount))) +' Мб))';
+end;
+
+procedure TUpdateManager.init(server:string;force:boolean);
+begin
+  if not DirectoryExists(MinecraftDir) then
+    CreateDir(MinecraftDir);
+  if not (FileExists(MinecraftDir + 'BaseFile')) OR (force = true) then
+  begin
+    RemoveAll(MinecraftDir);
+    DownloadFile(updateDir, 'base.zip');
+  end;
+  if not FileExists(MinecraftDir + 'dists\' + server + '\BaseFile') then
+    DownloadFile(updateDir, server + '.zip');
 end;
 
 function md5(SourceString: string): string;
@@ -98,9 +136,16 @@ begin
   end;
 end;
 
-procedure TUpdateManager.init(subj: string);
+function TUpdateManager.Md5File(filename: string): string;
+var
+  md5: TIdHashMessageDigest5;
+  fs: TfileStream;
 begin
-  if (subj = 'base') then DownloadFile(updatedir, 'base.zip') else DownloadFile(updateDir, subj + '.zip');
+  md5 := TIdHashMessageDigest5.Create;
+  fs := TFileStream.Create(filename, fmOpenRead);
+  result := AnsiLowerCase(md5.HashStreamAsHex(fs));
+  fs.Free;
+  md5.Free;
 end;
 
 procedure TUpdateManager.unpackFiles(arpath, topath: string);
