@@ -1,4 +1,4 @@
-unit ServerList;
+﻿unit ServerList;
 
 interface
 
@@ -53,7 +53,7 @@ begin
     end;
   end;
   if foo = false then
-    raise Exception.Create('Server not found');
+    raise Exception.Create('Server "'+ name +'" not found');
 end;
 
 function TServerList.getOnlineStatus(id: integer): boolean;      //true is online

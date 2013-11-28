@@ -1,4 +1,4 @@
-unit AuthManager;
+п»їunit AuthManager;
 
 interface
 
@@ -8,15 +8,17 @@ type
   TAuthManager = class(TObject)
 
 private
+  LaunchParams:string;
+  username:string;
   function generateToken():string;
 public
   constructor Create(); overload;
   destructor Destroy; override;
   function isAuth(login, password:string):boolean;
   function getParams():string;
+  function getLogin():string;
 end;
 
-var LaunchParams:string;
 
 implementation
 
@@ -46,32 +48,39 @@ function TAuthManager.generateToken: string;
     result := result + letters[RandomRange(1,16)];
 end;
 
+function TAuthManager.getLogin: string;
+begin
+  result := username;
+end;
+
 function TAuthManager.getParams: string;
 begin
-result:=LaunchParams;
+  result:=LaunchParams;
 end;
 
 function TAuthManager.isAuth(login, password:string): boolean;
 var
-  res, jsontext:string;
+  res, jsontext, token:string;
   json:TStringStream;
   http:TIdHTTP;
 begin
-  jsontext:='{"username": "'+ login +'","password": "'+ password +'","clientToken": "' + generateToken() +'"}';
+  token := generateToken();
+  jsontext:='{"username": "'+ login +'","password": "'+ password +'","clientToken": "' + token +'"}';
   http := TIdHttp.Create(nil);
   http.HandleRedirects := True;
   http.ReadTimeout := 5000;
   http.Request.ContentType := 'application/json';
   json := TStringStream.Create(jsontext);
   json.Position := 0;
-  res:=http.Post('http://www.happyminers.ru/MineCraft/auth16x.php', json);   {получение ответа}
+  res:=http.Post('http://www.happyminers.ru/MineCraft/auth16x.php', json);   {РїРѕР»СѓС‡РµРЅРёРµ РѕС‚РІРµС‚Р°}
   json.free;
   http.Free;
-  if (res = 'Bad login') then       //проверка не прошла
+  if (res = 'Bad login') then       //РїСЂРѕРІРµСЂРєР° РЅРµ РїСЂРѕС€Р»Р°
     result:=false
   else begin
-    LaunchParams := Copy(res, Pos('accessToken":"', res)+14, 21);
-    result:=true;                    //проверка прошла
+    LaunchParams := token + ':' + Copy(res, Pos('accessToken":"', res)+14, 21);
+    username := login;
+    result:=true;                    //РїСЂРѕРІРµСЂРєР° РїСЂРѕС€Р»Р°
   end;
 end;
 

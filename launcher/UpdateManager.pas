@@ -80,7 +80,7 @@ procedure TUpdateManager.IdHTTP1Work(ASender: TObject; AWorkMode: TWorkMode; AWo
 begin
   WorkCount:=AWorkCount;
   update.Form3.progressbar.position := AWorkCount;
-  update.Form3.LoadingLabel.Caption := 'Загрузка... ('+ IntToStr(AWorkCount) + '/' + IntToStr(FileSize) +' байт('+ FloatToStr(Round(BToMb(FileSize))) + '/' + FloatToStr(Round(BToMb(AWorkCount))) +' Мб))';
+  update.Form3.LoadingLabel.Caption := 'Р—Р°РіСЂСѓР·РєР°... ('+ IntToStr(AWorkCount) + '/' + IntToStr(FileSize) +' Р±Р°Р№С‚('+ FloatToStr(Round(BToMb(AWorkCount))) + '/' + FloatToStr(Round(BToMb(FileSize))) +' РњР±))';
 end;
 
 procedure TUpdateManager.init(server:string;force:boolean);
@@ -99,7 +99,7 @@ end;
 function md5(SourceString: string): string;
 var md5: TIdHashMessageDigest5;
 begin
-// получаем md5-хэш для строки
+// РїРѕР»СѓС‡Р°РµРј md5-С…СЌС€ РґР»СЏ СЃС‚СЂРѕРєРё
   Result := '';
   md5 := TIdHashMessageDigest5.Create;
   try
@@ -126,12 +126,12 @@ begin
   except
   on E:Exception do
   begin
-    Raise Exception.Create('Ошибка обновления файлов: ' + E.Message);
+    Raise Exception.Create('РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ С„Р°Р№Р»РѕРІ: ' + E.Message);
     Application.Terminate;
   end;
   end;
   end else begin
-    Raise Exception.Create('Ошибка обновления файлов: FileNotFound');
+    Raise Exception.Create('РћС€РёР±РєР° РѕР±РЅРѕРІР»РµРЅРёСЏ С„Р°Р№Р»РѕРІ: FileNotFound');
     Application.Terminate;
   end;
 end;
@@ -154,6 +154,7 @@ var
   Read: TFWZipReader;
   i:integer;
 begin
+  update.Form3.Title.Caption := 'РРґРµС‚ СЂР°СЃРїР°РєРѕРІРєР° С„Р°Р№Р»РѕРІ...';
   DataStream:=TMemoryStream.Create;
   DataStream.LoadFromFile(arpath);
   DataStream.Read(i,SizeOf(i));

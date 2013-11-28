@@ -5,6 +5,6 @@
 __history
 *.drc
 *.map
-*.exe
 *.dll
+Win32/*.exe
 bin/*

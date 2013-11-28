@@ -1048,7 +1048,7 @@ object Form1: TForm1
     Font.Style = []
   end
   object ExitBtn: TsButton
-    Left = 371
+    Left = 368
     Top = 306
     Width = 105
     Height = 22
@@ -1058,7 +1058,7 @@ object Form1: TForm1
     SkinData.SkinSection = 'BUTTON'
   end
   object SiteBtn: TsButton
-    Left = 260
+    Left = 257
     Top = 306
     Width = 105
     Height = 22
@@ -1156,11 +1156,13 @@ object Form1: TForm1
     ImgUnchecked = 0
   end
   object RememberCheckbox: TsCheckBox
-    Left = 149
+    Left = 141
     Top = 264
     Width = 180
     Height = 19
     Caption = #1047#1072#1087#1086#1084#1085#1080#1090#1100' '#1076#1072#1085#1085#1099#1077' '#1076#1083#1103' '#1074#1093#1086#1076#1072
+    Checked = True
+    State = cbChecked
     TabOrder = 6
     SkinData.SkinSection = 'CHECKBOX'
     ImgChecked = 0
@@ -1170,7 +1172,7 @@ object Form1: TForm1
     Left = 149
     Top = 306
     Width = 102
-    Height = 23
+    Height = 22
     Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
     TabOrder = 7
     OnClick = SettingsBtnClick
@@ -1180,7 +1182,7 @@ object Form1: TForm1
     Left = 38
     Top = 307
     Width = 105
-    Height = 20
+    Height = 21
     Caption = #1042#1086#1081#1090#1080
     TabOrder = 8
     OnClick = LoginBtnClick

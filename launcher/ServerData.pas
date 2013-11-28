@@ -1,4 +1,4 @@
-unit ServerData;
+﻿unit ServerData;
 
 interface
 

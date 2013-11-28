@@ -1,11 +1,11 @@
-unit settings;
+п»їunit settings;
 
 interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, main, SHFolder, ServerList, ServerData,
-  sSkinProvider, sEdit, sLabel, sButton;
+  sSkinProvider, sEdit, sLabel, sButton, Registry;
 
 type
   TForm2 = class(TForm)
@@ -37,12 +37,13 @@ var
   appdata:string;
   MinecraftDir:string;
   servers:TServerList;
+  reg:TRegIniFile;
 
 implementation
 
 {$R *.dfm}
 
-function GetSpecialFolderPath(folder : integer) : string;    {Полуаем системные пути}
+function GetSpecialFolderPath(folder : integer) : string;    {РџРѕР»СѓР°РµРј СЃРёСЃС‚РµРјРЅС‹Рµ РїСѓС‚Рё}
 const
   SHGFP_TYPE_CURRENT = 0;
 var
@@ -61,9 +62,24 @@ end;
 
 procedure TForm2.FormCreate(Sender: TObject);
 begin
-  VersionLabel.Caption:='Версия лаунчера: '+ LauncherVer;   {вывод версии}
-  appdata:=GetSpecialFolderPath(CSIDL_APPDATA);      {получаем appdata/roaming}
+  VersionLabel.Caption:='Р’РµСЂСЃРёСЏ Р»Р°СѓРЅС‡РµСЂР°: '+ LauncherVer;   {РІС‹РІРѕРґ РІРµСЂСЃРёРё}
+  appdata:=GetSpecialFolderPath(CSIDL_APPDATA);      {РїРѕР»СѓС‡Р°РµРј appdata/roaming}
   MinecraftDir:=appdata + '\' + RootDir + '\';
+  Reg := TRegIniFile.Create('Software\happyminers');
+  if (reg.ReadInteger('Settings', 'MinMem', -1) = -1) OR (reg.ReadInteger('Settings', 'MaxMem', -1) = -1) Then
+  begin
+    reg.WriteInteger('Settings', 'MinMem', 256);
+    MinMem := '256';
+    sEdit1.Text := MinMem;
+    MaxMem := '512';
+    sEdit2.Text := MaxMem;
+    reg.WriteInteger('Settings', 'MaxMem', 512);
+  end else begin
+    MinMem := IntToStr(reg.ReadInteger('Settings', 'MinMem', -1));
+    sEdit1.Text := MinMem;
+    MaxMem := IntToStr(reg.ReadInteger('Settings', 'MaxMem', -1));
+    sEdit2.Text := MaxMem;
+  end;
 end;
 
 procedure TForm2.initServers();
@@ -75,13 +91,13 @@ end;
 
 procedure TForm2.SaveBtnClick(Sender: TObject);
 begin
-    if (StrToInt(sEdit1.Text) > 256) AND (StrToInt(sEdit2.Text) > StrToInt(sEdit1.text)) then       {проверка правильности данных}
+    if (StrToInt(sEdit1.Text) >= 256) AND (StrToInt(sEdit2.Text) > StrToInt(sEdit1.text)) then       {РїСЂРѕРІРµСЂРєР° РїСЂР°РІРёР»СЊРЅРѕСЃС‚Рё РґР°РЅРЅС‹С…}
   begin
-    MinMem := sEdit1.Text;
-    MaxMem := sEdit2.Text;
+    reg.WriteInteger('Settings', 'MinMem', StrToInt(sEdit1.Text));
+    reg.WriteInteger('Settings', 'MinMem', StrToInt(sEdit2.Text));
     self.Close;
   end else
-    ShowMessage('Ошибка! Проверьте правильность введённых данных');
+    ShowMessage('РћС€РёР±РєР°! РџСЂРѕРІРµСЂСЊС‚Рµ РїСЂР°РІРёР»СЊРЅРѕСЃС‚СЊ РІРІРµРґС‘РЅРЅС‹С… РґР°РЅРЅС‹С…');
 end;
 
 end.

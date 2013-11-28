@@ -109,12 +109,12 @@
         <DCCReference Include="FWZipReader.pas"/>
         <DCCReference Include="FWZipStream.pas"/>
         <DCCReference Include="FWZipWriter.pas"/>
-        <DCCReference Include="enter.pas"/>
         <DCCReference Include="ServerData.pas"/>
         <DCCReference Include="ServerList.pas"/>
         <DCCReference Include="UpdateManager.pas"/>
         <DCCReference Include="AuthManager.pas"/>
         <DCCReference Include="PerimeterUnicode.pas"/>
+        <DCCReference Include="Launch.pas"/>
         <None Include="ModelSupport_Launcher\default.txaPackage"/>
         <None Include="ModelSupport_Launcher\default.txvpck"/>
         <None Include="ModelSupport_Launcher\update\default.txvpck"/>

@@ -1,4 +1,4 @@
-unit update;
+﻿unit update;
 
 interface
 
@@ -31,7 +31,7 @@ implementation
 
 {$R *.dfm}
 
-uses enter, UpdateManager;
+uses Launch, UpdateManager;
 
 { TForm3 }
 
@@ -47,10 +47,9 @@ begin
   form1.Hide;
   form3.Show;
   manager:=TUpdateManager.Create;
-
-  manager.init(chosenserver.getName,isForceUpdate);
-
+  manager.init(chosenserver.getName ,isForceUpdate);
   manager.Destroy;
+  Launch.PlayMinecraft(chosenserver.getName,main.auth);
 end;
 
 end.

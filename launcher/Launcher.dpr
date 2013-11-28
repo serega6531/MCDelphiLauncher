@@ -11,12 +11,12 @@ uses
   FWZipReader in 'FWZipReader.pas',
   FWZipStream in 'FWZipStream.pas',
   FWZipWriter in 'FWZipWriter.pas',
-  enter in 'enter.pas',
   ServerData in 'ServerData.pas',
   ServerList in 'ServerList.pas',
   UpdateManager in 'UpdateManager.pas',
   AuthManager in 'AuthManager.pas',
-  PerimeterUnicode in 'PerimeterUnicode.pas';
+  PerimeterUnicode in 'PerimeterUnicode.pas',
+  Launch in 'Launch.pas';
 
 {$R *.res}
 

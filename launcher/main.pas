@@ -1,4 +1,4 @@
-//Delphi launcher by serega6531
+п»ї//Delphi launcher by serega6531
 
 unit main;
 
@@ -7,7 +7,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.Imaging.pngimage, md5, IdBaseComponent, IdComponent, Vcl.OleCtrls, IdHTTP, IdIcmpClient,
+  Vcl.Imaging.pngimage, IdBaseComponent, IdComponent, Vcl.OleCtrls, IdHTTP, IdIcmpClient,
   System.Classes, IdRawBase, IdRawClient, shellapi, system.UITypes,
   Vcl.Menus, Math, AuthManager, PerimeterUnicode, sSkinManager, sButton,
   sComboBox, sEdit, sLabel, sCheckBox, registry;
@@ -28,9 +28,9 @@ type
     RememberCheckbox: TsCheckBox;
     SettingsBtn: TsButton;
     LoginBtn: TsButton;
-    procedure Button4Click(Sender: TObject);
+
     procedure FormCreate(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure SiteBtnClick(Sender: TObject);
     procedure ExitBtnClick(Sender: TObject);
@@ -58,7 +58,7 @@ implementation
 
 {$R *.dfm}
 
-uses settings, update, enter, IdHashMessageDigest, ServerList, ServerData;
+uses settings, update, IdHashMessageDigest, ServerList, ServerData;
 
 function IsConnectedToInternet: Boolean;
 begin
@@ -68,7 +68,7 @@ end;
 
 procedure TForm1.SiteBtnClick(Sender: TObject);
 begin
-  ShellExecute(Handle, nil, 'http://www.happyminers.ru', nil, nil, SW_SHOW);
+  ShellExecute(Handle, nil, 'http://www.happyminers.ru/', nil, nil, SW_SHOW);
 end;
 
 procedure TForm1.SettingsBtnClick(Sender: TObject);
@@ -83,19 +83,6 @@ begin
 end;
 
 procedure closeLauncher; forward;
-
-
-
-procedure TForm1.Button3Click(Sender: TObject);
-begin
-  Form2.ShowModal;
-end;
-
-procedure TForm1.Button4Click(Sender: TObject);
-begin
-  ShellExecute(Handle, nil, 'http://www.happyminers.ru', nil, nil, SW_SHOW);
-end;
-
 
 
 procedure TForm1.ExitBtnClick(Sender: TObject);
@@ -135,7 +122,7 @@ end;
 function _auth(login, password:string):boolean;
 begin
   result := auth.isAuth(login, password);
-  if result = true then
+  if result = true AND Form1.rememberCheckbox.Checked = true then
   begin
     reg.WriteString('Auth','Login',login);
     reg.WriteString('Auth','Password',password);
@@ -147,7 +134,8 @@ var
   _http:TIdHTTP;
 begin
   _http := TidHTTP.Create(nil);
-  if _http.Get('http://www.happyminers.ru/MineCraft/launcherver.php') = settings.LauncherVer then result := false else result := true;
+  if _http.Get('http://www.happyminers.ru/MineCraft/launcherver.php') <> settings.LauncherVer then result := true else result := false;
+  _http.Free;
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -163,7 +151,7 @@ begin
   //InitPerimeter(PerimeterInputData);      //Will activate later
   if not IsConnectedToInternet then
   begin
-    ShowMessage('Нет соединения с интернетом.');
+    ShowMessage('РќРµС‚ СЃРѕРµРґРёРЅРµРЅРёСЏ СЃ РёРЅС‚РµСЂРЅРµС‚РѕРј.');
     Application.Terminate;
   end;
   auth := TAuthManager.Create();
@@ -171,34 +159,35 @@ begin
   Reg := TRegIniFile.Create('Software\happyminers');
   if (reg.ReadString('Auth', 'Login', 'def') <> 'def') AND (reg.ReadString('Auth', 'Password', 'def') <> 'def') then
   begin
-    if MessageDlg('Обнаружены данные прошлой авторизации? Использовать их?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
+    if MessageDlg('РћР±РЅР°СЂСѓР¶РµРЅС‹ РґР°РЅРЅС‹Рµ РїСЂРѕС€Р»РѕР№ Р°РІС‚РѕСЂРёР·Р°С†РёРё? РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РёС…?', mtConfirmation, [mbYes, mbNo], 0) = mrYes then
     begin
       self.LoginEdit.Text := reg.ReadString('Auth', 'Login', 'def');
       self.PasswordEdit.Text := reg.ReadString('Auth', 'Password', 'def');
-    end else begin
+    end
+    else
+    begin
       reg.WriteString('Auth', 'Login', 'def'); reg.WriteString('Auth', 'Password', 'def');
     end;
   end;
   if needUpdate() then
   begin
-    MessageDlg('Необходимо обновить лаунчер!', mtError, [mbOk], 0);
+    MessageDlg('РќРµРѕР±С…РѕРґРёРјРѕ РѕР±РЅРѕРІРёС‚СЊ Р»Р°СѓРЅС‡РµСЂ!', mtError, [mbOk], 0);
     ShellExecute(Handle, nil, 'http://www.happyminers.ru/?mode=start', nil, nil, SW_SHOW);
     closeLauncher();
   end;
 end;
-
+
 procedure TForm1.LoginBtnClick(Sender: TObject);
 begin
   if CheckJava then
   begin
-    Login := LoginEdit.Text;              {логин}
-    Password := PasswordEdit.Text;           {пароль}
-    if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND _auth(login, password) then   //DISABLE AUTH FOR DEBUG
-    begin {проверка логина, длины логина,   длины пароля,                    проверка пользователя}
-      Form3.processUpdate((UpdateCheckbox.Checked = true), settings.servers.getServerByName(serversDropdownList.Items[serversDropdownList.ItemIndex]));        {загрузка файлов}
+    Login := LoginEdit.Text;              {Р»РѕРіРёРЅ}
+    Password := PasswordEdit.Text;           {РїР°СЂРѕР»СЊ}
+    if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND _auth(login, password) then
+    begin {РїСЂРѕРІРµСЂРєР° Р»РѕРіРёРЅР°, РґР»РёРЅС‹ Р»РѕРіРёРЅР°,   РґР»РёРЅС‹ РїР°СЂРѕР»СЏ,                    РїСЂРѕРІРµСЂРєР° РїРѕР»СЊР·РѕРІР°С‚РµР»СЏ}
+      Form3.processUpdate((UpdateCheckbox.Checked = true), settings.servers.getServerByName(serversDropdownList.Items[serversDropdownList.ItemIndex]));        {Р·Р°РіСЂСѓР·РєР° С„Р°Р№Р»РѕРІ}
     end else
-      //ShowMessage('Неправильный логин или пароль');
-      MessageDlg('Неправильный логин или пароль',mtError, [mbOK], 0);
+      MessageDlg('РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ',mtError, [mbOK], 0);
   end;
 end;
 
