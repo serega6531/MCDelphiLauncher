@@ -185,7 +185,7 @@ begin
     Password := PasswordEdit.Text;           {пароль}
     if (Length(Login) in [4..14]) AND (Length(Password) in [4..14]) AND _auth(login, password) then
     begin {проверка логина, длины логина,   длины пароля,                    проверка пользователя}
-      Form3.processUpdate((UpdateCheckbox.Checked = true), settings.servers.getServerByName(serversDropdownList.Items[serversDropdownList.ItemIndex]));        {загрузка файлов}
+      Form3.processUpdate(UpdateCheckbox.Checked, settings.servers.getServerByName(serversDropdownList.Items[serversDropdownList.ItemIndex]));        {загрузка файлов}
     end else
       MessageDlg('Неправильный логин или пароль',mtError, [mbOK], 0);
   end;

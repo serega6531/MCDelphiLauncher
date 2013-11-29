@@ -1,9 +1,9 @@
-unit UpdateManager;
+﻿unit UpdateManager;
 
 interface
 
 uses settings, idHTTP, IdBaseComponent, IdAntiFreezeBase, IdComponent, System.Classes, System.SysUtils, FWZipReader,
- update, idAntiFreeze, Forms, IdHashMessageDigest, IdGlobal, FileCtrl;
+ update, idAntiFreeze, Forms, IdHashMessageDigest, IdGlobal, FileCtrl, Registry;
 
 type
   TUpdateManager = class(TObject)
@@ -84,6 +84,10 @@ begin
 end;
 
 procedure TUpdateManager.init(server:string;force:boolean);
+var
+  BaseFile:TextFile;
+  reg:TRegIniFile;
+  ver:string;
 begin
   if not DirectoryExists(MinecraftDir) then
     CreateDir(MinecraftDir);
@@ -92,8 +96,25 @@ begin
     RemoveAll(MinecraftDir);
     DownloadFile(updateDir, 'base.zip');
   end;
-  if not FileExists(MinecraftDir + 'dists\' + server + '\BaseFile') then
+  reg := TRegIniFile.Create('Software\happyminers');
+  if not FileExists(MinecraftDir + 'dists\' + server + '\BaseFile') OR (reg.ReadInteger('Version', server, -1) <> StrToInt(http.Get('http://www.happyminers.ru/MineCraft/clientver.php?of='+server))) then
     DownloadFile(updateDir, server + '.zip');
+    AssignFile(BaseFile, MinecraftDir + 'dists\' + server + '\BaseFile');
+    Reset(BaseFile);
+    ReadLn(BaseFile, ver);
+    CloseFile(BaseFile);
+    try
+      reg.WriteInteger('Version', server, StrToInt(ver));
+    except
+      on E:Exception do
+      begin
+        if E.ClassName = 'EConvertError' then
+        if ver = '' then
+          raise Exception.Create('Ошибка обновления файлов: BaseFileEmpty')
+        else
+          raise Exception.Create('Ошибка обновления файлов: BaseFileConvertError');
+      end;
+    end;
 end;
 
 function md5(SourceString: string): string;
