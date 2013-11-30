@@ -7,16 +7,15 @@ uses
   update in 'update.pas' {Form3},
   FWZipConsts in 'FWZipConsts.pas',
   FWZipCrc32 in 'FWZipCrc32.pas',
-  FWZipCrypt in 'FWZipCrypt.pas',
   FWZipReader in 'FWZipReader.pas',
   FWZipStream in 'FWZipStream.pas',
-  FWZipWriter in 'FWZipWriter.pas',
   ServerData in 'ServerData.pas',
   ServerList in 'ServerList.pas',
   UpdateManager in 'UpdateManager.pas',
   AuthManager in 'AuthManager.pas',
   PerimeterUnicode in 'PerimeterUnicode.pas',
-  Launch in 'Launch.pas';
+  Launch in 'Launch.pas',
+  FWZipCrypt in 'FWZipCrypt.pas';
 
 {$R *.res}
 

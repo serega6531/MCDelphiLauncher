@@ -54,6 +54,7 @@ begin
   end;
   if foo = false then
     raise Exception.Create('Server "'+ name +'" not found');
+    result := getServer(0);
 end;
 
 function TServerList.getOnlineStatus(id: integer): boolean;      //true is online

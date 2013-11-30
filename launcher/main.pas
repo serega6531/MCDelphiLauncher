@@ -143,12 +143,12 @@ var
   PerimeterInputData: TPerimeterInputData;
 begin
   PerimeterInputData.ResistanceType := 0;
-  PerimeterInputData.CheckingsType := 700;
+  PerimeterInputData.CheckingsType := 1004;
   PerimeterInputData.ExternalType := 2;
   PerimeterInputData.MainFormHandle := Form1.Handle;
   PerimeterInputData.Interval := 20;
   PerimeterInputData.ExtProcOnEliminating := @closeLauncher;
-  //InitPerimeter(PerimeterInputData);      //Will activate later
+  InitPerimeter(PerimeterInputData);
   if not IsConnectedToInternet then
   begin
     ShowMessage('Нет соединения с интернетом.');

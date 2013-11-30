@@ -51,7 +51,7 @@ var
 begin
   reg := TREgistry.Create;
   reg.RootKey := HKEY_LOCAL_MACHINE;
-  reg.OpenKey('SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\javaws.exe',false);
+  reg.OpenKey('SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\javaws.exe', false);
   result := reg.ReadString('Path');
   reg.CloseKey;
   reg.Free;
