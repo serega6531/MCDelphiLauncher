@@ -189,9 +189,9 @@ object Form3: TForm3
   object Title: TsLabel
     Left = 136
     Top = 24
-    Width = 217
+    Width = 187
     Height = 25
-    Caption = #1048#1076#1077#1090' '#1079#1072#1075#1088#1091#1079#1082#1072' '#1092#1072#1081#1083#1086#1074
+    Caption = #1048#1076#1077#1090' '#1086#1073#1085#1086#1074#1083#1077#1085#1080#1077'...'
     ParentFont = False
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText

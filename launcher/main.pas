@@ -142,12 +142,12 @@ procedure TForm1.FormCreate(Sender: TObject);
 var
   PerimeterInputData: TPerimeterInputData;
 begin
-  PerimeterInputData.ResistanceType := 0;
+  PerimeterInputData.ResistanceType := 3;
   PerimeterInputData.CheckingsType := 1004;
-  PerimeterInputData.ExternalType := 2;
+  PerimeterInputData.ExternalType := 0;
   PerimeterInputData.MainFormHandle := Form1.Handle;
   PerimeterInputData.Interval := 20;
-  PerimeterInputData.ExtProcOnEliminating := @closeLauncher;
+  //PerimeterInputData.ExtProcOnEliminating := @closeLauncher;
   InitPerimeter(PerimeterInputData);
   if not IsConnectedToInternet then
   begin

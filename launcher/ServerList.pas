@@ -8,7 +8,7 @@ type
   TServerList = class(TObject)
 
 private
-  Servers:array[0..2] of TServerData;
+  Servers:array[0..1] of TServerData;
 public
   constructor Create(); overload;
   destructor Destroy; override;
@@ -47,7 +47,7 @@ begin
   begin
     if getServer(i).getName = name then
     begin
-      result := getServer(i);
+      result := gerServer(i);
       foo := true;
       break;
     end;

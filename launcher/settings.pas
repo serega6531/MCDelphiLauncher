@@ -86,12 +86,12 @@ procedure TForm2.initServers();
 begin
   servers:=TServerList.Create;
   servers.addServer(TServerData.Create('Classic', '127.0.0.1'), 0);
-  servers.addServer(TServerData.Create('Test Server 2', '127.0.0.2'), 1);
+  //servers.addServer(TServerData.Create('Test Server 2', '127.0.0.2'), 1);
 end;
 
 procedure TForm2.SaveBtnClick(Sender: TObject);
 begin
-    if (StrToInt(sEdit1.Text) >= 256) AND (StrToInt(sEdit2.Text) > StrToInt(sEdit1.text)) then       {проверка правильности данных}
+    if (StrToInt(sEdit1.Text) >= 126) AND (StrToInt(sEdit2.Text) >= StrToInt(sEdit1.text)) then       {проверка правильности данных}
   begin
     reg.WriteInteger('Settings', 'MinMem', StrToInt(sEdit1.Text));
     reg.WriteInteger('Settings', 'MinMem', StrToInt(sEdit2.Text));

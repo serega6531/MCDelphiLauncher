@@ -27,6 +27,8 @@ end;
 
 const updateDir:string = 'http://www.happyminers.ru/MineCraft/MinecraftDownload/';
 
+var isUnpacked:boolean;
+
 implementation
 
 { TServerList }
@@ -139,24 +141,10 @@ begin
     DownloadFile('base.zip');
   end;
   reg := TRegIniFile.Create('Software\happyminers');
-  if not (FileExists(MinecraftDir + 'dists\' + server + '\BaseFile')) OR (reg.ReadInteger('Version', server, -1) <> StrToInt(http.Get('http://www.happyminers.ru/MineCraft/clientver.php?of='+server))) OR not (checkMd5(server)) then
+  ver := http.Get('http://www.happyminers.ru/MineCraft/MinecraftDownload/'+server+'.ver');
+  if not (FileExists(MinecraftDir + 'dists\' + server + '\BaseFile')) OR (reg.ReadInteger('Version', server, -1) <> StrToInt(ver)) OR not (checkMd5(server)) then
     DownloadFile(server + '.zip');
-    AssignFile(BaseFile, MinecraftDir + 'dists\' + server + '\BaseFile');
-    Reset(BaseFile);
-    ReadLn(BaseFile, ver);
-    CloseFile(BaseFile);
-    try
-      reg.WriteInteger('Version', server, StrToInt(ver));
-    except
-      on E:Exception do
-      begin
-        if E.ClassName = 'EConvertError' then
-        if ver = '' then
-          raise Exception.Create('Ошибка обновления файлов: BaseFileEmpty')
-        else
-          raise Exception.Create('Ошибка обновления файлов: BaseFileConvertError');
-      end;
-    end;
+  reg.WriteInteger('Version', server, StrToInt(ver));
 end;
 
 procedure TUpdateManager.DownloadFile(filename: string);
@@ -166,11 +154,16 @@ begin
   if filesize <> -1 then
   begin
   try begin
+    LoadStream := TMemoryStream.Create;
+    update.Form3.Title.Caption := 'Идет загрузка файлов...';
     update.Form3.ProgressBar.Max := filesize;
     LoadStream.Clear;
     HTTP.Get(updateDir + filename, LoadStream);
     LoadStream.SaveToFile(MinecraftDir + filename);
     UnpackFiles(MinecraftDir + filename, MinecraftDir);
+    while isUnpacked <> true do
+      Sleep(500);
+    Sleep(100);
     DeleteFile(MinecraftDir + filename);
   end;
   except
@@ -178,14 +171,33 @@ begin
   begin
     Raise Exception.Create('Ошибка обновления файлов: ' + E.Message);
     Application.Terminate;
-  end;
-  end;
-  end else begin
+  end; end; end else
+  begin
     Raise Exception.Create('Ошибка обновления файлов: FileNotFound');
     Application.Terminate;
   end;
 end;
 
+type
+  TParams = record
+    arpath: string;
+    topath: string;
+  end;
+
+var
+  GlobalParams: TParams;
+
+procedure Unpacking;
+var
+  DataStream:TMemoryStream;
+  Read: TFWZipReader;
+  i:integer;
+  LocalParams: TParams;
+begin  LocalParams := TParams(GlobalParams);  DataStream:=TMemoryStream.Create;  DataStream.LoadFromFile(LocalParams.arpath);
+  DataStream.Read(i,SizeOf(i));
+  Read := TFWZipReader.Create;
+  Read.LoadFromStream(DataStream);
+  Read.ExtractAll(LocalParams.topath);  isUnpacked := true;  EndThread(0);end;
 function TUpdateManager.Md5File(filename: string): string;
 var
   md5: TIdHashMessageDigest5;
@@ -200,17 +212,12 @@ end;
 
 procedure TUpdateManager.unpackFiles(arpath, topath: string);
 var
-  DataStream:TMemoryStream;
-  Read: TFWZipReader;
-  i:integer;
+  ThreadID: LongWord;
 begin
   update.Form3.Title.Caption := 'Идет распаковка файлов...';
-  DataStream:=TMemoryStream.Create;
-  DataStream.LoadFromFile(arpath);
-  DataStream.Read(i,SizeOf(i));
-  Read := TFWZipReader.Create;
-  Read.LoadFromStream(DataStream);
-  Read.ExtractAll(topath);
+  GlobalParams.arpath := arpath;
+  GlobalParams.topath := topath;
+  BeginThread(0, 0, @Unpacking, @GlobalParams, 0, ThreadID);
 end;
 
 end.
