@@ -47,7 +47,7 @@ begin
   begin
     if getServer(i).getName = name then
     begin
-      result := gerServer(i);
+      result := getServer(i);
       foo := true;
       break;
     end;
