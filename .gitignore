@@ -1,10 +1,8 @@
 *.dcu
 *.~*~
+*~
 *.local
 *.identcache
 __history
 *.drc
 *.map
-*.dll
-Win32/*.exe
-bin/*

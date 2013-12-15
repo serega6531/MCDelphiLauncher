@@ -1,10 +1,7 @@
-MineCraft Delphi Launcher
-===========================
+MineCraft Delphi Launcher by serega6531
+================
 
-Free Minecraft Delphi Launcher
-
-Writed on Delphi XE5.
-Don't working at old versions.
-Launcher need AplhaSkins.
-In project path need to be favicon1.png.
-Other rules will added later.
+Free Minecraft Delphi Launcher.
+Writed on Delphi 2007.
+Need AlphaSkins, Indy 10 and Abbrevia (for unzip).
+In project path need to be favicon1.png and logo.png.
