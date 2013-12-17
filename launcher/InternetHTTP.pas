@@ -1,4 +1,4 @@
-unit InternetHTTP;
+п»їunit InternetHTTP;
 
 interface
 
@@ -18,112 +18,112 @@ type
 
 procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHandle: Cardinal; Msg: LongWord);
 {
-  Загружает файл по ссылке в URL в локальный каталог в Destination.
-  Выполняется в отдельном потоке, передаёт информацию о загрузке в
-  структуру TDownloadStatus.
+  Р—Р°РіСЂСѓР¶Р°РµС‚ С„Р°Р№Р» РїРѕ СЃСЃС‹Р»РєРµ РІ URL РІ Р»РѕРєР°Р»СЊРЅС‹Р№ РєР°С‚Р°Р»РѕРі РІ Destination.
+  Р’С‹РїРѕР»РЅСЏРµС‚СЃСЏ РІ РѕС‚РґРµР»СЊРЅРѕРј РїРѕС‚РѕРєРµ, РїРµСЂРµРґР°С‘С‚ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ Р·Р°РіСЂСѓР·РєРµ РІ
+  СЃС‚СЂСѓРєС‚СѓСЂСѓ TDownloadStatus.
 
-  Параметры:
-    URL - адрес файла в сети
-    Destination - Путь к файлу, в который надо сохранить данные
-    SaveInMemory - если TRUE, то загрузка производится в оперативную память,
-                   Destination не используется
-    MainHandle - хэндл, которому будут посылаться сообщения о статусе загрузки
-    Msg - номер, под которым хэндлу будут посылаться сообщения
+  РџР°СЂР°РјРµС‚СЂС‹:
+    URL - Р°РґСЂРµСЃ С„Р°Р№Р»Р° РІ СЃРµС‚Рё
+    Destination - РџСѓС‚СЊ Рє С„Р°Р№Р»Сѓ, РІ РєРѕС‚РѕСЂС‹Р№ РЅР°РґРѕ СЃРѕС…СЂР°РЅРёС‚СЊ РґР°РЅРЅС‹Рµ
+    SaveInMemory - РµСЃР»Рё TRUE, С‚Рѕ Р·Р°РіСЂСѓР·РєР° РїСЂРѕРёР·РІРѕРґРёС‚СЃСЏ РІ РѕРїРµСЂР°С‚РёРІРЅСѓСЋ РїР°РјСЏС‚СЊ,
+                   Destination РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ
+    MainHandle - С…СЌРЅРґР», РєРѕС‚РѕСЂРѕРјСѓ Р±СѓРґСѓС‚ РїРѕСЃС‹Р»Р°С‚СЊСЃСЏ СЃРѕРѕР±С‰РµРЅРёСЏ Рѕ СЃС‚Р°С‚СѓСЃРµ Р·Р°РіСЂСѓР·РєРё
+    Msg - РЅРѕРјРµСЂ, РїРѕРґ РєРѕС‚РѕСЂС‹Рј С…СЌРЅРґР»Сѓ Р±СѓРґСѓС‚ РїРѕСЃС‹Р»Р°С‚СЊСЃСЏ СЃРѕРѕР±С‰РµРЅРёСЏ
 
   TDownloadStatus:
-    SizeOfFile - размер загружаемого файла
-    DownloadSpeed - скорость загрузки
-    ReceivedBytes - загружено байт
-    RemainingTime - осталось времени до окончания загрузки
-    FilePointer - указатель на начало памяти, куда загружен файл (опционально)
+    SizeOfFile - СЂР°Р·РјРµСЂ Р·Р°РіСЂСѓР¶Р°РµРјРѕРіРѕ С„Р°Р№Р»Р°
+    DownloadSpeed - СЃРєРѕСЂРѕСЃС‚СЊ Р·Р°РіСЂСѓР·РєРё
+    ReceivedBytes - Р·Р°РіСЂСѓР¶РµРЅРѕ Р±Р°Р№С‚
+    RemainingTime - РѕСЃС‚Р°Р»РѕСЃСЊ РІСЂРµРјРµРЅРё РґРѕ РѕРєРѕРЅС‡Р°РЅРёСЏ Р·Р°РіСЂСѓР·РєРё
+    FilePointer - СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РЅР°С‡Р°Р»Рѕ РїР°РјСЏС‚Рё, РєСѓРґР° Р·Р°РіСЂСѓР¶РµРЅ С„Р°Р№Р» (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)
 
-  После каждой загруженного пакета данных процедура
-  посылает сообщение с номером Msg хэндлу в MainHandle,
-  в wParam содержится указатель на структуру TDownloadThread.
+  РџРѕСЃР»Рµ РєР°Р¶РґРѕР№ Р·Р°РіСЂСѓР¶РµРЅРЅРѕРіРѕ РїР°РєРµС‚Р° РґР°РЅРЅС‹С… РїСЂРѕС†РµРґСѓСЂР°
+  РїРѕСЃС‹Р»Р°РµС‚ СЃРѕРѕР±С‰РµРЅРёРµ СЃ РЅРѕРјРµСЂРѕРј Msg С…СЌРЅРґР»Сѓ РІ MainHandle,
+  РІ wParam СЃРѕРґРµСЂР¶РёС‚СЃСЏ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° СЃС‚СЂСѓРєС‚СѓСЂСѓ TDownloadThread.
 
-  По окончании загрузки хэндлу посылается сообщение
-  с номером, указанным в Msg, в котором в wParam = $FFFF
+  РџРѕ РѕРєРѕРЅС‡Р°РЅРёРё Р·Р°РіСЂСѓР·РєРё С…СЌРЅРґР»Сѓ РїРѕСЃС‹Р»Р°РµС‚СЃСЏ СЃРѕРѕР±С‰РµРЅРёРµ
+  СЃ РЅРѕРјРµСЂРѕРј, СѓРєР°Р·Р°РЅРЅС‹Рј РІ Msg, РІ РєРѕС‚РѕСЂРѕРј РІ wParam = $FFFF
 }
 
 function HTTPGet(ScriptAddress: string): string;
 {
-  Выполняет GET-запрос к скрипту в ScriptAddress. Ответ возвращает в строке.
+  Р’С‹РїРѕР»РЅСЏРµС‚ GET-Р·Р°РїСЂРѕСЃ Рє СЃРєСЂРёРїС‚Сѓ РІ ScriptAddress. РћС‚РІРµС‚ РІРѕР·РІСЂР°С‰Р°РµС‚ РІ СЃС‚СЂРѕРєРµ.
 }
 
 function HTTPPost(ScriptAddress: string; Data: pointer; Size: LongWord): string;
 procedure AddPOSTField(var Data: pointer; var Size: LongWord; Param, Value: string);
 procedure AddPOSTFile(var Data: pointer; var Size: LongWord; Param, Value, FilePath, ContentType: string);
 {
-  HTTPPost выполняет POST-запрос к скрипту, указанному в ScriptAddress.
-  Data - указатель на область памяти с параметрами запроса.
-  Size - размер этой области памяти.
+  HTTPPost РІС‹РїРѕР»РЅСЏРµС‚ POST-Р·Р°РїСЂРѕСЃ Рє СЃРєСЂРёРїС‚Сѓ, СѓРєР°Р·Р°РЅРЅРѕРјСѓ РІ ScriptAddress.
+  Data - СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РѕР±Р»Р°СЃС‚СЊ РїР°РјСЏС‚Рё СЃ РїР°СЂР°РјРµС‚СЂР°РјРё Р·Р°РїСЂРѕСЃР°.
+  Size - СЂР°Р·РјРµСЂ СЌС‚РѕР№ РѕР±Р»Р°СЃС‚Рё РїР°РјСЏС‚Рё.
 
-  Ответ возвращает в строке.
+  РћС‚РІРµС‚ РІРѕР·РІСЂР°С‰Р°РµС‚ РІ СЃС‚СЂРѕРєРµ.
 
-  AddPOSTField - добавляет поле запроса:
-    Data - переменная, в которую будет записан указатель
-           на область памяти с параметрами.
+  AddPOSTField - РґРѕР±Р°РІР»СЏРµС‚ РїРѕР»Рµ Р·Р°РїСЂРѕСЃР°:
+    Data - РїРµСЂРµРјРµРЅРЅР°СЏ, РІ РєРѕС‚РѕСЂСѓСЋ Р±СѓРґРµС‚ Р·Р°РїРёСЃР°РЅ СѓРєР°Р·Р°С‚РµР»СЊ
+           РЅР° РѕР±Р»Р°СЃС‚СЊ РїР°РјСЏС‚Рё СЃ РїР°СЂР°РјРµС‚СЂР°РјРё.
 
-    Size - переменная, в которую будет записан размер передаваемых данных
-           !!!ВНИМАНИЕ!!! Перед добавлением параметров сделать Size = 0.
+    Size - РїРµСЂРµРјРµРЅРЅР°СЏ, РІ РєРѕС‚РѕСЂСѓСЋ Р±СѓРґРµС‚ Р·Р°РїРёСЃР°РЅ СЂР°Р·РјРµСЂ РїРµСЂРµРґР°РІР°РµРјС‹С… РґР°РЅРЅС‹С…
+           !!!Р’РќРРњРђРќРР•!!! РџРµСЂРµРґ РґРѕР±Р°РІР»РµРЅРёРµРј РїР°СЂР°РјРµС‚СЂРѕРІ СЃРґРµР»Р°С‚СЊ Size = 0.
 
-    Param - название поля.
-    Value - значение поля.
+    Param - РЅР°Р·РІР°РЅРёРµ РїРѕР»СЏ.
+    Value - Р·РЅР°С‡РµРЅРёРµ РїРѕР»СЏ.
 
-  AddPOSTFile - добавляет в запрос файл:
-    То же самое, что и в AddPOSTField
+  AddPOSTFile - РґРѕР±Р°РІР»СЏРµС‚ РІ Р·Р°РїСЂРѕСЃ С„Р°Р№Р»:
+    РўРѕ Р¶Рµ СЃР°РјРѕРµ, С‡С‚Рѕ Рё РІ AddPOSTField
 
-    FilePath - путь к файлу.
-    ContentType - тип файла: например, 'image/png'
+    FilePath - РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ.
+    ContentType - С‚РёРї С„Р°Р№Р»Р°: РЅР°РїСЂРёРјРµСЂ, 'image/png'
 
-  ПРИМЕР:
+  РџР РРњР•Р :
 
   var
     Size: LongWord;
     Data: pointer;
     Response: string;
   begin
-    Size := 0; // Делать ОБЯЗАТЕЛЬНО!
+    Size := 0; // Р”РµР»Р°С‚СЊ РћР‘РЇР—РђРўР•Р›Р¬РќРћ!
 
-    // Добавляем данные для запроса
+    // Р”РѕР±Р°РІР»СЏРµРј РґР°РЅРЅС‹Рµ РґР»СЏ Р·Р°РїСЂРѕСЃР°
     AddPOSTField(Data, Size, 'user', 'Stepashka');
     AddPOSTField(Data, Size, 'password', '12345');
     AddPOSTFile(Data, Size, 'file', 'NewImage', 'C:\Photo-Stepashka.png', 'image/png');
 
-    // Отправляем запрос:
+    // РћС‚РїСЂР°РІР»СЏРµРј Р·Р°РїСЂРѕСЃ:
     Response := HTTPPost('http://site.ru/folder/script.php', Data, Size);
 
-    // Выводим ответ от запроса:
-    MessageBoxA(0, PAnsiChar(Response), 'Ответ от запроса', MB_ICONASTERISK);
+    // Р’С‹РІРѕРґРёРј РѕС‚РІРµС‚ РѕС‚ Р·Р°РїСЂРѕСЃР°:
+    MessageBoxA(0, PAnsiChar(Response), 'РћС‚РІРµС‚ РѕС‚ Р·Р°РїСЂРѕСЃР°', MB_ICONASTERISK);
   end;
 }
 
 
 procedure CreatePath(EndDir: string);
 {
-  Создаёт иерархию каталогов до конечного каталога включительно.
-  Допускаются разделители: "\" и "/"
+  РЎРѕР·РґР°С‘С‚ РёРµСЂР°СЂС…РёСЋ РєР°С‚Р°Р»РѕРіРѕРІ РґРѕ РєРѕРЅРµС‡РЅРѕРіРѕ РєР°С‚Р°Р»РѕРіР° РІРєР»СЋС‡РёС‚РµР»СЊРЅРѕ.
+  Р”РѕРїСѓСЃРєР°СЋС‚СЃСЏ СЂР°Р·РґРµР»РёС‚РµР»Рё: "\" Рё "/"
 }
 
 function ExtractFileDir(Path: string): string;
 {
-  Извлекает путь к файлу. Допускаются разделители: "\" и "/"
+  РР·РІР»РµРєР°РµС‚ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ. Р”РѕРїСѓСЃРєР°СЋС‚СЃСЏ СЂР°Р·РґРµР»РёС‚РµР»Рё: "\" Рё "/"
 }
 
 function ExtractFileName(Path: string): string;
 {
-  Извлекает имя файла. Допускаются разделители: "\" и "/"
+  РР·РІР»РµРєР°РµС‚ РёРјСЏ С„Р°Р№Р»Р°. Р”РѕРїСѓСЃРєР°СЋС‚СЃСЏ СЂР°Р·РґРµР»РёС‚РµР»Рё: "\" Рё "/"
 }
 
 function ExtractHost(Path: string): string;
 {
-  Извлекает имя хоста из сетевого адреса.
+  РР·РІР»РµРєР°РµС‚ РёРјСЏ С…РѕСЃС‚Р° РёР· СЃРµС‚РµРІРѕРіРѕ Р°РґСЂРµСЃР°.
   http://site.ru/folder/script.php  -->  site.ru
 }
 
 function ExtractObject(Path: string): string;
 {
-  Извлекает имя объекта из сетевого адреса:
+  РР·РІР»РµРєР°РµС‚ РёРјСЏ РѕР±СЉРµРєС‚Р° РёР· СЃРµС‚РµРІРѕРіРѕ Р°РґСЂРµСЃР°:
   http://site.ru/folder/script.php  -->  folder/script.php
 }
 
@@ -251,10 +251,10 @@ const
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Процедуры работы с файловой системой и адресами:
-// Допускаются разделители "\" и "/"
+// РџСЂРѕС†РµРґСѓСЂС‹ СЂР°Р±РѕС‚С‹ СЃ С„Р°Р№Р»РѕРІРѕР№ СЃРёСЃС‚РµРјРѕР№ Рё Р°РґСЂРµСЃР°РјРё:
+// Р”РѕРїСѓСЃРєР°СЋС‚СЃСЏ СЂР°Р·РґРµР»РёС‚РµР»Рё "\" Рё "/"
 
-// Создаёт иерархию папок до конечной указанной папки включительно:
+// РЎРѕР·РґР°С‘С‚ РёРµСЂР°СЂС…РёСЋ РїР°РїРѕРє РґРѕ РєРѕРЅРµС‡РЅРѕР№ СѓРєР°Р·Р°РЅРЅРѕР№ РїР°РїРєРё РІРєР»СЋС‡РёС‚РµР»СЊРЅРѕ:
 procedure CreatePath(EndDir: string);
 var
   I: LongWord;
@@ -274,7 +274,7 @@ end;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Получает каталог, в котором лежит файл:
+// РџРѕР»СѓС‡Р°РµС‚ РєР°С‚Р°Р»РѕРі, РІ РєРѕС‚РѕСЂРѕРј Р»РµР¶РёС‚ С„Р°Р№Р»:
 function ExtractFileDir(Path: string): string;
 var
   I: LongWord;
@@ -288,7 +288,7 @@ end;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Получает имя файла:
+// РџРѕР»СѓС‡Р°РµС‚ РёРјСЏ С„Р°Р№Р»Р°:
 function ExtractFileName(Path: string): string;
 var
   I: LongWord;
@@ -302,7 +302,7 @@ end;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Извлекает имя хоста:
+// РР·РІР»РµРєР°РµС‚ РёРјСЏ С…РѕСЃС‚Р°:
 // http://site.ru/folder/script.php  -->  site.ru
 function ExtractHost(Path: string): string;
 var
@@ -310,14 +310,14 @@ var
   PathLen: LongWord;
 begin
   PathLen := Length(Path);
-  I := 8; // Длина "http://"
+  I := 8; // Р”Р»РёРЅР° "http://"
   while (I <= PathLen) and (Path[I] <> '\') and (Path[I] <> '/') do Inc(I);
   Result := Copy(Path, 8, I - 8);
 end;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Извлекает имя объекта:
+// РР·РІР»РµРєР°РµС‚ РёРјСЏ РѕР±СЉРµРєС‚Р°:
 // http://site.ru/folder/script.php  -->  folder/script.php
 function ExtractObject(Path: string): string;
 var
@@ -371,11 +371,11 @@ procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHand
   begin
     HTTPDownloadParams := THTTPDownloadParams(Parameter^);
 
-    // Устанавливаем соединение:
+    // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ:
     hInet := InternetOpen(@AgentName[1], 0, nil, nil, 0);
     hURL := InternetOpenURL(hInet, PAnsiChar(HTTPDownloadParams.URL), nil, 0,  $4000000 + $100 + $80000000 + $800, 0);
 
-    // Получаем размер файла:
+    // РџРѕР»СѓС‡Р°РµРј СЂР°Р·РјРµСЂ С„Р°Р№Р»Р°:
     rSize := 4;
     rIndex := 0;
     HTTPQueryInfo(
@@ -386,7 +386,7 @@ procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHand
                    rIndex
                   );
 
-    // Создаём файл:
+    // РЎРѕР·РґР°С‘Рј С„Р°Р№Р»:
     CreatePath(ExtractFileDir(HTTPDownloadParams.Destination));
     hFile := CreateFile(
                          PAnsiChar(HTTPDownloadParams.Destination),
@@ -420,14 +420,14 @@ procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHand
           try
             WriteFile(hFile, Receiver^, ReceivedBytes, WriteBytes, nil);
           except
-            MessageBoxA(HTTPDownloadParams.MainHandle, 'Не удалось записать данные в файл!'+#13+'Возможно, файл защищён от записи!', 'Ошибка!', MB_ICONERROR);
+            MessageBoxA(HTTPDownloadParams.MainHandle, 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїРёСЃР°С‚СЊ РґР°РЅРЅС‹Рµ РІ С„Р°Р№Р»!'+#13+'Р’РѕР·РјРѕР¶РЅРѕ, С„Р°Р№Р» Р·Р°С‰РёС‰С‘РЅ РѕС‚ Р·Р°РїРёСЃРё!', 'РћС€РёР±РєР°!', MB_ICONERROR);
             EndThread(0);
           end
         else
         begin
           if FilePtr = nil then
           begin
-            MessageBoxA(HTTPDownloadParams.MainHandle, 'Не удалось записать данные в память!'+#13+'Возможно, не хватает памяти!', 'Ошибка!', MB_ICONERROR);
+            MessageBoxA(HTTPDownloadParams.MainHandle, 'РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РїРёСЃР°С‚СЊ РґР°РЅРЅС‹Рµ РІ РїР°РјСЏС‚СЊ!'+#13+'Р’РѕР·РјРѕР¶РЅРѕ, РЅРµ С…РІР°С‚Р°РµС‚ РїР°РјСЏС‚Рё!', 'РћС€РёР±РєР°!', MB_ICONERROR);
             EndThread(0);
           end;
           Move(Receiver^, FilePtr^, ReceivedBytes);
@@ -466,14 +466,14 @@ begin
   Params.Msg := Msg;
   Params.SaveInMemory := SaveInMemory;
   CloseHandle(BeginThread(nil, 0, @Download, @Params, 0, ThreadID));
-  Sleep(50); // Гарантируем, что данные успешно запишутся в поток
+  Sleep(50); // Р“Р°СЂР°РЅС‚РёСЂСѓРµРј, С‡С‚Рѕ РґР°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ Р·Р°РїРёС€СѓС‚СЃСЏ РІ РїРѕС‚РѕРє
 end;
 
 //HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 //                                POST-Request
 //HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
-// Добавляет в запрос текстовое поле:
+// Р”РѕР±Р°РІР»СЏРµС‚ РІ Р·Р°РїСЂРѕСЃ С‚РµРєСЃС‚РѕРІРѕРµ РїРѕР»Рµ:
 procedure AddPOSTField(var Data: pointer; var Size: LongWord; Param, Value: string);
 var
   NewMemSize: LongWord;
@@ -496,14 +496,14 @@ begin
   else
     ReallocMem(Data, NewMemSize);
 
-// Установили указатель на конец старого блока и записали данные:
+// РЈСЃС‚Р°РЅРѕРІРёР»Рё СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РєРѕРЅРµС† СЃС‚Р°СЂРѕРіРѕ Р±Р»РѕРєР° Рё Р·Р°РїРёСЃР°Р»Рё РґР°РЅРЅС‹Рµ:
   NewPtr := Pointer(LongWord(Data) + Size);
   Move((@StrData[1])^, NewPtr^, DataLen);
 
   Size := NewMemSize;
 end;
 
-// Добавляет в запрос файл:
+// Р”РѕР±Р°РІР»СЏРµС‚ РІ Р·Р°РїСЂРѕСЃ С„Р°Р№Р»:
 procedure AddPOSTFile(var Data: pointer; var Size: LongWord; Param, Value, FilePath, ContentType: string);
 var
   hFile: THandle;
@@ -537,7 +537,7 @@ begin
   else
     ReallocMem(Data, NewMemSize);
 
-// Установили указатель на конец старого блока и записали данные:
+// РЈСЃС‚Р°РЅРѕРІРёР»Рё СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РєРѕРЅРµС† СЃС‚Р°СЂРѕРіРѕ Р±Р»РѕРєР° Рё Р·Р°РїРёСЃР°Р»Рё РґР°РЅРЅС‹Рµ:
   NewPtr := Pointer(LongWord(Data) + Size);
   Move((@StrData[1])^, NewPtr^, DataLen);
 
@@ -548,7 +548,7 @@ begin
   Size := NewMemSize;
 end;
 
-// Выполнение запроса:
+// Р’С‹РїРѕР»РЅРµРЅРёРµ Р·Р°РїСЂРѕСЃР°:
 function HTTPPost(ScriptAddress: string; Data: pointer; Size: LongWord): string;
 var
   hInet, hConnect, hRequest: hInternet;
@@ -569,19 +569,19 @@ begin
   Host := PAnsiChar(ExtractHost(ScriptAddress));
   ScriptName := PAnsiChar(ExtractObject(ScriptAddress));
 
-  // Устанавливаем соединение:
+  // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ:
   hInet := InternetOpen(@AgentName[1], 0, nil, nil, 0);
   hConnect := InternetConnect(hInet, Host, 80, nil, nil, 3, 0, 0);
   hRequest := HTTPOpenRequest(hConnect, lpPOST, ScriptName, HTTPVer, nil, nil, $4000000 + $100 + $80000000 + $800, 0);
 
-  // Посылаем запрос:
+  // РџРѕСЃС‹Р»Р°РµРј Р·Р°РїСЂРѕСЃ:
   if Size = 0 then
   begin
     Result := '[PEACE OF SHIT]: Error at sending request: send data not present!';
     Exit;
   end;
 
-  StrData := #13#10 + '--' + Boundary + '--'; // Завершаем Boundary до вида "--boundary--"
+  StrData := #13#10 + '--' + Boundary + '--'; // Р—Р°РІРµСЂС€Р°РµРј Boundary РґРѕ РІРёРґР° "--boundary--"
 
   DataLen := LongWord(Length(StrData));
   NewMemSize := DataLen + Size;
@@ -592,7 +592,7 @@ begin
   HTTPSendRequest(hRequest, PAnsiChar(Header + Boundary), Length(Header + Boundary), Data, NewMemSize);
   FreeMem(Data);
 
-  // Получаем ответ:
+  // РџРѕР»СѓС‡Р°РµРј РѕС‚РІРµС‚:
   GetMem(Buffer, ReceiverSize);
 
   Response := '';
@@ -631,15 +631,15 @@ begin
   Host := PAnsiChar(ExtractHost(ScriptAddress));
   ScriptName := PAnsiChar(ExtractObject(ScriptAddress));
 
-  // Устанавливаем соединение:
+  // РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј СЃРѕРµРґРёРЅРµРЅРёРµ:
   hInet := InternetOpen(@AgentName[1], 0, nil, nil, 0);
   hConnect := InternetConnect(hInet, Host, 80, nil, nil, 3, 0, 0);
   hRequest := HTTPOpenRequest(hConnect, lpGET, ScriptName, HTTPVer, nil, nil, $4000000 + $100 + $80000000 + $800, 0);
 
-  // Посылаем запрос:
+  // РџРѕСЃС‹Р»Р°РµРј Р·Р°РїСЂРѕСЃ:
   HTTPSendRequest(hRequest, nil, 0, nil, 0);
 
-  // Получаем ответ:
+  // РџРѕР»СѓС‡Р°РµРј РѕС‚РІРµС‚:
   GetMem(Buffer, ReceiverSize);
   Response := '';
   repeat

@@ -3,7 +3,7 @@ unit Launch;
 interface
 
 uses
-  Winapi.Windows, System.SysUtils, System.Classes, Registry, shellapi, AuthManager;
+  Windows, Classes, ShellAPI, Auth, Registry, Settings;
 
 type
   TMinecraftData = record
@@ -16,55 +16,30 @@ type
     LogonInfo: string;
   end;
 
-procedure PlayMinecraft(servername:string;auth:TAuthManager);
+procedure PlayMinecraft(Servername: string; Auth: TAuthOutputData);
 
 implementation
 
-uses settings;
-
-procedure CheckFolder(Dir: string; Pattern: string; var FileList: TStringList);
-var
-  SearchRec: TSearchRec;
-begin
-  if FindFirst(Dir + '*', faDirectory, SearchRec) = 0 then
-  begin
-    repeat
-      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
-      begin
-        CheckFolder(Dir + SearchRec.Name + '\', Pattern, FileList);
-      end;
-    until FindNext(SearchRec) <> 0;
-  end;
-  FindClose(SearchRec);
-  if FindFirst(Dir + Pattern, faAnyFile xor faDirectory, SearchRec) = 0 then
-  begin
-    repeat
-      FileList.Add(Dir + SearchRec.Name);
-    until FindNext(SearchRec) <> 0;
-  end;
-  FindClose(SearchRec);
-end;
-
 function GetJavaPath:string;
 var
-  reg:TRegistry;
+  reg: TRegistry;
 begin
-  reg := TREgistry.Create;
+  reg := TRegistry.Create;
   reg.RootKey := HKEY_LOCAL_MACHINE;
-  reg.OpenKey('SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\javaws.exe', false);
-  result := reg.ReadString('Path');
+  reg.OpenKeyReadOnly('SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\javaws.exe');
+  Result := reg.ReadString('Path');
   reg.CloseKey;
   reg.Free;
 end;
 
 procedure ExecuteMinecraft(MinecraftData: TMinecraftData);
 var
-  lpDirectory, lpFile, lpParameters: PWideChar;
+  lpDirectory, lpFile, lpParameters: PAnsiChar;
 begin
   with MinecraftData do
   begin
-    lpDirectory := PWideChar(MinePath);
-    lpParameters := PWideChar(
+    lpDirectory := PAnsiChar(MinePath);
+    lpParameters := PAnsiChar(
                                //'-Dfml.ignoreInvalidMinecraftCertificates=true -Dfml.ignorePatchDiscrepancies=true ' +
                                '-Xms' + Xms + 'm ' +
                                '-Xmx' + Xmx + 'm ' +
@@ -76,12 +51,12 @@ begin
                                ' --tweakClass cpw.mods.fml.common.launcher.FMLTweaker'
                               }
                               );
-    lpFile := PWideChar(Java + '\javaw.exe');
+    lpFile := PAnsiChar(Java + '\java.exe');
   end;
-  ShellExecuteW(0,nil,lpFile,lpParameters,lpDirectory,SW_SHOWNORMAL);
+  ShellExecuteA(0,nil,lpFile,lpParameters,lpDirectory,SW_SHOWNORMAL);
 end;
 
-procedure PlayMinecraft(servername:string;auth:TAuthManager);
+procedure PlayMinecraft(servername:string;auth:TAuthOutputData);
 var
   FileList: TStringList;
   I: Word;
@@ -97,17 +72,17 @@ begin
     CP := CP + FileList.Strings[I] + ';';
   end;
   MinecraftData.Minepath := settings.MinecraftDir;
-  MinecraftData.Java := getJavaPath();
-  MinecraftData.Xms := settings.MinMem;
-  MinecraftData.Xmx := settings.MaxMem;
+  MinecraftData.Java := getJavaPath;
+  MinecraftData.Xms := settings.GameMemory;
+  MinecraftData.Xmx := settings.GameMemory;
   MinecraftData.NativesPath := settings.MinecraftDir + 'dists\' + servername + '\natives';
   MinecraftData.CP := CP;
-  MinecraftData.LogonInfo := '--username ' + auth.getLogin() + ' ' +
-                             '--session ' + auth.getParams() + ' ' +
+  MinecraftData.LogonInfo := '--username ' + auth.login + ' ' +
+                             '--session ' + auth.LaunchParams + ' ' +
                              '--version 1.6.4 ';
   ExecuteMinecraft(MinecraftData);
-  FreeAndNil(FileList);
-  ExitProcess(0);
+  FileList.Free;
+  //ExitProcess(0);
 end;
 
 end.

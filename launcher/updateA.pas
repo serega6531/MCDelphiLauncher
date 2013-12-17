@@ -1,4 +1,4 @@
-unit updateA;
+Ôªøunit updateA;
 
 interface
 
@@ -190,7 +190,7 @@ begin
   end;
   Reg.CloseKey;
   Reg.Free;
-  //Launch.PlayMinecraft(ServerName, Auth.Authdata);
+  Launch.PlayMinecraft(ServerName, Auth.Authdata);
 end;
 
 procedure TUpdateForm.Messenger(var Message: TMessage);
@@ -206,9 +206,9 @@ begin
     Exit;
   end;
   DownloadStatus := TDownloadStatus(Pointer(Message.wParam)^);
-  StatusLabel.Caption := '«‡„ÛÁÍ‡... (' + FloatToStr(Round(DownloadStatus.DownloadSpeed)) + ' ·‡ÈÚ/ÒÂÍ.)';
-  SizeLabel.Caption := BToMb(DownloadStatus.ReceivedBytes, 0) + ' Ã·/' + BToMb(DownloadStatus.SizeOfFile, 0) + ' Ã·';
-  SizeLabel.Left := Round(UpdateForm.Width / 2) - SizeLabel.Width;     //MAGIC!
+  StatusLabel.Caption := '–ó–∞–≥—Ä—É–∑–∫–∞... (' + FloatToStr(Round(DownloadStatus.DownloadSpeed)) + ' –±–∞–π—Ç/—Å–µ–∫.)';
+  SizeLabel.Caption := BToMb(DownloadStatus.ReceivedBytes, 0) + ' –ú–±/' + BToMb(DownloadStatus.SizeOfFile, 0) + ' –ú–±';
+  SizeLabel.Left := Round((UpdateForm.Width / 2) - (SizeLabel.Width / 2));     //MAGIC!
   ProgressBar.Max := DownloadStatus.SizeOfFile;
   ProgressBar.Position := DownloadStatus.ReceivedBytes;
 end;

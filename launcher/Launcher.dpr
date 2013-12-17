@@ -1,30 +1,25 @@
 program Launcher;
 
 uses
-  Vcl.Forms,
-  main in 'main.pas' {Form1},
-  settings in 'settings.pas' {Form2},
-  update in 'update.pas' {Form3},
-  FWZipConsts in 'FWZipConsts.pas',
-  FWZipCrc32 in 'FWZipCrc32.pas',
-  FWZipReader in 'FWZipReader.pas',
-  FWZipStream in 'FWZipStream.pas',
-  ServerData in 'ServerData.pas',
-  ServerList in 'ServerList.pas',
-  UpdateManager in 'UpdateManager.pas',
-  AuthManager in 'AuthManager.pas',
-  PerimeterUnicode in 'PerimeterUnicode.pas',
+  Forms,
+  main in 'main.pas' {MainForm},
+  Perimeter in 'Perimeter.pas',
+  ServersUtils in 'ServersUtils.pas',
+  settings in 'settings.pas' {SettingsForm},
+  Auth in 'Auth.pas',
+  updateA in 'updateA.pas' {UpdateForm},
   Launch in 'Launch.pas',
-  FWZipCrypt in 'FWZipCrypt.pas';
+  InternetHTTP in 'InternetHTTP.pas',
+  unMD5 in 'unMD5.pas';
 
 {$R *.res}
 
 begin
   Application.Initialize;
-  Application.MainFormOnTaskbar := False;
-  Application.Title := 'Minecraft launcher';
-  Application.CreateForm(TForm1, Form1);
-  Application.CreateForm(TForm2, Form2);
-  Application.CreateForm(TForm3, Form3);
+  Application.MainFormOnTaskbar := True;
+  Application.Title := 'Minecraft Launcher';
+  Application.CreateForm(TMainForm, MainForm);
+  Application.CreateForm(TSettingsForm, SettingsForm);
+  Application.CreateForm(TUpdateForm, UpdateForm);
   Application.Run;
 end.
