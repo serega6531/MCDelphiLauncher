@@ -1,4 +1,4 @@
-п»їunit settings;
+unit settings;
 
 interface
 
@@ -67,7 +67,7 @@ begin
   FindClose(SearchRec);
 end;
 
-function GetSpecialFolderPath(folder : integer) : string;    {РџРѕР»СѓР°РµРј СЃРёСЃС‚РµРјРЅС‹Рµ РїСѓС‚Рё}
+function GetSpecialFolderPath(folder : integer) : string;    {Полуаем системные пути}
 const
   SHGFP_TYPE_CURRENT = 0;
 var
@@ -82,7 +82,7 @@ end;
 procedure TSettingsForm.FormCreate(Sender: TObject);
 begin
   Reg := TRegIniFile.Create('Software\happyminers.ru');
-  VersionLabel.Caption := 'Р’РµСЂСЃРёСЏ Р»Р°СѓРЅС‡РµСЂР°: ' + LauncherVer;
+  VersionLabel.Caption := 'Версия лаунчера: ' + LauncherVer;
   AppData := GetSpecialFolderPath(CSIDL_APPDATA);
   MinecraftDir := AppData + '\' + RootDir + '\';
   GameMemory := IntToStr(Reg.ReadInteger('Settings', 'Memory', 512));

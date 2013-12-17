@@ -3,18 +3,12 @@
 interface
 
 type
-  TServerData = class(TObject)
-  private
-    Name: string;
-    Address: string;
-  public
-    constructor Create(Name, Address: string); overload;
-    destructor Destroy; override;
-    function GetName: string;
-    function GetAdress: string;
+  TServerData = record
+    name: string;
+    adress: string;
   end;
 
-procedure AddServer(Name, Address:string);
+procedure AddServer(nName, nAddress:string);
 function GetServer(ID:integer):TServerData;
 
 var
@@ -22,31 +16,17 @@ var
 
 implementation
 
-constructor TServerData.Create(Name, Address: string);
+procedure AddServer(nName, nAddress:string);
+var
+  tmp: TServerData;
 begin
-	Self.Name := Name;
-	Self.Address := Address;
-end;
-
-destructor TServerData.Destroy;
-begin
-  inherited;
-end;
-
-function TServerData.getAdress: string;
-begin
-	Result := Address;
-end;
-
-function TServerData.getName: string;
-begin
-	Result := Name;
-end;
-
-procedure AddServer(Name, Address:string);
-begin
+  with tmp do
+  begin
+    name := nName;
+    adress := nAddress;
+  end;
   SetLength(Servers, Length(Servers) + 1);
-  Servers[Length(Servers) - 1] := TServerData.Create(Name, Address);
+  Servers[Length(Servers) - 1] := tmp;
 end;
 
 function GetServer(ID: integer): TServerData;

@@ -1,4 +1,4 @@
-п»їunit Main;
+unit Main;
 
 interface
 
@@ -6,7 +6,7 @@ uses
   Windows, Controls, Forms, SysUtils,
   Dialogs, sSkinManager, SHDocVw, sPanel, sLabel,
   acPNG, acImage, sEdit, sComboBox, Perimeter, sButton, ShellAPI, Registry,
-  sCheckBox, idHTTP, StdCtrls, OleCtrls, ExtCtrls, Classes;
+  sCheckBox, idHTTP, StdCtrls, OleCtrls, ExtCtrls, Classes, Graphics;
 
 type
   TMainForm = class(TForm)
@@ -26,17 +26,19 @@ type
     ExitBtn: TsButton;
     UpdateCheckbox: TsCheckBox;
     RememberCheckbox: TsCheckBox;
+    DeleteDataButton: TsLabel;
     procedure FormCreate(Sender: TObject);
     procedure SiteBtnClick(Sender: TObject);
     procedure ExitBtnClick(Sender: TObject);
     procedure SettingsBtnClick(Sender: TObject);
-    procedure OnServersListChanged(Sender: TObject);
     procedure LoginBtnClick(Sender: TObject);
+    procedure DeleteDataButtonMouseEnter(Sender: TObject);
+    procedure DeleteDataButtonMouseLeave(Sender: TObject);
+    procedure DeleteDataButtonClick(Sender: TObject);
   end;
 
 var
   MainForm: TMainForm;
-  ChosenServerId: integer;
   Reg: TRegIniFile;
 
 implementation
@@ -44,6 +46,25 @@ implementation
 uses ServersUtils, Auth, Settings, UpdateA;
 
 {$R *.dfm}
+
+procedure TMainForm.DeleteDataButtonClick(Sender: TObject);
+begin
+  Reg.WriteString('Auth', 'Login', 'def');
+  Reg.WriteString('Auth', 'Password', 'def');
+  LoginEdit.Text := '';
+  PasswordEdit.Text := '';
+  DeleteDataButton.Visible := false;
+end;
+
+procedure TMainForm.DeleteDataButtonMouseEnter(Sender: TObject);
+begin
+  DeleteDataButton.Font.Style := DeleteDataButton.Font.Style  + [fsUnderline];
+end;
+
+procedure TMainForm.DeleteDataButtonMouseLeave(Sender: TObject);
+begin
+   DeleteDataButton.Font.Style := DeleteDataButton.Font.Style - [fsUnderline];
+end;
 
 procedure TMainForm.ExitBtnClick(Sender: TObject);
 begin
@@ -75,26 +96,21 @@ begin
   //InitPerimeter(PData);
   if NeedUpdate then
   begin
-    MessageDlg('РўСЂРµР±СѓРµС‚СЃСЏ РѕР±РЅРѕРІР»РµРЅРёРµ Р»Р°СѓРЅС‡РµСЂР°!', mtWarning, [mbOk], 0);
+    MessageDlg('Требуется обновление лаунчера!', mtWarning, [mbOk], 0);
     ShellExecute(Self.Handle, nil, 'http://www.happyminers.ru/?mode=start', nil, nil, SW_SHOW);
     ExitProcess(0);
   end;
   Reg := TRegIniFile.Create('Software\happyminers.ru');
   if (Reg.ReadString('Auth','Login','def') <> 'def') AND (Reg.ReadString('Auth','Password','def') <> 'def') then
   begin
-    if (MessageDlg('РћР±РЅР°СЂСѓР¶РµРЅС‹ РґР°РЅРЅС‹Рµ РїСЂРѕС€Р»РѕР№ Р°РІС‚РѕСЂРёР·Р°С†РёРё? РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РёС…?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
-    begin
-      LoginEdit.Text := Reg.ReadString('Auth','Login','');
-      PasswordEdit.Text := Reg.ReadString('Auth','Password','');
-    end else begin
-      Reg.WriteString('Auth', 'Login', 'def');
-      Reg.WriteString('Auth', 'Password', 'def');
-    end;
+    DeleteDataButton.Visible := true;
+    LoginEdit.Text := Reg.ReadString('Auth','Login','');
+    PasswordEdit.Text := Reg.ReadString('Auth','Password','');
   end;
   Settings.initServers;
   for I := 0 to Length(ServersUtils.Servers) - 1 do
   begin
-    ServersDropDownList.Items.Add(ServersUtils.GetServer(I).GetName);
+    ServersDropDownList.Items.Add(ServersUtils.GetServer(I).name);
   end;
   ServersDropDownList.ItemIndex := 0;
   NewsBrowser.Navigate('http://www.happyminers.ru/MineCraft/news.php');
@@ -116,17 +132,12 @@ begin
       Reg.WriteString('Auth', 'Login', AuthData.Login);
       Reg.WriteString('Auth', 'Password', AuthData.Password);
     end;
-    UpdateA._Update(GetServer(ChosenServerId).GetName, UpdateCheckbox.Checked);
+    UpdateA._Update(GetServer(self.ServersDropDownList.ItemIndex).name, UpdateCheckbox.Checked);
   end
   else
   begin
-    MessageBox(Self.Handle, 'РќРµРїСЂР°РІРёР»СЊРЅС‹Р№ Р»РѕРіРёРЅ РёР»Рё РїР°СЂРѕР»СЊ', 'РћС€РёР±РєР° Р°РІС‚РѕСЂРёР·Р°С†РёРё', MB_ICONERROR);
+    MessageBox(Self.Handle, 'Неправильный логин или пароль', 'Ошибка авторизации', MB_ICONERROR);
   end;
-end;
-
-procedure TMainForm.OnServersListChanged(Sender: TObject);
-begin
-  ChosenServerId := ServersDropDownList.ItemIndex;
 end;
 
 procedure TMainForm.SettingsBtnClick(Sender: TObject);

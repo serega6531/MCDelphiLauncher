@@ -13,7 +13,6 @@ type
   TAuthOutputData = record
     LaunchParams: string[38];
     Login: string[14];
-    Password: string[14];
   end;
 
 function IsAuth(Data:TAuthInputData): boolean;
@@ -49,16 +48,15 @@ begin
   JSON := TStringStream.Create(JSONText);
   JSON.Position := 0;
   Res := HTTP.Post('http://www.happyminers.ru/MineCraft/auth16x.php', JSON);   {получение ответа}
-  JSON.free;
-  HTTP.Free;
   if Res = 'Bad login' then       //проверка не прошла
     Result := false
   else begin
     Authdata.LaunchParams := Token + ':' + Copy(Res, Pos('accessToken":"', Res)+14, 21);
     Authdata.Login := Data.Login;
-    Authdata.Password := Data.Password;
     Result := true;                    //проверка прошла
   end;
+  JSON.free;
+  HTTP.Free;
 end;
 
 end.

@@ -51,7 +51,7 @@ begin
                                ' --tweakClass cpw.mods.fml.common.launcher.FMLTweaker'
                               }
                               );
-    lpFile := PAnsiChar(Java + '\java.exe');
+    lpFile := PAnsiChar(Java + '\javaw.exe');
   end;
   ShellExecuteA(0,nil,lpFile,lpParameters,lpDirectory,SW_SHOWNORMAL);
 end;
@@ -77,12 +77,12 @@ begin
   MinecraftData.Xmx := settings.GameMemory;
   MinecraftData.NativesPath := settings.MinecraftDir + 'dists\' + servername + '\natives';
   MinecraftData.CP := CP;
-  MinecraftData.LogonInfo := '--username ' + auth.login + ' ' +
+  MinecraftData.LogonInfo := '--username ' + auth.Login + ' ' +
                              '--session ' + auth.LaunchParams + ' ' +
                              '--version 1.6.4 ';
   ExecuteMinecraft(MinecraftData);
   FileList.Free;
-  //ExitProcess(0);
+  ExitProcess(0);
 end;
 
 end.

@@ -16,6 +16,7 @@ type
     SizeLabel: TsLabel;
     procedure CancelButtonClick(Sender: TObject);
     procedure Messenger(var Message: TMessage); message $FFE;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
   end;
 
 
@@ -151,7 +152,7 @@ end;
 
 function CheckBase(IsForceUpdate: Boolean): boolean;
 begin
-  Result := ((FileExists(MinecraftDir + 'BaseFile')) OR (IsForceUpdate = false));
+  Result := ((FileExists(MinecraftDir + 'BaseFile')) AND not IsForceUpdate);
 end;
 
 function CheckServer(ServerName: string): boolean;
@@ -167,30 +168,46 @@ begin
   begin
     Reg.WriteInteger('Version', ServerName, StrToInt(Ver));
   end;
+  Reg.CloseKey;
+  Reg.Free;
 end;
 
 procedure _Update(Server: string; IsForceUpdate: Boolean);
 begin
-  MainForm.Hide;
+  with MainForm do
+  begin
+    LoginBtn.Enabled := false;
+    SettingsBtn.Enabled := false;
+    SiteBtn.Enabled := false;
+    ExitBtn.Enabled := false;
+  end;
   UpdateForm.Show;
   ServerName := Server;
   NeedDownloadClient := false;
   if not DirectoryExists(MinecraftDir) then
     CreateDir(MinecraftDir);
-  if not CheckBase(isForceUpdate) then
+  if not CheckBase(IsForceUpdate) then
   begin
     RemoveAll(MinecraftDir);
     NeedDownloadClient := true;
     DownloadFile('base.zip');
-    Reg.WriteInteger('Version', Server, -1)
+    Reg.WriteInteger('Version', Server, -1);
+    Reg.CloseKey;
+    Reg.Free;
+    Exit;
   end;
   if not CheckServer(Server) AND not NeedDownloadClient then
   begin
     DownloadFile(ServerName + '.zip');
+    Exit;
   end;
-  Reg.CloseKey;
-  Reg.Free;
   Launch.PlayMinecraft(ServerName, Auth.Authdata);
+end;
+
+
+procedure TUpdateForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  ExitProcess(0);
 end;
 
 procedure TUpdateForm.Messenger(var Message: TMessage);
@@ -202,11 +219,12 @@ begin
     begin
       NeedDownloadClient := false;
       DownloadFile(ServerName + '.zip');
-    end;
+    end else
+      Launch.PlayMinecraft(ServerName, Auth.Authdata);
     Exit;
   end;
   DownloadStatus := TDownloadStatus(Pointer(Message.wParam)^);
-  StatusLabel.Caption := 'Загрузка... (' + FloatToStr(Round(DownloadStatus.DownloadSpeed)) + ' байт/сек.)';
+  StatusLabel.Caption := 'Загрузка... (' + BToMb(Round(DownloadStatus.DownloadSpeed), 0) + ' Мб/сек.)';
   SizeLabel.Caption := BToMb(DownloadStatus.ReceivedBytes, 0) + ' Мб/' + BToMb(DownloadStatus.SizeOfFile, 0) + ' Мб';
   SizeLabel.Left := Round((UpdateForm.Width / 2) - (SizeLabel.Width / 2));     //MAGIC!
   ProgressBar.Max := DownloadStatus.SizeOfFile;

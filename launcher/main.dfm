@@ -4,7 +4,7 @@ object MainForm: TMainForm
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Minecraft Launcher - HappyMiners.ru'
-  ClientHeight = 413
+  ClientHeight = 417
   ClientWidth = 674
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -8942,14 +8942,33 @@ object MainForm: TMainForm
       FF00FFFFFF00}
     SkinData.SkinSection = 'CHECKBOX'
   end
+  object DeleteDataButton: TsLabel
+    Left = 294
+    Top = 313
+    Width = 190
+    Height = 14
+    Caption = #1059#1076#1072#1083#1080#1090#1100' '#1076#1072#1085#1085#1099#1077' '#1072#1074#1090#1086#1088#1080#1079#1072#1094#1080#1080
+    Color = clBtnFace
+    ParentColor = False
+    ParentFont = False
+    Visible = False
+    OnClick = DeleteDataButtonClick
+    OnMouseEnter = DeleteDataButtonMouseEnter
+    OnMouseLeave = DeleteDataButtonMouseLeave
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlue
+    Font.Height = -12
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+  end
   object NewsBrowser: TWebBrowser
     Left = 8
     Top = 152
     Width = 265
-    Height = 245
+    Height = 257
     TabOrder = 0
     ControlData = {
-      4C000000631B0000521900000000000000000000000000000000000000000000
+      4C000000631B0000901A00000000000000000000000000000000000000000000
       000000004C000000000000000000000001000000E0D057007335CF11AE690800
       2B2E126208000000000000004C0000000114020000000000C000000000000046
       8000000000000000000000000000000000000000000000000000000000000000
@@ -9036,11 +9055,10 @@ object MainForm: TMainForm
     ItemIndex = -1
     ParentFont = False
     TabOrder = 3
-    OnChange = onServersListChanged
   end
   object LoginBtn: TsButton
     Left = 312
-    Top = 328
+    Top = 344
     Width = 105
     Height = 25
     Caption = #1042#1093#1086#1076
@@ -9050,7 +9068,7 @@ object MainForm: TMainForm
   end
   object SiteBtn: TsButton
     Left = 423
-    Top = 328
+    Top = 344
     Width = 105
     Height = 25
     Caption = #1057#1072#1081#1090
@@ -9060,7 +9078,7 @@ object MainForm: TMainForm
   end
   object SettingsBtn: TsButton
     Left = 534
-    Top = 328
+    Top = 344
     Width = 105
     Height = 25
     Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
@@ -9070,7 +9088,7 @@ object MainForm: TMainForm
   end
   object ExitBtn: TsButton
     Left = 423
-    Top = 368
+    Top = 384
     Width = 105
     Height = 25
     Caption = #1042#1099#1093#1086#1076
@@ -10346,7 +10364,7 @@ object MainForm: TMainForm
     ThirdParty.ThirdUpDown = ' '
     ThirdParty.ThirdScrollBar = ' '
     ThirdParty.ThirdStaticText = ' '
-    Left = 640
-    Top = 384
+    Left = 648
+    Top = 392
   end
 end
