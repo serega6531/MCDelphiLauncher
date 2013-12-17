@@ -190,7 +190,7 @@ begin
   end;
   Reg.CloseKey;
   Reg.Free;
-  //Launch.PlayMinecraft(ServerName, Auth.Authdata);
+  Launch.PlayMinecraft(ServerName, Auth.Authdata);
 end;
 
 procedure TUpdateForm.Messenger(var Message: TMessage);

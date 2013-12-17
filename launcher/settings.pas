@@ -1,103 +1,105 @@
-﻿unit settings;
+unit settings;
 
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, main, SHFolder, ServerList, ServerData,
-  sSkinProvider, sEdit, sLabel, sButton, Registry;
+  Windows, SysUtils, Forms,
+  sSkinProvider, StdCtrls, sLabel, sEdit, sButton, Registry, ServersUtils, SHFolder,
+  Controls, Classes;
 
 type
-  TForm2 = class(TForm)
-    sSkinProvider1: TsSkinProvider;
-    sEdit1: TsEdit;
-    sEdit2: TsEdit;
+  TSettingsForm = class(TForm)
+    TitleLabel: TsLabel;
+    SkinProvider: TsSkinProvider;
+    MemoryEdit: TsEdit;
+    MemoryLabel: TsLabel;
+    SaveButton: TsButton;
+    CancelButton: TsButton;
     VersionLabel: TsLabel;
-    XmsLabel: TsLabel;
-    XmxLabel: TsLabel;
-    SaveBtn: TsButton;
-    BackBtn: TsButton;
-    procedure initServers();
+    procedure CancelButtonClick(Sender: TObject);
+    procedure SaveButtonClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure SaveBtnClick(Sender: TObject);
-    procedure BackBtnClick(Sender: TObject);
-  private
-    { Private declarations }
-  public
-    { Public declarations }
   end;
 
+procedure InitServers;
+procedure CheckFolder(Dir: string; Pattern: string; var FileList: TStringList);
+
 const
-  LauncherVer:string = '1';
-  RootDir:string = '.happyminers';
+  LauncherVer: string = '1';
+  RootDir: string = '.happyminers';
 
 var
-  Form2: TForm2;
-  MinMem, MaxMem:string;
-  appdata:string;
-  MinecraftDir:string;
-  servers:TServerList;
-  reg:TRegIniFile;
+  SettingsForm: TSettingsForm;
+  Reg: TRegIniFile;
+  MinecraftDir: string;
+  GameMemory: string;
+  AppData: string;
 
 implementation
 
 {$R *.dfm}
 
-function GetSpecialFolderPath(folder : integer) : string;    {Полуаем системные пути}
+procedure TSettingsForm.CancelButtonClick(Sender: TObject);
+begin
+  Self.Close;
+end;
+
+procedure CheckFolder(Dir: string; Pattern: string; var FileList: TStringList);
+var
+  SearchRec: TSearchRec;
+begin
+  if FindFirst(Dir + '*', faDirectory, SearchRec) = 0 then
+  begin
+    repeat
+      if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
+      begin
+        CheckFolder(Dir + SearchRec.Name + '\', Pattern, FileList);
+      end;
+    until FindNext(SearchRec) <> 0;
+  end;
+  FindClose(SearchRec);
+  if FindFirst(Dir + Pattern, faAnyFile xor faDirectory, SearchRec) = 0 then
+  begin
+    repeat
+      FileList.Add(Dir + SearchRec.Name);
+    until FindNext(SearchRec) <> 0;
+  end;
+  FindClose(SearchRec);
+end;
+
+function GetSpecialFolderPath(folder : integer) : string;    {������� ��������� ����}
 const
   SHGFP_TYPE_CURRENT = 0;
 var
-  path: array [0..MAX_PATH] of char;
+  Path: array [0..MAX_PATH] of char;
 begin
-  if SUCCEEDED(SHGetFolderPath(0,folder,0,SHGFP_TYPE_CURRENT,@path[0])) then
-    Result := path
+  if SUCCEEDED(SHGetFolderPath(0,folder,0,SHGFP_TYPE_CURRENT,@Path[0])) then
+    Result := Path
   else
     Raise Exception.Create('Can''t find AppData dir');
 end;
 
-procedure TForm2.BackBtnClick(Sender: TObject);
+procedure TSettingsForm.FormCreate(Sender: TObject);
 begin
-  Form2.Close;
+  Reg := TRegIniFile.Create('Software\happyminers.ru');
+  VersionLabel.Caption := '������ ��������: ' + LauncherVer;
+  AppData := GetSpecialFolderPath(CSIDL_APPDATA);
+  MinecraftDir := AppData + '\' + RootDir + '\';
+  GameMemory := IntToStr(Reg.ReadInteger('Settings', 'Memory', 512));
+  MemoryEdit.Text := GameMemory;
 end;
 
-procedure TForm2.FormCreate(Sender: TObject);
+procedure InitServers;
 begin
-  VersionLabel.Caption:='Версия лаунчера: '+ LauncherVer;   {вывод версии}
-  appdata:=GetSpecialFolderPath(CSIDL_APPDATA);      {получаем appdata/roaming}
-  MinecraftDir:=appdata + '\' + RootDir + '\';
-  Reg := TRegIniFile.Create('Software\happyminers');
-  if (reg.ReadInteger('Settings', 'MinMem', -1) = -1) OR (reg.ReadInteger('Settings', 'MaxMem', -1) = -1) Then
-  begin
-    reg.WriteInteger('Settings', 'MinMem', 256);
-    MinMem := '256';
-    sEdit1.Text := MinMem;
-    MaxMem := '512';
-    sEdit2.Text := MaxMem;
-    reg.WriteInteger('Settings', 'MaxMem', 512);
-  end else begin
-    MinMem := IntToStr(reg.ReadInteger('Settings', 'MinMem', -1));
-    sEdit1.Text := MinMem;
-    MaxMem := IntToStr(reg.ReadInteger('Settings', 'MaxMem', -1));
-    sEdit2.Text := MaxMem;
-  end;
+  ServersUtils.AddServer('Classic', 'localhost');
+  ServersUtils.AddServer('Another Server', '127.0.0.1');
 end;
 
-procedure TForm2.initServers();
+procedure TSettingsForm.SaveButtonClick(Sender: TObject);
 begin
-  servers:=TServerList.Create;
-  servers.addServer(TServerData.Create('Classic', '127.0.0.1'), 0);
-  //servers.addServer(TServerData.Create('Test Server 2', '127.0.0.2'), 1);
-end;
-
-procedure TForm2.SaveBtnClick(Sender: TObject);
-begin
-    if (StrToInt(sEdit1.Text) >= 126) AND (StrToInt(sEdit2.Text) >= StrToInt(sEdit1.text)) then       {проверка правильности данных}
-  begin
-    reg.WriteInteger('Settings', 'MinMem', StrToInt(sEdit1.Text));
-    reg.WriteInteger('Settings', 'MinMem', StrToInt(sEdit2.Text));
-    self.Close;
-  end else
-    ShowMessage('Ошибка! Проверьте правильность введённых данных');
+  Reg.WriteInteger('Settings', 'Memory', StrToInt(MemoryEdit.Text));
+  Reg.CloseKey;
+  Self.Close;
 end;
 
 end.
