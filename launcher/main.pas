@@ -6,7 +6,7 @@ uses
   Windows, Forms,
   Dialogs, sSkinManager, SHDocVw, sPanel, sLabel,
   acPNG, acImage, sEdit, sComboBox, Perimeter, sButton, ShellAPI, Registry,
-  sCheckBox, Graphics, StdCtrls, OleCtrls, ExtCtrls, Classes, Controls;
+  sCheckBox, Graphics, StdCtrls, OleCtrls, ExtCtrls, Classes, Controls, WinSock;
 
 type
   TMainForm = class(TForm)
@@ -71,6 +71,9 @@ begin
   ExitProcess(0);
 end;
 
+function GetLocalIP: string;
+var  WSAData: TWSAData;  P: PHostEnt;  Buf: array [0..127] of Char;begin  Result := '';  if (WSAStartup($101, wsaData) = 0) and (GetHostName(@Buf, 128) = 0) then    try      P := GetHostByName(@Buf);      if P <> nil then      Result := inet_ntoa(PInAddr(p^.h_addr_list^)^);    finally      WSACleanup;    end;end;
+
 function NeedUpdate: boolean;
 begin
   if HTTPGet('http://www.happyminers.ru/MineCraft/launcherver.php') = settings.LauncherVer then
@@ -91,6 +94,11 @@ begin
   PData.Interval := 20;
   PData.ExtProcOnEliminating := GetProcAddress(GetModuleHandle('ntdll.dll'), 'LdrShutdownProcess');
   //InitPerimeter(PData);
+  if GetLocalIP = '127.0.0.1' then
+  begin
+    MessageDlg('Нет подключения к интернету', mtError, [mbOk], 0);
+    ExitProcess(0);
+  end;
   if NeedUpdate then
   begin
     MessageDlg('Требуется обновление лаунчера!', mtWarning, [mbOk], 0);

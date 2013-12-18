@@ -243,11 +243,11 @@ function HttpQueryInfo(hRequest: HINTERNET; dwInfoLevel: LongWord;
 //HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
 const
-  AgentName: PAnsiChar = 'Internet Client';
+  AgentName: PAnsiChar = 'Launcher';
   lpPOST: PAnsiChar = 'POST';
   lpGET: PAnsiChar = 'GET';
   HTTPVer: PAnsiChar = 'HTTP/1.1';
-  Boundary: string = 'DisIsUniqueBoundary4POSTRequestYouShouldUseInYourFuckingApps';
+  Boundary: string = 'ThisIsUniqueBoundary4POSTRequest';
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
