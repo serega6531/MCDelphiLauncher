@@ -2,7 +2,7 @@ unit Auth;
 
 interface
 
-uses Classes, IdHTTP;
+uses Classes, InternetHTTP;
 
 type
   TAuthInputData = record
@@ -35,19 +35,16 @@ end;
 
 function IsAuth(Data: TAuthInputData): boolean;
 var
-  Res, JSONText, Token: string;
-  JSON: TStringStream;
-  HTTP: TIdHTTP;
+  Res, Token: string;
+  Size: LongWord;
+  PostData: pointer;
 begin
+  Size := 0;
   Token := GenerateToken;
-  JSONText:='{"username": "'+ Data.Login +'","password": "'+ Data.Password +'","clientToken": "' + Token +'"}';
-  HTTP := TIdHttp.Create(nil);
-  HTTP.HandleRedirects := True;
-  HTTP.ReadTimeout := 5000;
-  HTTP.Request.ContentType := 'application/json';
-  JSON := TStringStream.Create(JSONText);
-  JSON.Position := 0;
-  Res := HTTP.Post('http://www.happyminers.ru/MineCraft/auth16x.php', JSON);   {получение ответа}
+  AddPOSTField(PostData, Size, 'username', Data.Login);
+  AddPOSTField(PostData, Size, 'password', Data.Password);
+  AddPOSTField(PostData, Size, 'clientToken', Token);
+  Res := HTTPPost('http://www.happyminers.ru/MineCraft/auth16xpost.php', PostData, Size);
   if Res = 'Bad login' then       //проверка не прошла
     Result := false
   else begin
@@ -55,8 +52,6 @@ begin
     Authdata.Login := Data.Login;
     Result := true;                    //проверка прошла
   end;
-  JSON.free;
-  HTTP.Free;
 end;
 
 end.

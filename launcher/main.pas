@@ -3,10 +3,10 @@ unit Main;
 interface
 
 uses
-  Windows, Controls, Forms, SysUtils,
+  Windows, Forms,
   Dialogs, sSkinManager, SHDocVw, sPanel, sLabel,
   acPNG, acImage, sEdit, sComboBox, Perimeter, sButton, ShellAPI, Registry,
-  sCheckBox, idHTTP, StdCtrls, OleCtrls, ExtCtrls, Classes, Graphics;
+  sCheckBox, Graphics, StdCtrls, OleCtrls, ExtCtrls, Classes, Controls;
 
 type
   TMainForm = class(TForm)
@@ -43,7 +43,7 @@ var
 
 implementation
 
-uses ServersUtils, Auth, Settings, UpdateA;
+uses ServersUtils, Auth, Settings, UpdateA, InternetHTTP;
 
 {$R *.dfm}
 
@@ -72,11 +72,8 @@ begin
 end;
 
 function NeedUpdate: boolean;
-var
-  HTTP:TIdHTTP;
 begin
-  HTTP := TIdHTTP.Create(nil);
-  if HTTP.Get('http://www.happyminers.ru/MineCraft/launcherver.php') = settings.LauncherVer then
+  if HTTPGet('http://www.happyminers.ru/MineCraft/launcherver.php') = settings.LauncherVer then
     Result := false
   else
     Result := true;

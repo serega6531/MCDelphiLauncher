@@ -3,9 +3,8 @@
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, ComCtrls, acProgressBar, StdCtrls, sLabel, Registry, settings,
-  sButton, AbUnzper, AbArcTyp;
+  Windows, Messages, SysUtils, Classes, Forms, acProgressBar, sLabel, Registry, settings,
+  sButton, AbUnzper, AbArcTyp, StdCtrls, Controls, ComCtrls;
 
 type
   TUpdateForm = class(TForm)
