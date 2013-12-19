@@ -2,7 +2,7 @@ unit Auth;
 
 interface
 
-uses Classes, InternetHTTP;
+uses InternetHTTP;
 
 type
   TAuthInputData = record

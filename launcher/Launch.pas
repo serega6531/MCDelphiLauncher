@@ -3,7 +3,7 @@ unit Launch;
 interface
 
 uses
-  Windows, Classes, ShellAPI, Auth, Registry, Settings;
+  Windows, ShellAPI, Auth, Registry, Settings;
 
 type
   TMinecraftData = record
@@ -56,32 +56,27 @@ begin
   ShellExecuteA(0,nil,lpFile,lpParameters,lpDirectory,SW_SHOWNORMAL);
 end;
 
+function getCP(server:string):string;
+begin
+  CheckFolder(settings.MinecraftDir+'libraries\', '*.jar');
+  CheckFolder(settings.MinecraftDir+'dists\' + server + '\', '*.jar');
+  result := settings.tCP;
+end;
+
 procedure PlayMinecraft(servername:string;auth:TAuthOutputData);
 var
-  FileList: TStringList;
-  I: Word;
-  CP: string;
   MinecraftData: TMinecraftData;
 begin
-  FileList := TStringList.Create;
-  CheckFolder(settings.MinecraftDir+'libraries\', '*.jar', FileList);
-  CheckFolder(settings.MinecraftDir+'dists\' + servername + '\', '*.jar', FileList);
-  CP := '';
-  for I := 0 to FileList.Count - 1 do
-  begin
-    CP := CP + FileList.Strings[I] + ';';
-  end;
   MinecraftData.Minepath := settings.MinecraftDir;
   MinecraftData.Java := getJavaPath;
   MinecraftData.Xms := settings.GameMemory;
   MinecraftData.Xmx := settings.GameMemory;
   MinecraftData.NativesPath := settings.MinecraftDir + 'dists\' + servername + '\natives';
-  MinecraftData.CP := CP;
+  MinecraftData.CP := getCP(servername);
   MinecraftData.LogonInfo := '--username ' + auth.Login + ' ' +
                              '--session ' + auth.LaunchParams + ' ' +
                              '--version 1.6.4 ';
   ExecuteMinecraft(MinecraftData);
-  FileList.Free;
   ExitProcess(0);
 end;
 

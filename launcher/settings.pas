@@ -22,7 +22,7 @@ type
   end;
 
 procedure InitServers;
-procedure CheckFolder(Dir: string; Pattern: string; var FileList: TStringList);
+procedure CheckFolder(Dir: string; Pattern: string);
 
 const
   LauncherVer: string = '1';
@@ -34,6 +34,7 @@ var
   MinecraftDir: string;
   GameMemory: string;
   AppData: string;
+  tCP:string;
 
 implementation
 
@@ -44,7 +45,7 @@ begin
   Self.Close;
 end;
 
-procedure CheckFolder(Dir: string; Pattern: string; var FileList: TStringList);
+procedure CheckFolder(Dir: string; Pattern: string);
 var
   SearchRec: TSearchRec;
 begin
@@ -53,7 +54,7 @@ begin
     repeat
       if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
       begin
-        CheckFolder(Dir + SearchRec.Name + '\', Pattern, FileList);
+        CheckFolder(Dir + SearchRec.Name + '\', Pattern);
       end;
     until FindNext(SearchRec) <> 0;
   end;
@@ -61,7 +62,7 @@ begin
   if FindFirst(Dir + Pattern, faAnyFile xor faDirectory, SearchRec) = 0 then
   begin
     repeat
-      FileList.Add(Dir + SearchRec.Name);
+     tCP := tCP + Dir + SearchRec.Name + ';';
     until FindNext(SearchRec) <> 0;
   end;
   FindClose(SearchRec);

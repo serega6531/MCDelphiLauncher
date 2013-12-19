@@ -6,7 +6,7 @@ uses
   Windows, Forms,
   Dialogs, sSkinManager, SHDocVw, sPanel, sLabel,
   acPNG, acImage, sEdit, sComboBox, Perimeter, sButton, ShellAPI, Registry,
-  sCheckBox, Graphics, StdCtrls, OleCtrls, ExtCtrls, Classes, Controls, WinSock;
+  sCheckBox, Graphics, StdCtrls, OleCtrls, ExtCtrls, Controls, WinSock, Classes;
 
 type
   TMainForm = class(TForm)
