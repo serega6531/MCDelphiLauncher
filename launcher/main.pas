@@ -82,6 +82,19 @@ begin
     Result := true;
 end;
 
+function IsJavaFound: boolean;
+var
+  jReg: TRegistry;
+begin
+  jReg := TRegistry.Create;
+  jReg.RootKey := HKEY_LOCAL_MACHINE;
+  jReg.OpenKeyReadOnly('SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\javaws.exe');
+  if jReg.ReadString('Path') = '' Then
+    result := false
+  else
+    result := true;
+end;
+
 procedure TMainForm.FormCreate(Sender: TObject);
 var
   I: integer;
@@ -106,6 +119,10 @@ begin
     ExitProcess(0);
   end;
   Reg := TRegIniFile.Create('Software\happyminers.ru');
+  if not IsJavaFound then
+  begin
+    MessageBoxA(0, 'Java не найдена!', 'Ошибка', 0);
+  end;
   if (Reg.ReadString('Auth','Login','def') <> 'def') AND (Reg.ReadString('Auth','Password','def') <> 'def') then
   begin
     DeleteDataButton.Visible := true;

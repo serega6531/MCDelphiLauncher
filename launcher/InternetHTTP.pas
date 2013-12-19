@@ -10,8 +10,11 @@ type
     DownloadSpeed: single;
     ReceivedBytes: LongWord;
     RemainingTime: single;
-    FilePointer: pointer;
 
+// Указатель на файл в памяти (если выбрана загрузка в память)
+    FilePtr: pointer;
+
+    // За 1 такт:
     CurrentReceivedBytes: LongWord;
     CurrentElapsedTime: single;
   end;
@@ -247,14 +250,14 @@ const
   lpPOST: PAnsiChar = 'POST';
   lpGET: PAnsiChar = 'GET';
   HTTPVer: PAnsiChar = 'HTTP/1.1';
-  Boundary: string = 'ThisIsUniqueBoundary4POSTRequest';
+  Boundary: string = 'ЕрisIsUniqueBoundary4POSTRequest';
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Процедуры работы с файловой системой и адресами:
-// Допускаются разделители "\" и "/"
+// Ïðîöåäóðû ðàáîòû ñ ôàéëîâîé ñèñòåìîé è àäðåñàìè:
+// Äîïóñêàþòñÿ ðàçäåëèòåëè "\" è "/"
 
-// Создаёт иерархию папок до конечной указанной папки включительно:
+// Ñîçäà¸ò èåðàðõèþ ïàïîê äî êîíå÷íîé óêàçàííîé ïàïêè âêëþ÷èòåëüíî:
 procedure CreatePath(EndDir: string);
 var
   I: LongWord;
@@ -274,7 +277,7 @@ end;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Получает каталог, в котором лежит файл:
+// Ïîëó÷àåò êàòàëîã, â êîòîðîì ëåæèò ôàéë:
 function ExtractFileDir(Path: string): string;
 var
   I: LongWord;
@@ -288,7 +291,7 @@ end;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Получает имя файла:
+// Ïîëó÷àåò èìÿ ôàéëà:
 function ExtractFileName(Path: string): string;
 var
   I: LongWord;
@@ -302,7 +305,7 @@ end;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Извлекает имя хоста:
+// Èçâëåêàåò èìÿ õîñòà:
 // http://site.ru/folder/script.php  -->  site.ru
 function ExtractHost(Path: string): string;
 var
@@ -310,14 +313,14 @@ var
   PathLen: LongWord;
 begin
   PathLen := Length(Path);
-  I := 8; // Длина "http://"
+  I := 8; // Äëèíà "http://"
   while (I <= PathLen) and (Path[I] <> '\') and (Path[I] <> '/') do Inc(I);
   Result := Copy(Path, 8, I - 8);
 end;
 
 //- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
-// Извлекает имя объекта:
+// Èçâëåêàåò èìÿ îáúåêòà:
 // http://site.ru/folder/script.php  -->  folder/script.php
 function ExtractObject(Path: string): string;
 var
@@ -367,15 +370,15 @@ procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHand
     FilePtr: pointer;
   const
     Header: PAnsiChar = 'Content-Type: application/x-www-form-urlencoded';
-    ReceiverSize: LongWord = 104892;
+    ReceiverSize: LongWord = 1048576;
   begin
     HTTPDownloadParams := THTTPDownloadParams(Parameter^);
 
-    // Устанавливаем соединение:
+    // Óñòàíàâëèâàåì ñîåäèíåíèå:
     hInet := InternetOpen(@AgentName[1], 0, nil, nil, 0);
     hURL := InternetOpenURL(hInet, PAnsiChar(HTTPDownloadParams.URL), nil, 0,  $4000000 + $100 + $80000000 + $800, 0);
 
-    // Получаем размер файла:
+    // Ïîëó÷àåì ðàçìåð ôàéëà:
     rSize := 4;
     rIndex := 0;
     HTTPQueryInfo(
@@ -386,23 +389,35 @@ procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHand
                    rIndex
                   );
 
-    // Создаём файл:
-    CreatePath(ExtractFileDir(HTTPDownloadParams.Destination));
-    hFile := CreateFile(
-                         PAnsiChar(HTTPDownloadParams.Destination),
-                         GENERIC_READ + GENERIC_WRITE,
-                         0,
-                         nil,
-                         CREATE_ALWAYS,
-                         FILE_ATTRIBUTE_NORMAL,
-                         0
-                        );
+    asm
+      xor eax, eax
+      mov FilePtr, eax
+      mov DownloadStatus.FilePtr, eax
+      mov hFile, eax
+    end;
+
+    if HTTPDownloadParams.SaveInMemory then
+    begin
+    // Âûäåëÿåì ïàìÿòü äëÿ ôàéëà:
+      GetMem(FilePtr, DownloadStatus.SizeOfFile);
+      DownloadStatus.FilePtr := FilePtr;
+    end
+    else
+    begin
+    // Ñîçäà¸ì ôàéë:
+      CreatePath(ExtractFileDir(HTTPDownloadParams.Destination));
+      hFile := CreateFile(
+                           PAnsiChar(HTTPDownloadParams.Destination),
+                           GENERIC_READ + GENERIC_WRITE,
+                           0,
+                           nil,
+                           CREATE_ALWAYS,
+                           FILE_ATTRIBUTE_NORMAL,
+                           0
+                          );
+    end;
 
     DownloadStatus.ReceivedBytes := 0;
-
-    FilePtr := nil;
-    if HTTPDownloadParams.SaveInMemory then GetMem(FilePtr, DownloadStatus.SizeOfFile);
-
     GetMem(Receiver, ReceiverSize);
 
     repeat
@@ -421,14 +436,14 @@ procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHand
             WriteFile(hFile, Receiver^, ReceivedBytes, WriteBytes, nil);
           except
             MessageBoxA(HTTPDownloadParams.MainHandle, 'Не удалось записать данные в файл!'+#13+'Возможно, файл защищён от записи!', 'Ошибка!', MB_ICONERROR);
-            EndThread(0);
+            Break;
           end
         else
         begin
           if FilePtr = nil then
           begin
             MessageBoxA(HTTPDownloadParams.MainHandle, 'Не удалось записать данные в память!'+#13+'Возможно, не хватает памяти!', 'Ошибка!', MB_ICONERROR);
-            EndThread(0);
+            Break;
           end;
           Move(Receiver^, FilePtr^, ReceivedBytes);
           FilePtr := Pointer(LongWord(FilePtr) + ReceivedBytes);
@@ -441,7 +456,7 @@ procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHand
         DownloadStatus.ReceivedBytes := DownloadStatus.ReceivedBytes + ReceivedBytes;
         DownloadStatus.RemainingTime := (DownloadStatus.SizeOfFile - DownloadStatus.ReceivedBytes) / DownloadStatus.DownloadSpeed;
 
-        SendMessage(HTTPDownloadParams.MainHandle, HTTPDownloadParams.Msg, Integer(@DownloadStatus), 0);
+        SendMessage(HTTPDownloadParams.MainHandle, HTTPDownloadParams.Msg, 0, LongWord(@DownloadStatus));
       end;
     until ReceivedBytes = 0;
 
@@ -451,7 +466,7 @@ procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHand
     InternetCloseHandle(hURL);
     InternetCloseHandle(hInet);
 
-    SendMessage(HTTPDownloadParams.MainHandle, HTTPDownloadParams.Msg, $FFFF, 0);
+    SendMessage(HTTPDownloadParams.MainHandle, HTTPDownloadParams.Msg, $FFFF, LongWord(@DownloadStatus));
 
     EndThread(0);
   end;
@@ -466,14 +481,14 @@ begin
   Params.Msg := Msg;
   Params.SaveInMemory := SaveInMemory;
   CloseHandle(BeginThread(nil, 0, @Download, @Params, 0, ThreadID));
-  Sleep(50); // Гарантируем, что данные успешно запишутся в поток
+  Sleep(50); // Ãàðàíòèðóåì, ÷òî äàííûå óñïåøíî çàïèøóòñÿ â ïîòîê
 end;
 
 //HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 //                                POST-Request
 //HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 
-// Добавляет в запрос текстовое поле:
+// Äîáàâëÿåò â çàïðîñ òåêñòîâîå ïîëå:
 procedure AddPOSTField(var Data: pointer; var Size: LongWord; Param, Value: string);
 var
   NewMemSize: LongWord;
@@ -496,14 +511,14 @@ begin
   else
     ReallocMem(Data, NewMemSize);
 
-// Установили указатель на конец старого блока и записали данные:
+// Óñòàíîâèëè óêàçàòåëü íà êîíåö ñòàðîãî áëîêà è çàïèñàëè äàííûå:
   NewPtr := Pointer(LongWord(Data) + Size);
   Move((@StrData[1])^, NewPtr^, DataLen);
 
   Size := NewMemSize;
 end;
 
-// Добавляет в запрос файл:
+// Äîáàâëÿåò â çàïðîñ ôàéë:
 procedure AddPOSTFile(var Data: pointer; var Size: LongWord; Param, Value, FilePath, ContentType: string);
 var
   hFile: THandle;
@@ -537,7 +552,7 @@ begin
   else
     ReallocMem(Data, NewMemSize);
 
-// Установили указатель на конец старого блока и записали данные:
+// Óñòàíîâèëè óêàçàòåëü íà êîíåö ñòàðîãî áëîêà è çàïèñàëè äàííûå:
   NewPtr := Pointer(LongWord(Data) + Size);
   Move((@StrData[1])^, NewPtr^, DataLen);
 
@@ -548,7 +563,7 @@ begin
   Size := NewMemSize;
 end;
 
-// Выполнение запроса:
+// Âûïîëíåíèå çàïðîñà:
 function HTTPPost(ScriptAddress: string; Data: pointer; Size: LongWord): string;
 var
   hInet, hConnect, hRequest: hInternet;
@@ -569,19 +584,19 @@ begin
   Host := PAnsiChar(ExtractHost(ScriptAddress));
   ScriptName := PAnsiChar(ExtractObject(ScriptAddress));
 
-  // Устанавливаем соединение:
+  // Óñòàíàâëèâàåì ñîåäèíåíèå:
   hInet := InternetOpen(@AgentName[1], 0, nil, nil, 0);
   hConnect := InternetConnect(hInet, Host, 80, nil, nil, 3, 0, 0);
   hRequest := HTTPOpenRequest(hConnect, lpPOST, ScriptName, HTTPVer, nil, nil, $4000000 + $100 + $80000000 + $800, 0);
 
-  // Посылаем запрос:
+  // Ïîñûëàåì çàïðîñ:
   if Size = 0 then
   begin
     Result := '[PEACE OF SHIT]: Error at sending request: send data not present!';
     Exit;
   end;
 
-  StrData := #13#10 + '--' + Boundary + '--'; // Завершаем Boundary до вида "--boundary--"
+  StrData := #13#10 + '--' + Boundary + '--'; // Çàâåðøàåì Boundary äî âèäà "--boundary--"
 
   DataLen := LongWord(Length(StrData));
   NewMemSize := DataLen + Size;
@@ -592,7 +607,7 @@ begin
   HTTPSendRequest(hRequest, PAnsiChar(Header + Boundary), Length(Header + Boundary), Data, NewMemSize);
   FreeMem(Data);
 
-  // Получаем ответ:
+  // Ïîëó÷àåì îòâåò:
   GetMem(Buffer, ReceiverSize);
 
   Response := '';
@@ -631,15 +646,15 @@ begin
   Host := PAnsiChar(ExtractHost(ScriptAddress));
   ScriptName := PAnsiChar(ExtractObject(ScriptAddress));
 
-  // Устанавливаем соединение:
+  // Óñòàíàâëèâàåì ñîåäèíåíèå:
   hInet := InternetOpen(@AgentName[1], 0, nil, nil, 0);
   hConnect := InternetConnect(hInet, Host, 80, nil, nil, 3, 0, 0);
   hRequest := HTTPOpenRequest(hConnect, lpGET, ScriptName, HTTPVer, nil, nil, $4000000 + $100 + $80000000 + $800, 0);
 
-  // Посылаем запрос:
+  // Ïîñûëàåì çàïðîñ:
   HTTPSendRequest(hRequest, nil, 0, nil, 0);
 
-  // Получаем ответ:
+  // Ïîëó÷àåì îòâåò:
   GetMem(Buffer, ReceiverSize);
   Response := '';
   repeat
