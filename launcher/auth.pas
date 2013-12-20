@@ -2,7 +2,7 @@ unit Auth;
 
 interface
 
-uses InternetHTTP;
+uses InternetHTTP, crypt, Dialogs, SysUtils;
 
 type
   TAuthInputData = record
@@ -41,14 +41,16 @@ var
 begin
   Size := 0;
   Token := GenerateToken;
-  AddPOSTField(PostData, Size, 'username', Data.Login);
-  AddPOSTField(PostData, Size, 'password', Data.Password);
-  AddPOSTField(PostData, Size, 'clientToken', Token);
+  makeKey2;
+  AddPOSTField(PostData, Size, 'username', CryptString(Data.Login, key2));
+  AddPOSTField(PostData, Size, 'password', CryptString(Data.Password, key2));
+  AddPOSTField(PostData, Size, 'clientToken', CryptString(Token, key2));
+  AddPOSTField(PostData, Size, 'key2', IntToStr(key2));
   Res := HTTPPost('http://www.happyminers.ru/MineCraft/auth16xpost.php', PostData, Size);
-  if Res = 'Bad login' then       //проверка не прошла
+  if (Res = 'Bad login') OR (Res = '') then       //проверка не прошла
     Result := false
   else begin
-    Authdata.LaunchParams := Token + ':' + Copy(Res, Pos('accessToken":"', Res)+14, 21);
+    Authdata.LaunchParams := Token + ':' + decryptString(Copy(Res, Pos('accessToken":"', Res)+14, 21), key2);
     Authdata.Login := Data.Login;
     Result := true;                    //проверка прошла
   end;

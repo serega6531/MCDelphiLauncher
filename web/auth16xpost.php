@@ -1,5 +1,6 @@
 <?php
 require('../system.php');
+require('crypt.php');
 
 function generateSessionId() {
     srand(time());
@@ -13,12 +14,12 @@ function logExit($text, $output = "Bad login") {
 
 if (empty($_POST)) 
 
-	logExit("[auth16x.php] login process [Empty input] [ ".((empty($_POST["username"]))? 'LOGIN ':'').((empty($_POST["password"]))? 'PASSWORD ':'').((empty($_POST["clientToken"]))? 'clientToken ':'')."]");
+	logExit("[auth16xpost.php] login process [Empty input] [LOGIN PASSWORD clientToken key2");
 
 	loadTool('user.class.php'); 
 	BDConnect('auth');
 
-$login = $_POST["username"]; $password = $_POST["password"]; $clientToken = $_POST["clientToken"];
+$key2 = $_POST["key"]; $login = decryptStr($_POST["username"], $key2); $password = decryptStr($_POST["password"], $key2); $clientToken = decryptStr($_POST["clientToken"], $key2);
 
 if (!preg_match("/^[a-zA-Z0-9_-]+$/", $password)  or
 	!preg_match("/^[a-f0-9-]+$/", $clientToken)) 
@@ -41,8 +42,8 @@ if (!preg_match("/^[a-zA-Z0-9_-]+$/", $password)  or
         $profile = array ( 'id' => $auth_user->id(), 'name' => $auth_user->name() ) ;
         
         $responce = array(
-            'clientToken' => $clientToken, 
-            'accessToken' => $sessid, 
+            'clientToken' => cryptStr($clientToken), 
+            'accessToken' => cryptStr($sessid), 
             'availableProfiles' => array ( 0 => $profile), 
             'selectedProfile' => $profile);
         

@@ -10,7 +10,8 @@ uses
   updateA in 'updateA.pas' {UpdateForm},
   Launch in 'Launch.pas',
   InternetHTTP in 'InternetHTTP.pas',
-  unMD5 in 'unMD5.pas';
+  unMD5 in 'unMD5.pas',
+  crypt in 'crypt.pas';
 
 {$R *.res}
 
