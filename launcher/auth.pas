@@ -2,7 +2,7 @@ unit Auth;
 
 interface
 
-uses InternetHTTP, crypt, Dialogs, SysUtils;
+uses InternetHTTP, crypt, Dialogs, SysUtils, hwid_impl;
 
 type
   TAuthInputData = record
@@ -38,13 +38,16 @@ var
   Res, Token: string;
   Size: LongWord;
   PostData: pointer;
+  r: tresults_array_dv;
+  key2: integer;
 begin
+  key2 := makeKey2;
   Size := 0;
-  Token := GenerateToken;
-  makeKey2;
+  Token := GenerateToken;         
   AddPOSTField(PostData, Size, 'username', CryptString(Data.Login, key2));
   AddPOSTField(PostData, Size, 'password', CryptString(Data.Password, key2));
   AddPOSTField(PostData, Size, 'clientToken', CryptString(Token, key2));
+  AddPOSTField(PostData, Size, 'hid', CryptString(IntToStr(getHardDriveComputerID(r)), key2));
   AddPOSTField(PostData, Size, 'key2', IntToStr(key2));
   Res := HTTPPost('http://www.happyminers.ru/MineCraft/auth16xpost.php', PostData, Size);
   if (Res = 'Bad login') OR (Res = '') then       //проверка не прошла

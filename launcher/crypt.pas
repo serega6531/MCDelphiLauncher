@@ -17,13 +17,10 @@ function cryptString(str: string; key2: integer): string;
 //  }
 
 function decryptString(str: string; key2: integer): string;
-procedure makeKey2;
+function makeKey2: integer;
 
 const
   key: integer = 7;
-
-var
-  key2: integer;
 
 implementation
 
@@ -33,7 +30,7 @@ var
 begin
   for I := 1 to Length(str) do
   begin
-    result := result + chr(ord(str[i]) + key);
+    result := result + chr(ord(str[i]) + key - key2);
   end;
 end;
 
@@ -43,7 +40,7 @@ var
 begin
   for I := 1 to Length(str) do
   begin
-    result := result + chr(ord(str[i]) - key);
+    result := result + chr(ord(str[i]) - key + key2);
   end;
 end;
 
@@ -55,9 +52,9 @@ begin
     Result := Random(ATo - AFrom) + AFrom;
 end;
 
-procedure makeKey2;
+function makeKey2: integer;
 begin
-  key2 := RandomRange((key * -1) + 1, key - 1);
+  result := RandomRange(0, key - 1);
 end;
 
 end.

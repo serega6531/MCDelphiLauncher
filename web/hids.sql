@@ -1,0 +1,1 @@
+ALTER TABLE `accounts` ADD `hid` SMALLINT(6) NULL DEFAULT NULL AFTER `password`;
