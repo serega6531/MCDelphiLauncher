@@ -14,12 +14,12 @@ function logExit($text, $output = "Bad login") {
 
 if (empty($_POST)) 
 
-	logExit("[auth16xpost.php] login process [Empty input] [LOGIN PASSWORD clientToken key2");
+	logExit("[auth16xpost.php] login process [Empty input] [LOGIN PASSWORD clientToken HID key2]");
 
 	loadTool('user.class.php'); 
 	BDConnect('auth');
 
-$key2 = $_POST["key"]; $login = decryptStr($_POST["username"], $key2); $password = decryptStr($_POST["password"], $key2); $clientToken = decryptStr($_POST["clientToken"], $key2);
+$key2 = $_POST["key"]; $login = decryptStr($_POST["username"], $key2); $password = decryptStr($_POST["password"], $key2); $clientToken = decryptStr($_POST["clientToken"], $key2); $hid = decryptStr($_POST["hid"], $key2);
 
 if (!preg_match("/^[a-zA-Z0-9_-]+$/", $password)  or
 	!preg_match("/^[a-f0-9-]+$/", $clientToken)) 
@@ -37,15 +37,27 @@ if (!preg_match("/^[a-zA-Z0-9_-]+$/", $password)  or
     BD("UPDATE `{$bd_names['users']}` SET `{$bd_users['session']}`='".TextBase::SQLSafe($sessid)."' WHERE `{$BD_Field}`='".TextBase::SQLSafe($login)."'");
     BD("UPDATE `{$bd_names['users']}` SET `{$bd_users['clientToken']}`='".TextBase::SQLSafe($clientToken)."' WHERE `{$BD_Field}`='".TextBase::SQLSafe($login)."'");
 
-	vtxtlog("[auth16xpost.php] login process [Success] User [$login] Session [$sessid] clientToken[$clientToken]");			
-	
-        $profile = array ( 'id' => $auth_user->id(), 'name' => $auth_user->name() ) ;
+	$ohid = BD("SELECT `id` FROM `hids` WHERE `hid`='".TextBase::SQLSafe($hid)."'");
+    if (mysql_num_rows($ohid) == 0)
+    {
+    	vtxtlog("Updating hid for [$login : $hid]");
+    	BD("INSERT INTO `hids` (`hid`, `banned`) VALUES ('".TextBase::SQLSafe($hid)."', '0')");	
+    }
+
+    $hidsql = BD("SELECT `banned` FROM `hids` WHERE `hid`='".TextBase::SQLSafe($hid)."'");
+    while ($row1 = mysql_fetch_array($hidsql))
+    {
+    	if ($row1['banned'] == 1)
+    	{
+    		logExit("[auth16xpost.php] login process [HID banned: $hid]");
+    	}
+	}
+
+	vtxtlog("[auth16xpost.php] login process [Success] User [$login] Session [$sessid] clientToken[$clientToken] hid [$hid]");			
         
         $responce = array(
-            'clientToken' => cryptStr($clientToken), 
-            'accessToken' => cryptStr($sessid), 
-            'availableProfiles' => array ( 0 => $profile), 
-            'selectedProfile' => $profile);
+            'clientToken' => cryptStr($clientToken, $key2), 
+            'accessToken' => cryptStr($sessid, $key2));
         
         exit(json_encode($responce));
 ?>
