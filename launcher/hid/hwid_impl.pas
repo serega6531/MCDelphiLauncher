@@ -1096,15 +1096,13 @@ const m_cVxDFunctionIdesDInfo = 1;
 
 function ReadDrivePortsInWin9X(var Dest: tresults_array_dv): Boolean;
 var
-  i: Cardinal;
+  i, j: Cardinal;
   VxDHandle: THandle;
   pOutBufVxD: pt_IdeDInfo;
   lpBytesReturned: DWORD;
-  status: LongBool; //BOOL
   info: rt_IdeDInfo;
 
   diskinfo: tdiskdata_dv;
-  j: Integer;
 
   count_drives_dv: Integer;
 begin
@@ -1113,19 +1111,6 @@ begin
   //-VxDHandle := 0;
   //-pOutBufVxD := nil;
   lpBytesReturned := 0;
-
-		//  set the thread priority high so that we get exclusive access to the disk
-  status :=
-		// SetThreadPriority (GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
-    SetPriorityClass(GetCurrentProcess(), REALTIME_PRIORITY_CLASS);
-		// SetPriorityClass (GetCurrentProcess (), HIGH_PRIORITY_CLASS);
-
-{$ifdef PRINTING_TO_CONSOLE_ALLOWED}
-   if (not status) then begin
-	   // Write(Format (#$0D#$0A+'ERROR: Could not SetThreadPriority, LastError: %d'+#$0D#$0A, GetLastError ());
-	   Write(Format (#$0D#$0A+'ERROR: Could not SetPriorityClass, LastError: %d'+#$0D#$0A, [GetLastError]));
-   end;
-{$ENDIF}
 
       // 1. Make an output buffer for the VxD
    //-rt_IdeDInfo info;

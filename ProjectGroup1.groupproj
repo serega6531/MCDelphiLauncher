@@ -1,0 +1,44 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProjectGuid>{cf4927f2-58c7-4cda-815d-c20212737110}</ProjectGuid>
+  </PropertyGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Projects Include="launcher\Hasher\Hasher.dproj" />
+    <Projects Include="launcher\Launcher.dproj" />
+  </ItemGroup>
+  <ProjectExtensions>
+    <Borland.Personality>Default.Personality</Borland.Personality>
+    <Borland.ProjectType />
+    <BorlandProject>
+  <BorlandProject xmlns=""> <Default.Personality> </Default.Personality> </BorlandProject></BorlandProject>
+  </ProjectExtensions>
+  <Target Name="Launcher">
+    <MSBuild Projects="launcher\Launcher.dproj" Targets="" />
+  </Target>
+  <Target Name="Launcher:Clean">
+    <MSBuild Projects="launcher\Launcher.dproj" Targets="Clean" />
+  </Target>
+  <Target Name="Launcher:Make">
+    <MSBuild Projects="launcher\Launcher.dproj" Targets="Make" />
+  </Target>
+  <Target Name="Hasher">
+    <MSBuild Projects="launcher\Hasher\Hasher.dproj" Targets="" />
+  </Target>
+  <Target Name="Hasher:Clean">
+    <MSBuild Projects="launcher\Hasher\Hasher.dproj" Targets="Clean" />
+  </Target>
+  <Target Name="Hasher:Make">
+    <MSBuild Projects="launcher\Hasher\Hasher.dproj" Targets="Make" />
+  </Target>
+  <Target Name="Build">
+    <CallTarget Targets="Launcher;Hasher" />
+  </Target>
+  <Target Name="Clean">
+    <CallTarget Targets="Launcher:Clean;Hasher:Clean" />
+  </Target>
+  <Target Name="Make">
+    <CallTarget Targets="Launcher:Make;Hasher:Make" />
+  </Target>
+  <Import Condition="Exists('$(MSBuildBinPath)\Borland.Group.Targets')" Project="$(MSBuildBinPath)\Borland.Group.Targets" />
+</Project>

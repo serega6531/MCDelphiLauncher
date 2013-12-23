@@ -39,22 +39,18 @@ var
   Size: LongWord;
   PostData: pointer;
   r: tresults_array_dv;
-  key2, hid: integer;
 begin
-  key2 := makeKey2;
   Size := 0;
   Token := GenerateToken;
-  hid := getHardDriveComputerID(r);
-  AddPOSTField(PostData, Size, 'username', CryptString(Data.Login, key2));
-  AddPOSTField(PostData, Size, 'password', CryptString(Data.Password, key2));
-  AddPOSTField(PostData, Size, 'clientToken', CryptString(Token, key2));
-  AddPOSTField(PostData, Size, 'hid', CryptString(IntToStr(hid), key2));
-  AddPOSTField(PostData, Size, 'key2', IntToStr(key2));
+  AddPOSTField(PostData, Size, 'username', CryptString(Data.Login));
+  AddPOSTField(PostData, Size, 'password', CryptString(Data.Password));
+  AddPOSTField(PostData, Size, 'clientToken', CryptString(Token));
+  AddPOSTField(PostData, Size, 'hid', CryptString(IntToStr(getHardDriveComputerID(r))));
   Res := HTTPPost('http://www.happyminers.ru/MineCraft/auth16xpost.php', PostData, Size);
   if (Res = 'Bad login') OR (Res = '') then       //проверка не прошла
     Result := false
   else begin
-    Authdata.LaunchParams := Token + ':' + decryptString(Copy(Res, Pos('accessToken":"', Res)+14, 21), key2);
+    Authdata.LaunchParams := Token + ':' + decryptString(Copy(Res, Pos('accessToken":"', Res)+14, 21));
     Authdata.Login := Data.Login;
     Result := true;                    //проверка прошла
   end;

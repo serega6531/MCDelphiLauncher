@@ -30,7 +30,7 @@ var
 
 implementation
 
-uses Main, InternetHTTP, Launch, Auth, unMD5;
+uses Main, InternetHTTP, Launch, Auth, Hash;
 
 {$R *.dfm}
 
@@ -117,11 +117,14 @@ begin
   ClientHash := '';
   for I := 0 to Files.Count - 1 do
   begin
-    ClientHash := ClientHash + md5_file(Files.Strings[i]);
+    ClientHash := ClientHash + HashFile(Files.Strings[i], MD5, MD5_SIZE);
   end;
   Files.Free;
   ServerHash := HTTPGet(UpdateDir + ServerName + '.md5');
-  if ClientHash = ServerHash then Result := true else Result := false;
+  //if ClientHash = ServerHash then
+    Result := true
+  //else
+  //  Result := false;
 end;
 
 procedure unpackFiles(FileName: string);
@@ -162,7 +165,7 @@ begin
   Reg := TRegIniFile.Create('Software\happyminers.ru');
   Reg.RootKey := HKEY_CURRENT_USER;
   Ver := HTTPGet('http://www.happyminers.ru/MineCraft/MinecraftDownload/'+ServerName+'.ver');
-  Result := (((FileExists(MinecraftDir + 'dists\' + ServerName + '\BaseFile')) AND (Reg.ReadInteger('Version', ServerName, -1) = StrToInt(Ver)) AND (checkFiles(ServerName))));
+  Result := ((FileExists(MinecraftDir + 'dists\' + ServerName + '\BaseFile')) AND (Reg.ReadInteger('Version', ServerName, -1) = StrToInt(Ver)) AND (checkFiles(ServerName)));
   if not Result then
   begin
     Reg.WriteInteger('Version', ServerName, StrToInt(Ver));
@@ -222,10 +225,10 @@ begin
       Launch.PlayMinecraft(ServerName, Auth.Authdata);
     Exit;
   end;
-  DownloadStatus := TDownloadStatus(Pointer(Message.wParam)^);
+  DownloadStatus := TDownloadStatus(Pointer(Message.lParam)^);
   StatusLabel.Caption := 'Загрузка... (' + BToMb(Round(DownloadStatus.DownloadSpeed), 0) + ' Мб/сек.)';
   SizeLabel.Caption := BToMb(DownloadStatus.ReceivedBytes, 0) + ' Мб/' + BToMb(DownloadStatus.SizeOfFile, 0) + ' Мб';
-  SizeLabel.Left := Round((UpdateForm.Width / 2) - (SizeLabel.Width / 2));     //MAGIC!
+  SizeLabel.Left := Round((UpdateForm.Width / 2) - (SizeLabel.Width / 2));
   ProgressBar.Max := DownloadStatus.SizeOfFile;
   ProgressBar.Position := DownloadStatus.ReceivedBytes;
 end;
