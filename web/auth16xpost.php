@@ -14,12 +14,12 @@ function logExit($text, $output = "Bad login") {
 
 if (empty($_POST)) 
 
-	logExit("[auth16xpost.php] login process [Empty input] [LOGIN PASSWORD clientToken HID key2]");
+	logExit("[auth16xpost.php] login process [Empty input] [LOGIN PASSWORD clientToken HID]");
 
 	loadTool('user.class.php'); 
 	BDConnect('auth');
 
-$key2 = $_POST["key"]; $login = decryptStr($_POST["username"], $key2); $password = decryptStr($_POST["password"], $key2); $clientToken = decryptStr($_POST["clientToken"], $key2); $hid = decryptStr($_POST["hid"], $key2);
+$login = decryptStr($_POST["username"]); $password = decryptStr($_POST["password"]); $clientToken = decryptStr($_POST["clientToken"]); $hid = decryptStr($_POST["hid"]);
 
 if (!preg_match("/^[a-zA-Z0-9_-]+$/", $password)  or
 	!preg_match("/^[a-f0-9-]+$/", $clientToken)) 
@@ -56,8 +56,8 @@ if (!preg_match("/^[a-zA-Z0-9_-]+$/", $password)  or
 	vtxtlog("[auth16xpost.php] login process [Success] User [$login] Session [$sessid] clientToken[$clientToken] hid [$hid]");			
         
         $responce = array(
-            'clientToken' => cryptStr($clientToken, $key2), 
-            'accessToken' => cryptStr($sessid, $key2));
+            'clientToken' => cryptStr($clientToken), 
+            'accessToken' => cryptStr($sessid));
         
         exit(json_encode($responce));
 ?>

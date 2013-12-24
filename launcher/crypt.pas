@@ -3,23 +3,10 @@ unit crypt;
 interface
 
 function cryptString(str: string): string;
-
-//  PHP аналог:
-
-//  function cryptStr($str)
-//  {
-//	  $result = '';
-//	  $key = 7;
-//	  for ($i=0; $i < strlen($str); $i++) {
-//		  $result .= chr(ord($str[$i]) + $key);
-//	  }
-//	  return $result;
-//  }
-
 function decryptString(str: string): string;
 
 const
-  key: integer = 7;
+  key: Byte = 7;
 
 implementation
 
