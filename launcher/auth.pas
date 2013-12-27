@@ -73,7 +73,7 @@ begin
   if (Res = 'Bad login') OR (Res = '') then       //проверка не прошла
     Result := false
   else begin
-    Authdata.LaunchParams := Token + ':' + getJsonStr('accessToken', Res);
+    Authdata.LaunchParams := Token + ':' + decryptString(getJsonStr('accessToken', Res));
     Authdata.Login := Data.Login;
     Result := true;                    //проверка прошла
   end;

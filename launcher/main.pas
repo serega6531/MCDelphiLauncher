@@ -42,7 +42,6 @@ var
   MainForm: TMainForm;
   Reg: TRegIniFile;
   isServerOnline: boolean;
-  chosenServer: integer;
 
 implementation
 
@@ -163,7 +162,7 @@ begin
       Reg.WriteString('Auth', 'Login', AuthData.Login);
       Reg.WriteString('Auth', 'Password', AuthData.Password);
     end;
-    UpdateA._Update(GetServer(ServersBox.ItemIndex).name, UpdateCheckbox.Checked);
+    UpdateA._Update(GetServer(ServersBox.ItemIndex), UpdateCheckbox.Checked);
   end
   else
   begin
@@ -182,6 +181,20 @@ begin
 end;
 
 function GetLocalIP: string;
-var  WSAData: TWSAData;  P: PHostEnt;  Buf: array [0..127] of Char;begin  Result := '';  if (WSAStartup($101, wsaData) = 0) and (GetHostName(@Buf, 128) = 0) then    try      P := GetHostByName(@Buf);      if P <> nil then      Result := inet_ntoa(PInAddr(p^.h_addr_list^)^);    finally      WSACleanup;    end;end;
+var
+  WSAData: TWSAData;
+  P: PHostEnt;
+  Buf: array [0..127] of Char;
+begin
+  Result := '';
+  if (WSAStartup($101, wsaData) = 0) and (GetHostName(@Buf, 128) = 0) then
+    try
+      P := GetHostByName(@Buf);
+      if P <> nil then
+      Result := inet_ntoa(PInAddr(p^.h_addr_list^)^);
+    finally
+      WSACleanup;
+    end;
+end;
 
 end.

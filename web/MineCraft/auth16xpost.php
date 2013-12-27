@@ -14,7 +14,7 @@ function logExit($text, $output = "Bad login") {
 
 if (empty($_POST)) 
 
-	logExit("[auth16xpost.php] login process [Empty input] [LOGIN PASSWORD clientToken HID]");
+	logExit("[auth16xpost.php] login process [Empty input]");
 
 	loadTool('user.class.php'); 
 	BDConnect('auth');
@@ -41,7 +41,7 @@ if (!preg_match("/^[a-zA-Z0-9_-]+$/", $password)  or
     if (mysql_num_rows($ohid) == 0)
     {
     	vtxtlog("Updating hid for [$login : $hid]");
-    	BD("INSERT INTO `hids` (`hid`, `banned`) VALUES ('".TextBase::SQLSafe($hid)."', '0')");	
+    	BD("INSERT INTO `hids` (`username`, `hid`, `banned`) VALUES ('".TextBase::SQLSafe($login)."', '".TextBase::SQLSafe($hid)."', '0')");	
     }
 
     $hidsql = BD("SELECT `banned` FROM `hids` WHERE `hid`='".TextBase::SQLSafe($hid)."'");

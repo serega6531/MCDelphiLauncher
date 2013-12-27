@@ -3,7 +3,7 @@ unit Launch;
 interface
 
 uses
-  Windows, ShellAPI, Auth, Registry, Settings;
+  Windows, ShellAPI, Auth, Registry, Settings, ServersUtils;
 
 type
   TMinecraftData = record
@@ -16,7 +16,7 @@ type
     LogonInfo: string;
   end;
 
-procedure PlayMinecraft(Servername: string; Auth: TAuthOutputData);
+procedure PlayMinecraft(server: TServerData;auth: TAuthOutputData);
 
 implementation
 
@@ -63,7 +63,7 @@ begin
   result := settings.tCP;
 end;
 
-procedure PlayMinecraft(servername:string;auth:TAuthOutputData);
+procedure PlayMinecraft(server: TServerData;auth: TAuthOutputData);
 var
   MinecraftData: TMinecraftData;
 begin
@@ -71,11 +71,13 @@ begin
   MinecraftData.Java := getJavaPath;
   MinecraftData.Xms := settings.GameMemory;
   MinecraftData.Xmx := settings.GameMemory;
-  MinecraftData.NativesPath := settings.MinecraftDir + 'dists\' + servername + '\natives';
-  MinecraftData.CP := getCP(servername);
+  MinecraftData.NativesPath := settings.MinecraftDir + 'dists\' + server.name + '\natives';
+  MinecraftData.CP := getCP(server.name);
   MinecraftData.LogonInfo := '--username ' + auth.Login + ' ' +
                              '--session ' + auth.LaunchParams + ' ' +
-                             '--version 1.6.4 ';
+                             '--version 1.6.4 ' +
+                             '--gameDir ' + settings.MinecraftDir + ' ' +
+                             '--assetsDir ' + settings.MinecraftDir + 'assets ';
   ExecuteMinecraft(MinecraftData);
   ExitProcess(0);
 end;

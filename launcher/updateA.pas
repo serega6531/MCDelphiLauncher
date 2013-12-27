@@ -4,7 +4,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Classes, Forms, acProgressBar, sLabel, Registry, settings,
-  sButton, AbUnzper, AbArcTyp, StdCtrls, Controls, ComCtrls;
+  sButton, AbUnzper, AbArcTyp, StdCtrls, Controls, ComCtrls, ServersUtils;
 
 type
   TUpdateForm = class(TForm)
@@ -19,7 +19,7 @@ type
   end;
 
 
-procedure _Update(Server: string; IsForceUpdate: Boolean);
+procedure _Update(Server: TServerData; IsForceUpdate: Boolean);
 
 const
   UpdateDir: string = 'http://www.happyminers.ru/MineCraft/MinecraftDownload/';
@@ -37,6 +37,7 @@ uses Main, InternetHTTP, Launch, Auth, Hash;
 
 var
   ServerName, DownloadingFile: string;
+  Server: TServerData;
   DownloadStatus: TDownloadStatus;
   NeedDownloadClient: boolean;
 
@@ -174,7 +175,7 @@ begin
   Reg.Free;
 end;
 
-procedure _Update(Server: string; IsForceUpdate: Boolean);
+procedure _Update(Server: TServerData; IsForceUpdate: Boolean);
 begin
   with MainForm do
   begin
@@ -184,7 +185,8 @@ begin
     ExitBtn.Enabled := false;
   end;
   UpdateForm.Show;
-  ServerName := Server;
+  updateA.Server := Server;
+  ServerName := Server.name;
   NeedDownloadClient := false;
   if not DirectoryExists(MinecraftDir) then
     CreateDir(MinecraftDir);
@@ -193,17 +195,17 @@ begin
     RemoveAll(MinecraftDir);
     NeedDownloadClient := true;
     DownloadFile('base.zip');
-    Reg.WriteInteger('Version', Server, -1);
+    Reg.WriteInteger('Version', ServerName, -1);
     Reg.CloseKey;
     Reg.Free;
     Exit;
   end;
-  if not CheckServer(Server) AND not NeedDownloadClient then
+  if not CheckServer(ServerName) AND not NeedDownloadClient then
   begin
     DownloadFile(ServerName + '.zip');
     Exit;
   end;
-  Launch.PlayMinecraft(ServerName, Auth.Authdata);
+  Launch.PlayMinecraft(Server, Auth.Authdata);
 end;
 
 
@@ -222,7 +224,7 @@ begin
       NeedDownloadClient := false;
       DownloadFile(ServerName + '.zip');
     end else
-      Launch.PlayMinecraft(ServerName, Auth.Authdata);
+      Launch.PlayMinecraft(Server, Auth.Authdata);
     Exit;
   end;
   DownloadStatus := TDownloadStatus(Pointer(Message.lParam)^);
