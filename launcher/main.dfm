@@ -4,8 +4,8 @@ object MainForm: TMainForm
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = 'Minecraft Launcher - HappyMiners.ru'
-  ClientHeight = 417
-  ClientWidth = 674
+  ClientHeight = 432
+  ClientWidth = 887
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -180,14 +180,14 @@ object MainForm: TMainForm
     Caption = #1055#1072#1088#1086#1083#1100':'
   end
   object ServerLabel: TsLabel
-    Left = 328
-    Top = 247
+    Left = 753
+    Top = 159
     Width = 41
     Height = 13
     Caption = #1057#1077#1088#1074#1077#1088':'
   end
   object LogoImg: TsImage
-    Left = 8
+    Left = 112
     Top = 8
     Width = 641
     Height = 113
@@ -8943,8 +8943,8 @@ object MainForm: TMainForm
     SkinData.SkinSection = 'CHECKBOX'
   end
   object DeleteDataButton: TsLabel
-    Left = 294
-    Top = 313
+    Left = 302
+    Top = 289
     Width = 190
     Height = 14
     Caption = #1059#1076#1072#1083#1080#1090#1100' '#1076#1072#1085#1085#1099#1077' '#1072#1074#1090#1086#1088#1080#1079#1072#1094#1080#1080
@@ -9025,12 +9025,85 @@ object MainForm: TMainForm
     BoundLabel.MaxWidth = 0
     BoundLabel.UseSkinColor = True
   end
-  object ServersDropDownList: TsComboBox
-    Left = 392
-    Top = 244
-    Width = 185
-    Height = 21
-    Alignment = taLeftJustify
+  object LoginBtn: TsButton
+    Left = 302
+    Top = 336
+    Width = 105
+    Height = 25
+    Caption = #1042#1093#1086#1076
+    TabOrder = 3
+    OnClick = LoginBtnClick
+    SkinData.SkinSection = 'BUTTON'
+  end
+  object SiteBtn: TsButton
+    Left = 413
+    Top = 336
+    Width = 105
+    Height = 25
+    Caption = #1057#1072#1081#1090
+    TabOrder = 4
+    OnClick = SiteBtnClick
+    SkinData.SkinSection = 'BUTTON'
+  end
+  object SettingsBtn: TsButton
+    Left = 524
+    Top = 336
+    Width = 105
+    Height = 25
+    Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
+    TabOrder = 5
+    OnClick = SettingsBtnClick
+    SkinData.SkinSection = 'BUTTON'
+  end
+  object ExitBtn: TsButton
+    Left = 413
+    Top = 376
+    Width = 105
+    Height = 25
+    Caption = #1042#1099#1093#1086#1076
+    TabOrder = 6
+    OnClick = ExitBtnClick
+    SkinData.SkinSection = 'BUTTON'
+  end
+  object UpdateCheckbox: TsCheckBox
+    Left = 292
+    Top = 264
+    Width = 177
+    Height = 19
+    Caption = #1055#1088#1080#1085#1091#1076#1080#1090#1077#1083#1100#1085#1086#1077' '#1086#1073#1085#1086#1074#1083#1077#1085#1080#1077
+    TabOrder = 7
+    SkinData.SkinSection = 'CHECKBOX'
+    ImgChecked = 0
+    ImgUnchecked = 0
+  end
+  object RememberCheckbox: TsCheckBox
+    Left = 475
+    Top = 264
+    Width = 192
+    Height = 19
+    Caption = #1047#1072#1087#1086#1084#1085#1080#1090#1100' '#1076#1072#1085#1085#1099#1077' '#1072#1074#1090#1086#1088#1080#1079#1072#1094#1080#1080
+    Checked = True
+    State = cbChecked
+    TabOrder = 8
+    SkinData.SkinSection = 'CHECKBOX'
+    ImgChecked = 0
+    ImgUnchecked = 0
+  end
+  object ServersBox: TsListBox
+    Left = 681
+    Top = 178
+    Width = 177
+    Height = 231
+    Style = lbOwnerDrawFixed
+    Color = clWhite
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ItemHeight = 16
+    ParentFont = False
+    TabOrder = 9
     BoundLabel.Indent = 0
     BoundLabel.Font.Charset = DEFAULT_CHARSET
     BoundLabel.Font.Color = clWindowText
@@ -9040,85 +9113,7 @@ object MainForm: TMainForm
     BoundLabel.Layout = sclLeft
     BoundLabel.MaxWidth = 0
     BoundLabel.UseSkinColor = True
-    DropDownCount = 5
-    SkinData.SkinSection = 'COMBOBOX'
-    VerticalAlignment = taAlignTop
-    Style = csDropDownList
-    AutoComplete = False
-    Color = clWhite
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ItemHeight = 15
-    ItemIndex = -1
-    ParentFont = False
-    TabOrder = 3
-  end
-  object LoginBtn: TsButton
-    Left = 312
-    Top = 344
-    Width = 105
-    Height = 25
-    Caption = #1042#1093#1086#1076
-    TabOrder = 4
-    OnClick = LoginBtnClick
-    SkinData.SkinSection = 'BUTTON'
-  end
-  object SiteBtn: TsButton
-    Left = 423
-    Top = 344
-    Width = 105
-    Height = 25
-    Caption = #1057#1072#1081#1090
-    TabOrder = 5
-    OnClick = SiteBtnClick
-    SkinData.SkinSection = 'BUTTON'
-  end
-  object SettingsBtn: TsButton
-    Left = 534
-    Top = 344
-    Width = 105
-    Height = 25
-    Caption = #1053#1072#1089#1090#1088#1086#1081#1082#1080
-    TabOrder = 6
-    OnClick = SettingsBtnClick
-    SkinData.SkinSection = 'BUTTON'
-  end
-  object ExitBtn: TsButton
-    Left = 423
-    Top = 384
-    Width = 105
-    Height = 25
-    Caption = #1042#1099#1093#1086#1076
-    TabOrder = 7
-    OnClick = ExitBtnClick
-    SkinData.SkinSection = 'BUTTON'
-  end
-  object UpdateCheckbox: TsCheckBox
-    Left = 284
-    Top = 288
-    Width = 177
-    Height = 19
-    Caption = #1055#1088#1080#1085#1091#1076#1080#1090#1077#1083#1100#1085#1086#1077' '#1086#1073#1085#1086#1074#1083#1077#1085#1080#1077
-    TabOrder = 8
-    SkinData.SkinSection = 'CHECKBOX'
-    ImgChecked = 0
-    ImgUnchecked = 0
-  end
-  object RememberCheckbox: TsCheckBox
-    Left = 467
-    Top = 288
-    Width = 192
-    Height = 19
-    Caption = #1047#1072#1087#1086#1084#1085#1080#1090#1100' '#1076#1072#1085#1085#1099#1077' '#1072#1074#1090#1086#1088#1080#1079#1072#1094#1080#1080
-    Checked = True
-    State = cbChecked
-    TabOrder = 9
-    SkinData.SkinSection = 'CHECKBOX'
-    ImgChecked = 0
-    ImgUnchecked = 0
+    SkinData.SkinSection = 'EDIT'
   end
   object SkinManager: TsSkinManager
     InternalSkins = <
@@ -10364,7 +10359,7 @@ object MainForm: TMainForm
     ThirdParty.ThirdUpDown = ' '
     ThirdParty.ThirdScrollBar = ' '
     ThirdParty.ThirdStaticText = ' '
-    Left = 648
-    Top = 392
+    Left = 864
+    Top = 496
   end
 end

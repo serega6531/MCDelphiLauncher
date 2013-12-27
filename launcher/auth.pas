@@ -2,7 +2,7 @@ unit Auth;
 
 interface
 
-uses InternetHTTP, crypt, Dialogs, SysUtils, hwid_impl;
+uses InternetHTTP, Dialogs, SysUtils, hwid_impl, JSON;
 
 type
   TAuthInputData = record
@@ -20,6 +20,9 @@ function IsAuth(Data:TAuthInputData): boolean;
 var
   Authdata:TAuthOutputData;
 
+const
+  key: Byte = 7;
+
 implementation
 
 function GenerateToken: string;
@@ -31,6 +34,26 @@ function GenerateToken: string;
    Randomize;
    for I := 1 to 16 do
     Result := Result + Letters[Random(15) + 1];
+end;
+
+function cryptString(str: string): string;
+var
+  I: integer;
+begin
+  for I := 1 to Length(str) do
+  begin
+    result := result + chr(ord(str[i]) + key);
+  end;
+end;
+
+function decryptString(str: string): string;
+var
+  I: integer;
+begin
+  for I := 1 to Length(str) do
+  begin
+    result := result + chr(ord(str[i]) - key);
+  end;
 end;
 
 function IsAuth(Data: TAuthInputData): boolean;
@@ -50,7 +73,7 @@ begin
   if (Res = 'Bad login') OR (Res = '') then       //проверка не прошла
     Result := false
   else begin
-    Authdata.LaunchParams := Token + ':' + decryptString(Copy(Res, Pos('accessToken":"', Res)+14, 21));
+    Authdata.LaunchParams := Token + ':' + getJsonStr('accessToken', Res);
     Authdata.Login := Data.Login;
     Result := true;                    //проверка прошла
   end;

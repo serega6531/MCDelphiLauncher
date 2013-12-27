@@ -10,12 +10,12 @@ uses
   updateA in 'updateA.pas' {UpdateForm},
   Launch in 'Launch.pas',
   InternetHTTP in 'InternetHTTP.pas',
-  crypt in 'crypt.pas',
   crtdll_wrapper in 'hid\crtdll_wrapper.pas',
   hwid_impl in 'hid\hwid_impl.pas',
   isctype in 'hid\isctype.pas',
   winioctl in 'hid\winioctl.pas',
-  Hash in 'Hash.pas';
+  Hash in 'Hash.pas',
+  JSON in 'JSON.pas';
 
 {$R *.res}
 

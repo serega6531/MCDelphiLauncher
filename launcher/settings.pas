@@ -5,7 +5,7 @@ interface
 uses
   Windows, SysUtils, Forms,
   sSkinProvider, StdCtrls, sLabel, sEdit, sButton, Registry, ServersUtils, SHFolder,
-  Controls, Classes;
+  Controls, Classes, InternetHTTP, JSON;
 
 type
   TSettingsForm = class(TForm)
@@ -91,9 +91,44 @@ begin
 end;
 
 procedure InitServers;
+var
+  Size: LongWord;
+  Data: pointer;
+  Response, CountResponse: string;
+  I: Integer;
+  server: TServerData;
+  count: integer;
+const
+  countNames: string = 'abcdefgh';
 begin
-  ServersUtils.AddServer('Classic', 'localhost');
-  ServersUtils.AddServer('Another Server', '127.0.0.1');
+  {ServersUtils.AddServer('Classic', 'localhost');
+  ServersUtils.AddServer('Another Server', '127.0.0.1');}
+  Size := 0;
+  AddPOSTField(Data, Size, 'count', '1');
+  CountResponse := HTTPPost('http://www.happyminers.ru/go/servers', Data, Size);
+  count := getJsonInt('count', CountResponse);
+  if count > 0 then
+  begin
+    for I := 1 to count do
+    begin
+      Size := 0;
+      AddPOSTField(Data, Size, 'server', IntToStr(getJsonInt(countNames[i], CountResponse)));
+      Response := HTTPPost('http://www.happyminers.ru/go/servers', Data, Size);
+      with server do
+      begin
+        id := getJsonInt('id', Response);
+        name := getJsonStr('name', Response);
+        adress := getJsonStr('adress', Response);
+        status := getJsonBool('status', Response);
+        players := getJsonInt('players', Response);
+        slots := getJsonInt('slots', Response);
+      end;
+      ServersUtils.AddServer(server);
+    end;
+  end else begin
+    MessageBox(Application.Handle, 'Нет серверов!', 'Нет серверов!', Error);
+  end;
+
 end;
 
 procedure TSettingsForm.SaveButtonClick(Sender: TObject);

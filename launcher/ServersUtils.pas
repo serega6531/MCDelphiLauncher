@@ -4,11 +4,12 @@ interface
 
 type
   TServerData = record
-    name: string;
-    adress: string;
+    name, adress: string;
+    id, players, slots: integer;
+    status: boolean;
   end;
 
-procedure AddServer(nName, nAddress:string);
+procedure AddServer(data: TServerData);
 function GetServer(ID:integer):TServerData;
 
 var
@@ -16,17 +17,10 @@ var
 
 implementation
 
-procedure AddServer(nName, nAddress:string);
-var
-  tmp: TServerData;
+procedure AddServer(data: TServerData);
 begin
-  with tmp do
-  begin
-    name := nName;
-    adress := nAddress;
-  end;
   SetLength(Servers, Length(Servers) + 1);
-  Servers[Length(Servers) - 1] := tmp;
+  Servers[Length(Servers) - 1] := data;
 end;
 
 function GetServer(ID: integer): TServerData;

@@ -6,7 +6,8 @@ uses
   Windows, Forms,
   Dialogs, sSkinManager, SHDocVw, sPanel, sLabel,
   acPNG, acImage, sEdit, sComboBox, Perimeter, sButton, ShellAPI, Registry,
-  sCheckBox, Graphics, StdCtrls, OleCtrls, ExtCtrls, Controls, WinSock, Classes;
+  sCheckBox, Graphics, StdCtrls, OleCtrls, ExtCtrls, Controls, WinSock, Classes,
+  sListBox, SysUtils;
 
 type
   TMainForm = class(TForm)
@@ -19,7 +20,6 @@ type
     LogoImg: TsImage;
     PasswordEdit: TsEdit;
     LoginEdit: TsEdit;
-    ServersDropDownList: TsComboBox;
     LoginBtn: TsButton;
     SiteBtn: TsButton;
     SettingsBtn: TsButton;
@@ -27,6 +27,7 @@ type
     UpdateCheckbox: TsCheckBox;
     RememberCheckbox: TsCheckBox;
     DeleteDataButton: TsLabel;
+    ServersBox: TsListBox;
     procedure FormCreate(Sender: TObject);
     procedure SiteBtnClick(Sender: TObject);
     procedure ExitBtnClick(Sender: TObject);
@@ -40,6 +41,8 @@ type
 var
   MainForm: TMainForm;
   Reg: TRegIniFile;
+  isServerOnline: boolean;
+  chosenServer: integer;
 
 implementation
 
@@ -56,9 +59,9 @@ begin
   DeleteDataButton.Visible := false;
 end;
 
-procedure TMainForm.DeleteDataButtonMouseEnter(Sender: TObject);
+procedure TMainForm.ExitBtnClick(Sender: TObject);
 begin
-  DeleteDataButton.Font.Style := DeleteDataButton.Font.Style  + [fsUnderline];
+  ExitProcess(0);
 end;
 
 procedure TMainForm.DeleteDataButtonMouseLeave(Sender: TObject);
@@ -66,13 +69,11 @@ begin
    DeleteDataButton.Font.Style := DeleteDataButton.Font.Style - [fsUnderline];
 end;
 
-procedure TMainForm.ExitBtnClick(Sender: TObject);
+procedure TMainForm.DeleteDataButtonMouseEnter(Sender: TObject);
 begin
-  ExitProcess(0);
+  DeleteDataButton.Font.Style := DeleteDataButton.Font.Style  + [fsUnderline];
 end;
 
-function GetLocalIP: string;
-var  WSAData: TWSAData;  P: PHostEnt;  Buf: array [0..127] of Char;begin  Result := '';  if (WSAStartup($101, wsaData) = 0) and (GetHostName(@Buf, 128) = 0) then    try      P := GetHostByName(@Buf);      if P <> nil then      Result := inet_ntoa(PInAddr(p^.h_addr_list^)^);    finally      WSACleanup;    end;end;
 
 function NeedUpdate: boolean;
 begin
@@ -94,6 +95,8 @@ begin
   else
     result := true;
 end;
+
+function GetLocalIP: string; forward;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 var
@@ -132,9 +135,15 @@ begin
   Settings.initServers;
   for I := 0 to Length(ServersUtils.Servers) - 1 do
   begin
-    ServersDropDownList.Items.Add(ServersUtils.GetServer(I).name);
+    if ServersUtils.GetServer(I).status then
+      ServersBox.Items.Add(ServersUtils.GetServer(I).name + ' [' + IntToStr(ServersUtils.GetServer(I).players) + '/' + IntToStr(ServersUtils.GetServer(I).slots) + ']');
   end;
-  ServersDropDownList.ItemIndex := 0;
+  if ServersBox.Items.Count = 0 then
+  begin
+    MessageBox(Self.Handle, 'Все сервера на техобслуживании!', 'Ошибка!', MB_ICONERROR);
+    ExitProcess(0);
+  end;
+  ServersBox.ItemIndex := 0;
   NewsBrowser.Navigate('http://www.happyminers.ru/MineCraft/news.php');
 end;
 
@@ -154,7 +163,7 @@ begin
       Reg.WriteString('Auth', 'Login', AuthData.Login);
       Reg.WriteString('Auth', 'Password', AuthData.Password);
     end;
-    UpdateA._Update(GetServer(self.ServersDropDownList.ItemIndex).name, UpdateCheckbox.Checked);
+    UpdateA._Update(GetServer(ServersBox.ItemIndex).name, UpdateCheckbox.Checked);
   end
   else
   begin
@@ -171,5 +180,8 @@ procedure TMainForm.SiteBtnClick(Sender: TObject);
 begin
   ShellExecute(Self.Handle, nil, 'http://www.happyminers.ru/', nil, nil, SW_SHOW);
 end;
+
+function GetLocalIP: string;
+var  WSAData: TWSAData;  P: PHostEnt;  Buf: array [0..127] of Char;begin  Result := '';  if (WSAStartup($101, wsaData) = 0) and (GetHostName(@Buf, 128) = 0) then    try      P := GetHostByName(@Buf);      if P <> nil then      Result := inet_ntoa(PInAddr(p^.h_addr_list^)^);    finally      WSACleanup;    end;end;
 
 end.
