@@ -26,9 +26,7 @@ begin
   else if Pos('}', res) > 0 then
     res := Copy(res, 0, Pos('}', res) - 1)
   else if Pos(']', res) > 0 then
-    res := Copy(res, 0, Pos(']', res) - 1)
-  else
-    result := -1;
+    res := Copy(res, 0, Pos(']', res) - 1);
 
   result := StrToInt(res);
 end;

@@ -32,30 +32,6 @@ begin
   reg.Free;
 end;
 
-procedure ExecuteMinecraft(MinecraftData: TMinecraftData);
-var
-  lpDirectory, lpFile, lpParameters: PAnsiChar;
-begin
-  with MinecraftData do
-  begin
-    lpDirectory := PAnsiChar(MinePath);
-    lpParameters := PAnsiChar(
-                               //'-Dfml.ignoreInvalidMinecraftCertificates=true -Dfml.ignorePatchDiscrepancies=true ' +
-                               '-Xms' + Xms + 'm ' +
-                               '-Xmx' + Xmx + 'm ' +
-                               '-Djava.library.path="' + NativesPath + '" ' +
-                               '-cp "' + CP + '" ' +
-                               'net.minecraft.client.main.Main ' + LogonInfo
-                              {
-                               'net.minecraft.launchwrapper.Launch' + LogonInfo +
-                               ' --tweakClass cpw.mods.fml.common.launcher.FMLTweaker'
-                              }
-                              );
-    lpFile := PAnsiChar(Java + '\javaw.exe');
-  end;
-  ShellExecuteA(0,nil,lpFile,lpParameters,lpDirectory,SW_SHOWNORMAL);
-end;
-
 function getCP(server:string):string;
 begin
   CheckFolder(settings.MinecraftDir+'libraries\', '*.jar');
@@ -66,19 +42,30 @@ end;
 procedure PlayMinecraft(server: TServerData;auth: TAuthOutputData);
 var
   MinecraftData: TMinecraftData;
+  LibraryHandle: THandle;
+  ExecuteMinecraft: procedure(MinecraftData: TMinecraftData); stdcall;
 begin
-  MinecraftData.Minepath := settings.MinecraftDir;
+  MinecraftData.Minepath := MinecraftDir;
   MinecraftData.Java := getJavaPath;
-  MinecraftData.Xms := settings.GameMemory;
-  MinecraftData.Xmx := settings.GameMemory;
-  MinecraftData.NativesPath := settings.MinecraftDir + 'dists\' + server.name + '\natives';
+  MinecraftData.Xms := GameMemory;
+  MinecraftData.Xmx := GameMemory;
+  MinecraftData.NativesPath := MinecraftDir + 'dists\' + server.name + '\natives';
   MinecraftData.CP := getCP(server.name);
   MinecraftData.LogonInfo := '--username ' + auth.Login + ' ' +
                              '--session ' + auth.LaunchParams + ' ' +
                              '--version 1.6.4 ' +
-                             '--gameDir ' + settings.MinecraftDir + ' ' +
-                             '--assetsDir ' + settings.MinecraftDir + 'assets ';
-  ExecuteMinecraft(MinecraftData);
+                             '--gameDir ' + MinecraftDir + ' ' +
+                             '--assetsDir ' + MinecraftDir + 'assets ';
+  @ExecuteMinecraft := nil;
+  LibraryHandle := LoadLibrary(PAnsiChar(AnsiString(MinecraftDir + 'dists\' + server.name + '\Launch.dll')));
+  if LibraryHandle <> 0 then
+  begin
+    @ExecuteMinecraft := GetProcAddress(LibraryHandle, 'ExecuteMinecraft');
+    if @ExecuteMinecraft <> nil then
+    begin
+      ExecuteMinecraft(MinecraftData);
+    end;
+  end;
   ExitProcess(0);
 end;
 

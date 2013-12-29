@@ -370,7 +370,7 @@ procedure HTTPDownload(URL, Destination: string; SaveInMemory: boolean; MainHand
     FilePtr: pointer;
   const
     Header: PAnsiChar = 'Content-Type: application/x-www-form-urlencoded';
-    ReceiverSize: LongWord = 1048576;
+    ReceiverSize: LongWord = 131072;
   begin
     HTTPDownloadParams := THTTPDownloadParams(Parameter^);
 
