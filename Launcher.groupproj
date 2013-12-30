@@ -23,15 +23,6 @@
   <Target Name="Launcher:Make">
     <MSBuild Projects="launcher\Launcher.dproj" Targets="Make" />
   </Target>
-  <Target Name="Hasher">
-    <MSBuild Projects="launcher\Hasher\Hasher.dproj" Targets="" />
-  </Target>
-  <Target Name="Hasher:Clean">
-    <MSBuild Projects="launcher\Hasher\Hasher.dproj" Targets="Clean" />
-  </Target>
-  <Target Name="Hasher:Make">
-    <MSBuild Projects="launcher\Hasher\Hasher.dproj" Targets="Make" />
-  </Target>
   <Target Name="Launch">
     <MSBuild Projects="launcher\Launch.dproj" Targets="" />
   </Target>
@@ -41,14 +32,23 @@
   <Target Name="Launch:Make">
     <MSBuild Projects="launcher\Launch.dproj" Targets="Make" />
   </Target>
+  <Target Name="Hasher">
+    <MSBuild Projects="launcher\Hasher\Hasher.dproj" Targets="" />
+  </Target>
+  <Target Name="Hasher:Clean">
+    <MSBuild Projects="launcher\Hasher\Hasher.dproj" Targets="Clean" />
+  </Target>
+  <Target Name="Hasher:Make">
+    <MSBuild Projects="launcher\Hasher\Hasher.dproj" Targets="Make" />
+  </Target>
   <Target Name="Build">
-    <CallTarget Targets="Launcher;Hasher;Launch" />
+    <CallTarget Targets="Launcher;Launch;Hasher" />
   </Target>
   <Target Name="Clean">
-    <CallTarget Targets="Launcher:Clean;Hasher:Clean;Launch:Clean" />
+    <CallTarget Targets="Launcher:Clean;Launch:Clean;Hasher:Clean" />
   </Target>
   <Target Name="Make">
-    <CallTarget Targets="Launcher:Make;Hasher:Make;Launch:Make" />
+    <CallTarget Targets="Launcher:Make;Launch:Make;Hasher:Make" />
   </Target>
   <Import Condition="Exists('$(MSBuildBinPath)\Borland.Group.Targets')" Project="$(MSBuildBinPath)\Borland.Group.Targets" />
 </Project>

@@ -194,10 +194,10 @@ begin
   begin
     RemoveAll(MinecraftDir);
     NeedDownloadClient := true;
-    DownloadFile('base.zip');
     Reg.WriteInteger('Version', ServerName, -1);
     Reg.CloseKey;
     Reg.Free;
+    DownloadFile('base.zip');
     Exit;
   end;
   if not CheckServer(ServerName) AND not NeedDownloadClient then
@@ -222,6 +222,7 @@ begin
     if NeedDownloadClient then
     begin
       NeedDownloadClient := false;
+      CheckServer(ServerName);
       DownloadFile(ServerName + '.zip');
     end else
       Launch.PlayMinecraft(Server, Auth.Authdata);

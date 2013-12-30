@@ -45,7 +45,7 @@ var
 
 implementation
 
-uses ServersUtils, Auth, Settings, UpdateA, InternetHTTP;
+uses ServersUtils, Auth, Settings, UpdateA, InternetHTTP, Hash;
 
 {$R *.dfm}
 
@@ -76,7 +76,7 @@ end;
 
 function NeedUpdate: boolean;
 begin
-  if HTTPGet('http://www.happyminers.ru/MineCraft/launcherver.php') = settings.LauncherVer then
+  if (HTTPGet('http://www.happyminers.ru/MineCraft/launcherver.php?what=version') = settings.LauncherVer) AND (HTTPGet('http://www.happyminers.ru/MineCraft/launcherver.php?what=hash') = HashFile(Application.ExeName, MD5, MD5_SIZE)) then
     Result := false
   else
     Result := true;
