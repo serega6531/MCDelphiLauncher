@@ -65,6 +65,7 @@ begin
     begin
       ExecuteMinecraft(MinecraftData);
     end;
+    FreeLibrary(LibraryHandle);
   end;
   ExitProcess(0);
 end;
