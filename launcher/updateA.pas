@@ -27,6 +27,7 @@ const
 
 var
   UpdateForm: TUpdateForm;
+  ClientHash: string;
 
 implementation
 
@@ -60,7 +61,7 @@ begin
  end;
 end;
 
-procedure FindFiles(Dir: string; Pattern: string; var FileList: TStringList);
+procedure FindFiles(Dir: string; Pattern: string);
 var
   SearchRec: TSearchRec;
 begin
@@ -69,7 +70,7 @@ begin
     repeat
       if (SearchRec.Name <> '.') and (SearchRec.Name <> '..') then
       begin
-        FindFiles(Dir + SearchRec.Name + '\', Pattern, FileList);
+        FindFiles(Dir + SearchRec.Name + '\', Pattern);
       end;
     until FindNext(SearchRec) <> 0;
   end;
@@ -77,7 +78,7 @@ begin
   if FindFirst(Dir + Pattern, faAnyFile xor faDirectory, SearchRec) = 0 then
   begin
     repeat
-      FileList.Add(Dir + SearchRec.Name);
+      ClientHash := ClientHash + HashFile(Dir + SearchRec.Name, MD5, MD5_SIZE);
     until FindNext(SearchRec) <> 0;
   end;
   FindClose(SearchRec);
@@ -108,19 +109,12 @@ end;
 
 function CheckFiles(ServerName :string): Boolean;
 var
-  Files: TStringList;
-  ClientHash, ServerHash: string;
+  ServerHash: string;
   I: Integer;
 begin
-  Files := TStringList.Create;
-  Files.Add(MinecraftDir + 'dists\' + ServerName + '\' + ServerName + '.jar');
-  FindFiles(Settings.MinecraftDir+'mods\', '*.jar', Files);
   ClientHash := '';
-  for I := 0 to Files.Count - 1 do
-  begin
-    ClientHash := ClientHash + HashFile(Files.Strings[i], MD5, MD5_SIZE);
-  end;
-  Files.Free;
+  FindFiles(Settings.MinecraftDir+'mods\', '*.jar');
+  ClientHash := ClientHash + HashFile(MinecraftDir + 'dists\' + ServerName + '\' + ServerName + '.jar', MD5, MD5_SIZE);
   ServerHash := HTTPGet(UpdateDir + ServerName + '.md5');
   //if ClientHash = ServerHash then
     Result := true
