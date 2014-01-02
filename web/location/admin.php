@@ -240,11 +240,15 @@ if ($do) {
 			BD("UPDATE `hids` SET `banned` = '0' WHERE `id` = {$_POST['id']}");
 		}
 	}
-	$func1 = function ($int) {if ($int == 1) {return 'Да';} else {return 'Нет';}};
-	$func2 = function ($int) {if ($int == 1) {return 'Разбанить';} else {return 'Забанить';}};
-	$func3 = function ($int) {if ($int == 1) {return 'unban';} else {return 'ban';}};
+	$func1 = function ($int) {if ($int == 1) {return 'Да';}         else {return 'Нет';}      };
+	$func2 = function ($int) {if ($int == 1) {return 'Разбанить';}  else {return 'Забанить';} };
+	$func3 = function ($int) {if ($int == 1) {return 'unban';}      else {return 'ban';}      };
 	$table = "";
-	$hids = BD("SELECT * FROM `hids` ORDER BY `id`");
+	if (isset($_POST['player'])) {
+		$hids = BD("SELECT * FROM `hids` WHERE `username` LIKE '%".TextBase::SQLSafe($_POST['player'])."%' ORDER BY `id` DESC LIMIT 0, 20");
+	} else {
+		$hids = BD("SELECT * FROM `hids` ORDER BY `id` LIMIT 0, 20");
+	}
 	$count = mysql_num_rows($hids);
 	if ($count > 0){
   		while ($result = mysql_fetch_array($hids)) {
@@ -263,7 +267,7 @@ if ($do) {
 
   		define('HIDS_TABLE', $table);
   		include View::Get('hids.html', $st_subdir);
-	} 	
+	} else {echo '<div class="block-header">Ничего нет</div><div class="block-line"></div><div class="tab-pane" id="launcher"><p>Нет игроков</p></div><br /><br /><center><input type="button" value="Показать всех" onclick="window.location.href=location.href;"></center>';}	
 	break;
 
     case 'rcon': 
