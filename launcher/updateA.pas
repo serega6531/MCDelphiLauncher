@@ -113,7 +113,8 @@ var
   I: Integer;
 begin
   ClientHash := '';
-  FindFiles(Settings.MinecraftDir+'mods\', '*.jar');
+  FindFiles(Settings.MinecraftDir+'mods\', '*.zip');
+  FindFiles(Settings.MinecraftDir+'coremods\', '*.jar');
   ClientHash := ClientHash + HashFile(MinecraftDir + 'dists\' + ServerName + '\' + ServerName + '.jar', MD5, MD5_SIZE);
   ServerHash := HTTPGet(UpdateDir + ServerName + '.md5');
   //if ClientHash = ServerHash then
