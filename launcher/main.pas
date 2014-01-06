@@ -102,7 +102,7 @@ var
   I: integer;
   PData: TPerimeterInputData;
 begin
-  PData.ResistanceType := 3;
+  PData.ResistanceType := 4;
   PData.CheckingsType := 1004;
   PData.ExternalType := 0;
   PData.MainFormHandle := MainForm.Handle;
