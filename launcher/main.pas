@@ -134,7 +134,7 @@ begin
   Settings.initServers;
   for I := 0 to Length(ServersUtils.Servers) - 1 do
   begin
-    if ServersUtils.GetServer(I).status then
+    if (ServersUtils.GetServer(I).status) then
       ServersBox.Items.Add(ServersUtils.GetServer(I).name + ' [' + IntToStr(ServersUtils.GetServer(I).players) + '/' + IntToStr(ServersUtils.GetServer(I).slots) + ']');
   end;
   if ServersBox.Items.Count = 0 then
@@ -154,6 +154,11 @@ begin
   begin
     Login := LoginEdit.Text;
     Password := PasswordEdit.Text;
+  end;
+  if ServersUtils.GetServer(ServersBox.ItemIndex).players = ServersUtils.GetServer(ServersBox.ItemIndex).slots then
+  begin
+    MessageBox(Self.Handle, 'Сервер полон.', 'Ошибка!', MB_ICONERROR);
+    Exit;
   end;
   if (Length(AuthData.Login) > 3) and (Length(AuthData.Password) > 3) and (Auth.IsAuth(AuthData)) then
   begin

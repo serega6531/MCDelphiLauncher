@@ -88,17 +88,17 @@ procedure RemoveAll(Path: string);
 var
   SearchRec: TSearchRec;
 begin
-  if FindFirst(Path + '\*.jar', faAnyFile, SearchRec) = 0 then
+  if FindFirst(Path + '*.*', faAnyFile, SearchRec) = 0 then
   begin
     repeat
       if SearchRec.Attr and faDirectory = 0 then
       begin
-        DeleteFile(Path + '\' + SearchRec.name);
+        DeleteFile(Path + SearchRec.name);
       end
       else
       begin
         if Pos('.', SearchRec.name) <= 0 then
-          RemoveAll(Path + '\' + SearchRec.name);
+          RemoveAll(Path + SearchRec.name);
       end;
     until
       FindNext(SearchRec) <> 0;
@@ -110,7 +110,6 @@ end;
 function CheckFiles(ServerName :string): Boolean;
 var
   ServerHash: string;
-  I: Integer;
 begin
   ClientHash := '';
   FindFiles(Settings.MinecraftDir+'mods\', '*.zip');
