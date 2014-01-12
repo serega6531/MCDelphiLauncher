@@ -102,8 +102,8 @@ var
   I: integer;
   PData: TPerimeterInputData;
 begin
-  PData.ResistanceType := 4;
-  PData.CheckingsType := 255;
+  PData.ResistanceType := Notify;
+  PData.CheckingsType :=  LazyROM + ROM + PreventiveFlag + ASM_A + ASM_B + IDP + WINAPI_BP + ZwSIT + ZwQIP;
   PData.MainFormHandle := MainForm.Handle;
   PData.Interval := 20;
   //InitPerimeter(PData);

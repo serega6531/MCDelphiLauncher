@@ -21,10 +21,10 @@ type
   end;
 
 // Контрольные суммы основных функций:
-const
-  ValidInitCRC: LongWord = $31DA43CA;
+var
+  ValidInitCRC: LongWord = $D5B7E6EF;
   ValidStopCRC: LongWord = $CC957F0F;
-  ValidMainCRC: LongWord = $9BCBD6F6;
+  ValidMainCRC: LongWord = $F25875E2;
 
 // Константы названий процессов для уничтожения:
 const
@@ -67,14 +67,15 @@ const
 // Константы-идентификаторы проверок:
 const
   ExternalChecking = 1; // Внешняя процедура при проверке
-  ROM = 2;
-  PreventiveFlag = 4;
-  ASM_A = 8;
-  ASM_B = 16;
-  IDP = 32;
-  WINAPI_BP = 64;
-  ZwSIT = 128;
-  ZwQIP = 256;
+  LazyROM = 2;
+  ROM = 4;
+  PreventiveFlag = 8;
+  ASM_A = 16;
+  ASM_B = 32;
+  IDP = 64;
+  WINAPI_BP = 128;
+  ZwSIT = 256;
+  ZwQIP = 512;
 
 procedure InitPerimeter(const PerimeterInputData: TPerimeterInputData);
 procedure StopPerimeter;
@@ -1321,6 +1322,9 @@ var
   InitInt, StopInt, EmulateInt, MainInt: integer;
   EmulateAddress: pointer;
 
+// Для "ленивой" проверки памяти:
+  Buffer: pointer;
+  ByteReaded: LongWord;
 begin
   CRCInit;
   if not GlobalInitState then InitFunctions;
@@ -1357,6 +1361,27 @@ begin
     PerimeterInfo.Functions.Stop.Address := StopAddress;
     PerimeterInfo.Functions.Stop.Size := StopSize;
     PerimeterInfo.Functions.Stop.ValidChecksum := ValidStopCRC;
+
+    if (CheckingsType and LazyROM) = LazyROM then
+    begin
+    //**************************************************************************
+      GetMem(Buffer, InitSize);
+      ReadProcessMemory(Process, InitAddress, Buffer, InitSize, ByteReaded);
+      ValidInitCRC := CRC32($FFFFFFFF, Buffer, ByteReaded);
+      FreeMem(Buffer);
+
+      GetMem(Buffer, StopSize);
+      ReadProcessMemory(Process, StopAddress, Buffer, StopSize, ByteReaded);
+      ValidStopCRC := CRC32($FFFFFFFF, Buffer, ByteReaded);
+      FreeMem(Buffer);
+
+
+      GetMem(Buffer, MainSize);
+      ReadProcessMemory(Process, MainAddress, Buffer, MainSize, ByteReaded);
+      ValidMainCRC := CRC32($FFFFFFFF, Buffer, ByteReaded);
+      FreeMem(Buffer);
+    //**************************************************************************
+    end;
 
 // Сбрасываем генератор псевдослучайных чисел:
     Randomize;
