@@ -103,11 +103,9 @@ var
   PData: TPerimeterInputData;
 begin
   PData.ResistanceType := 4;
-  PData.CheckingsType := 1004;
-  PData.ExternalType := 0;
+  PData.CheckingsType := 255;
   PData.MainFormHandle := MainForm.Handle;
   PData.Interval := 20;
-  PData.ExtProcOnEliminating := GetProcAddress(GetModuleHandle('ntdll.dll'), 'LdrShutdownProcess');
   //InitPerimeter(PData);
   if GetLocalIP = '127.0.0.1' then
   begin

