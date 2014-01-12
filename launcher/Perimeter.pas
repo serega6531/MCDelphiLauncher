@@ -50,31 +50,31 @@ const
 // Константы механизма противодействия:
 const
   Nothing = 0;
-  ShutdownProcess = 1;
-  KillProcesses = 2;
-  Notify = 4;
-  BlockIO = 8;
-  ShutdownPrimary = 16;
-  ShutdownSecondary = 32;
-  GenerateBSOD = 64;
-  HardBSOD = 128;
+  ExternalEliminating = 1;  // Внешняя процедура при ликвидации угрозы
+  ShutdownProcess = 2;
+  KillProcesses = 4;
+  Notify = 8;
+  BlockIO = 16;
+  ShutdownPrimary = 32;
+  ShutdownSecondary = 64;
+  GenerateBSOD = 128;
+  HardBSOD = 256;
 
 {$IFDEF HARDCORE_MODE}
-  DestroyMBR = 256;
+  DestroyMBR = 512;
 {$ENDIF}
-  ExternalEliminating = 512;  // Внешняя процедура при ликвидации угрозы
 
 // Константы-идентификаторы проверок:
 const
-  ROM = 1;
-  PreventiveFlag = 2;
-  ASM_A = 4;
-  ASM_B = 8;
-  IDP = 16;
-  WINAPI_BP = 32;
-  ZwSIT = 64;
-  ZwQIP = 128;
-  ExternalChecking = 256; // Внешняя процедура при проверке
+  ExternalChecking = 1; // Внешняя процедура при проверке
+  ROM = 2;
+  PreventiveFlag = 4;
+  ASM_A = 8;
+  ASM_B = 16;
+  IDP = 32;
+  WINAPI_BP = 64;
+  ZwSIT = 128;
+  ZwQIP = 256;
 
 procedure InitPerimeter(const PerimeterInputData: TPerimeterInputData);
 procedure StopPerimeter;
