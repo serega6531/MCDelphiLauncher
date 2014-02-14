@@ -71,7 +71,7 @@ begin
   if keypos <> 0 then
   begin
     result := Copy(str, keypos + Length(key) + 3, MaxInt);
-    result := Copy(result, 0, Pos(']', result) - 1);
+    result := Copy(result, 0, LastDelimiter(']', result) - 1);
   end else result := '';
 end;
 
